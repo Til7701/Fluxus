@@ -23,7 +23,12 @@ public class KlassRegister {
 
     public Optional<Klass> getKlass(Type type, Imports imports) {
         return switch (type) {
-            case SimpleType(_, String name) -> Optional.of(klasses.get(imports.map(name)));
+            case SimpleType(_, String name) -> {
+                Klass klass = klasses.get(imports.map(name));
+                if (klass == null)
+                    throw new KlassNotFoundException(type.toString());
+                yield Optional.of(klass);
+            }
             case IType _ -> Optional.of(klasses.get(I.TYPE.name()));
             case UType _ -> Optional.of(klasses.get(U.TYPE.name()));
             default -> throw new NotImplementedException(type.toString());

@@ -95,8 +95,7 @@ genericTypeList
     ;
 
 fieldDefinition
-    : fieldModifier* typeIdentifier SymbolIdentifier SEMI #uninitializedFieldDefinition
-    | fieldModifier* typeIdentifier SymbolIdentifier ASSIGN expression SEMI #initializedFieldDefinition
+    : fieldModifier* typeIdentifier SymbolIdentifier ASSIGN expression SEMI #initializedFieldDefinition
     ;
 
 fieldModifier

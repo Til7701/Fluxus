@@ -3,6 +3,7 @@ package de.til7701.javelin.interpreter;
 import module de.til7701.javelin.ast;
 import module de.til7701.javelin.common;
 import de.til7701.javelin.interpreter.variable.PrimitiveVariable;
+import de.til7701.javelin.interpreter.variable.StructVariable;
 import de.til7701.javelin.interpreter.variable.Variable;
 import de.til7701.javelin.interpreter.variable.VariableFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -123,10 +124,50 @@ public class Interpreter {
                 yield variableFactory.asArray(variables, elementType);
             }
             case ConstructorCall(_, Type type, List<Expression> arguments) -> {
-
+                Klass klass = environment.getKlassRegister().getKlass(type, currentImports)
+                        .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
+                List<Variable> argumentValues = arguments.stream()
+                        .map((Expression e) -> evaluateExpression(e, stack))
+                        .toList();
+                Type[] argumentTypes = argumentValues.stream()
+                        .map(Variable::type)
+                        .toArray(Type[]::new);
+                yield switch (klass) {
+                    case JavaKlass _ -> throw new UnsupportedOperationException();
+                    case JavelinKlass javelinKlass -> {
+                        JavelinMetod method = javelinKlass.getConstructor(argumentTypes, environment)
+                                .orElseThrow(() -> new RuntimeException("Constructor: with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + klass));
+                        Variable struct = initStruct(type, javelinKlass);
+                        Stack s = new Stack();
+                        s.push(new StackFrame());
+                        s.initializeVariable("this", struct);
+                        executeJavelinMethod(method, argumentValues, s);
+                        yield struct;
+                    }
+                };
+            }
+            case InstanceFieldAccess(_, Expression instance, String fieldName) -> {
+                Variable inst = evaluateExpression(instance, stack);
+                if (inst instanceof StructVariable struct) {
+                    yield struct.getField(fieldName);
+                } else {
+                    throw new RuntimeException("Instance is not a struct");
+                }
             }
             default -> throw new NotImplementedException(expression.toString());
         };
+    }
+
+    private Variable initStruct(Type type, JavelinKlass javelinKlass) {
+        Map<String, Variable> fields = new HashMap<>();
+        for (KlassField field : javelinKlass.fields()) {
+            String name = field.name();
+            Stack staticKlassStack = new Stack(); // TODO replace when implementing static members
+            staticKlassStack.push(new StackFrame());
+            Variable fieldInit = evaluateExpression(field.init(), staticKlassStack);
+            fields.put(name, fieldInit);
+        }
+        return new StructVariable(type, fields);
     }
 
     private Variable executeJavaMethod(JavaMetod javaMetod, List<Variable> argumentValues) {
@@ -150,6 +191,12 @@ public class Interpreter {
 
     private Variable executeJavelinMethod(JavelinMetod javelinMetod, List<Variable> argumentValues, Stack stack) {
         stack.push(new StackFrame());
+        for (int i = 0; i < javelinMetod.parameterNames().length; i++) {
+            stack.initializeVariable(
+                    javelinMetod.parameterNames()[i],
+                    argumentValues.get(i)
+            );
+        }
         executeStatement(javelinMetod.body(), stack);
         StackFrame frame = stack.pop();
         return frame.getReturnValue();

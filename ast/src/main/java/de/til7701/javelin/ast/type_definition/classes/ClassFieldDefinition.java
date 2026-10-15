@@ -13,6 +13,6 @@ public record ClassFieldDefinition(
         List<FieldModifier> modifiers,
         Type type,
         String name,
-        Optional<Expression> value
+        Expression value
 ) implements Node {
 }

@@ -48,4 +48,7 @@ public class StructVariable implements Variable {
         return type;
     }
 
+    public Variable getField(String fieldName) {
+        return instanceFields.get(fieldName);
+    }
 }

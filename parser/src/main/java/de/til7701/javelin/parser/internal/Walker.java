@@ -212,14 +212,9 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
 
     @Override
     public Node visitConstructorCall(JavelinParser.ConstructorCallContext ctx) {
-        List<Expression> args;
-        if (ctx.expression().size() <= 1) {
-            args = Collections.emptyList();
-        } else {
-            args = ctx.expression().subList(1, ctx.expression().size()).stream()
-                    .map(c -> (Expression) visit(c))
-                    .toList();
-        }
+        List<Expression> args = ctx.expression().stream()
+                .map(c -> (Expression) visit(c))
+                .toList();
         return new ConstructorCall(
                 createSpan(ctx),
                 (Type) visit(ctx.typeIdentifier()),
@@ -450,20 +445,6 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
     }
 
     @Override
-    public Node visitUninitializedFieldDefinition(JavelinParser.UninitializedFieldDefinitionContext ctx) {
-        List<FieldModifier> fieldModifiers = ctx.fieldModifier().stream()
-                .map(fmCtx -> (FieldModifier) visit(fmCtx))
-                .toList();
-        return new ClassFieldDefinition(
-                createSpan(ctx),
-                fieldModifiers,
-                (Type) visit(ctx.typeIdentifier()),
-                ctx.SymbolIdentifier().getText(),
-                Optional.empty()
-        );
-    }
-
-    @Override
     public Node visitInitializedFieldDefinition(JavelinParser.InitializedFieldDefinitionContext ctx) {
         List<FieldModifier> fieldModifiers = ctx.fieldModifier().stream()
                 .map(fmCtx -> (FieldModifier) visit(fmCtx))
@@ -473,7 +454,7 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
                 fieldModifiers,
                 (Type) visit(ctx.typeIdentifier()),
                 ctx.SymbolIdentifier().getText(),
-                Optional.of((Expression) visit(ctx.expression()))
+                (Expression) visit(ctx.expression())
         );
     }
 

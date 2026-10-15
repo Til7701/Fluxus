@@ -1,7 +1,7 @@
 pub class;
 
-U64 mostSigBits;
-U64 leastSigBits;
+U64 mostSigBits = 0U64;
+U64 leastSigBits = 0U64;
 
 pub (U64 mostSigBits, U64 leastSigBits) {
     this.mostSigBits = mostSigBits;
@@ -14,4 +14,8 @@ pub static UUID random() {
 
 pub static Bool eq(UUID left, UUID right) {
     return left.mostSigBits == right.mostSigBits && left.leastSigBits == right.leastSigBits;
+}
+
+pub static Str asStr(UUID id) {
+    return U64.asStr(id.mostSigBits) + ", " + U64.asStr(id.leastSigBits);
 }

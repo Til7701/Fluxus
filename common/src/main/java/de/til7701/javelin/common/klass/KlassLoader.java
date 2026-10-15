@@ -82,7 +82,8 @@ public class KlassLoader {
         List<KlassField> fields = classDefinition.fields().stream()
                 .map(fieldDefinition -> new KlassField(
                         fieldDefinition.name(),
-                        fieldDefinition.type()
+                        fieldDefinition.type(),
+                        fieldDefinition.value()
                 ))
                 .toList();
         List<JavelinMetod> constructors = classDefinition.constructors().stream()
