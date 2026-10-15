@@ -133,7 +133,7 @@ public class Interpreter {
                         .map(Variable::type)
                         .toArray(Type[]::new);
                 yield switch (klass) {
-                    case JavaKlass _ -> throw new UnsupportedOperationException();
+                    case JavaKlass _ -> throw new NotImplementedException();
                     case JavelinKlass javelinKlass -> {
                         JavelinMetod method = javelinKlass.getConstructor(argumentTypes, environment)
                                 .orElseThrow(() -> new RuntimeException("Constructor: with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + klass));
@@ -192,10 +192,7 @@ public class Interpreter {
     private Variable executeJavelinMethod(JavelinMetod javelinMetod, List<Variable> argumentValues, Stack stack) {
         stack.push(new StackFrame());
         for (int i = 0; i < javelinMetod.parameterNames().length; i++) {
-            stack.initializeVariable(
-                    javelinMetod.parameterNames()[i],
-                    argumentValues.get(i)
-            );
+            stack.initializeVariable(javelinMetod.parameterNames()[i], argumentValues.get(i));
         }
         executeStatement(javelinMetod.body(), stack);
         StackFrame frame = stack.pop();

@@ -9,7 +9,7 @@ pub (U64 mostSigBits, U64 leastSigBits) {
 }
 
 pub static UUID random() {
-    return UUID(0U64, 0U64);
+    return UUID(1U64, 2U64);
 }
 
 pub static Bool eq(UUID left, UUID right) {

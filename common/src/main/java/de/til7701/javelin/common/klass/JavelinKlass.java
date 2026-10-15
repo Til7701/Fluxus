@@ -31,9 +31,7 @@ public record JavelinKlass(
         Imports imports = environment.getPrimitiveImports();
         this.imports().forEach(imports::addImport);
 
-        List<JavelinMetod> metods = constructors;
-
-        for (JavelinMetod metod : metods) {
+        for (JavelinMetod metod : constructors) {
             Type[] parameterTypes = Arrays.stream(metod.parameterTypes())
                     .map(type -> type.mapNames(imports::map))
                     .map(type -> {

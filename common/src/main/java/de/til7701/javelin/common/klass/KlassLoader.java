@@ -11,6 +11,7 @@ import de.til7701.javelin.ast.type_definition.TypeDefinition;
 import de.til7701.javelin.ast.type_definition.TypeModifierValue;
 import de.til7701.javelin.ast.type_definition.classes.ClassDefinition;
 import de.til7701.javelin.common.shaft.JavelinType;
+import de.til7701.javelin.common.shaft.Void;
 import de.til7701.javelin.common.util.Ignore;
 import de.til7701.javelin.common.util.Java;
 import de.til7701.javelin.common.util.Natives;
@@ -104,7 +105,7 @@ public class KlassLoader {
                 .map(methodDefinition -> (Metod) new JavelinMetod(
                         methodDefinition.modifiers().stream().anyMatch(m -> m.value() == MethodModifierValue.STATIC),
                         methodDefinition.name(),
-                        methodDefinition.returnType().orElse(new SimpleType(methodDefinition.span(), "None")),
+                        methodDefinition.returnType().orElse(Void.TYPE),
                         methodDefinition.parameters().parameters().stream()
                                 .map(MethodParameter::type)
                                 .toArray(Type[]::new),

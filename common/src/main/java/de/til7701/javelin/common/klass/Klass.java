@@ -31,6 +31,9 @@ public sealed interface Klass permits JavaKlass, JavelinKlass {
     default Optional<Metod> getMethod(String methodName, Type[] argumentTypes, Environment environment) {
         Imports imports = environment.getPrimitiveImports();
         this.imports().forEach(imports::addImport);
+        argumentTypes = Arrays.stream(argumentTypes)
+                .map(type -> type.mapNames(imports::map))
+                .toArray(Type[]::new);
 
         List<Metod> metods = methodsGroupedByName().get(methodName);
         if (metods == null) {

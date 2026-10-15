@@ -39,9 +39,7 @@ class Stack {
     }
 
     @Nullable StackFrame peek() {
-        if (stack.isEmpty())
-            return null;
-        return stack.pop();
+        return stack.peek();
     }
 
     void initializeVariable(String name, Variable variable) {
