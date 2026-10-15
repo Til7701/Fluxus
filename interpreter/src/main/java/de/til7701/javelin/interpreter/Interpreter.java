@@ -154,6 +154,21 @@ public class Interpreter {
                     throw new RuntimeException("Instance is not a struct");
                 }
             }
+            case TypeCastExpression(_, Type targetType, Expression valueExpression) -> {
+                Variable value = evaluateExpression(valueExpression, stack);
+                Type valueType = value.type().mapNames(currentImports::map);
+                targetType = targetType.mapNames(currentImports::map);
+
+                Klass klass = environment.getKlassRegister().getKlass(valueType, currentImports)
+                        .orElseThrow(() -> new RuntimeException("Class not found for type: " + valueType));
+                String methodName = "as__" + targetType.name().replace('.', '_');
+                Metod method = klass.getMethod(methodName, new Type[]{valueType}, environment)
+                        .orElseThrow(() -> new RuntimeException("Method: " + methodName + " with args: " + valueType + " not found for class: " + klass));
+                yield switch (method) {
+                    case JavaMetod javaMetod -> executeJavaMethod(javaMetod, List.of(value));
+                    case JavelinMetod javelinMetod -> executeJavelinMethod(javelinMetod, List.of(value), stack);
+                };
+            }
             default -> throw new NotImplementedException(expression.toString());
         };
     }

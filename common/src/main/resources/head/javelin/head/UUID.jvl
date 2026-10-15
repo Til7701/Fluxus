@@ -16,6 +16,6 @@ pub static Bool eq(UUID left, UUID right) {
     return left.mostSigBits == right.mostSigBits && left.leastSigBits == right.leastSigBits;
 }
 
-pub static Str asStr(UUID id) {
-    return U64.asStr(id.mostSigBits) + ", " + U64.asStr(id.leastSigBits);
+pub static Str as__javelin_shaft_Str(UUID id) {
+    return (id.mostSigBits as Str) + ", " + (id.leastSigBits as Str);
 }

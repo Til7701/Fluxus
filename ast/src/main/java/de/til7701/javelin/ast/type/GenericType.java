@@ -24,4 +24,9 @@ public record GenericType(
         return false;
     }
 
+    @Override
+    public String name() {
+        return "";
+    }
+
 }

@@ -37,7 +37,7 @@ public final class U implements Primitive {
         return of(UN.sub(left.value, right.value));
     }
 
-    public static Str asStr(U value) {
+    public static Str as__javelin_shaft_Str(U value) {
         return Str.of(value.value.toString());
     }
 

@@ -10,4 +10,6 @@ public sealed interface Type extends Node permits CollectionType, GenericType, I
 
     boolean isAssignableTo(Type other);
 
+    String name();
+
 }

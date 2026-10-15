@@ -35,7 +35,7 @@ public final class Array implements Primitive {
         return array.value[i];
     }
 
-    public static Str asStr(Array value) {
+    public static Str as__javelin_shaft_Str(Array value) {
         return Str.of(Arrays.deepToString(value.value));
     }
 

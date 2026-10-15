@@ -22,4 +22,9 @@ public record UType(
                 && name.equals("javelin.shaft.U"));
     }
 
+    @Override
+    public String name() {
+        return "javelin.shaft.U";
+    }
+
 }

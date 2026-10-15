@@ -35,7 +35,7 @@ public final class Bool implements Primitive {
         return of(left.value == right.value);
     }
 
-    public static Str asStr(Bool value) {
+    public static Str as__javelin_shaft_Str(Bool value) {
         return Str.of(Boolean.toString(value.value));
     }
 

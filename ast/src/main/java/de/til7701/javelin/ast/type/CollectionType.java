@@ -2,7 +2,6 @@ package de.til7701.javelin.ast.type;
 
 import de.til7701.javelin.ast.Span;
 
-import java.util.Collection;
 import java.util.function.Function;
 
 public record CollectionType(
@@ -23,6 +22,11 @@ public record CollectionType(
     @Override
     public boolean isAssignableTo(Type other) {
         return other instanceof CollectionType(_, Type otherIndexType, Type otherElementType);
+    }
+
+    @Override
+    public String name() {
+        return "";
     }
 
 }
