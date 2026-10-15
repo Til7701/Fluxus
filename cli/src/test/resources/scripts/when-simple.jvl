@@ -1,6 +1,6 @@
 let x = true;
 when x == false {
-    Io.println("triggered");
+    System.println("triggered");
 }
 x = false;
 x = true;

@@ -1,11 +1,11 @@
 let a = 1I3;
 let b = 2I3;
 
-Io.println(I3.asStr(a));
-Io.println(I3.asStr(b));
+System.println(I3.asStr(a));
+System.println(I3.asStr(b));
 
 let sum = a + b;
-Io.println(I3.asStr(sum));
+System.println(I3.asStr(sum));
 
 let overflow = sum + 1I3;
-Io.println(I3.asStr(overflow));
+System.println(I3.asStr(overflow));

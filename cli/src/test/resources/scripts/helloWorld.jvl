@@ -1,1 +1,1 @@
-Io.println("Hello World");
+System.println("Hello World");

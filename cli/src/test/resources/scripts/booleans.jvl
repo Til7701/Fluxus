@@ -1,9 +1,9 @@
 let a = new true;
 let b = new false;
 
-Io.println(Bool.asStr(a));
-Io.println(Bool.asStr(a && b));
+System.println(Bool.asStr(a));
+System.println(Bool.asStr(a && b));
 
 true = new false;
 
-Io.println(Bool.asStr(a && true));
+System.println(Bool.asStr(a && true));

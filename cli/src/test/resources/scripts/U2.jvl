@@ -1,11 +1,11 @@
 let a = 1U2;
 let b = 2U2;
 
-Io.println(U2.asStr(a));
-Io.println(U2.asStr(b));
+System.println(U2.asStr(a));
+System.println(U2.asStr(b));
 
 let sum = a + b;
-Io.println(U2.asStr(sum));
+System.println(U2.asStr(sum));
 
 let overflow = sum + 1U2;
-Io.println(U2.asStr(overflow));
+System.println(U2.asStr(overflow));

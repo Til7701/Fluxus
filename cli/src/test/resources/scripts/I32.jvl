@@ -1,14 +1,14 @@
 let a = 1I32;
 let b = 2I32;
 
-Io.println(I32.asStr(a));
-Io.println(I32.asStr(b));
+System.println(I32.asStr(a));
+System.println(I32.asStr(b));
 
 let sum = a + b;
-Io.println(I32.asStr(sum));
+System.println(I32.asStr(sum));
 
 let neg = -1I32;
-Io.println(I32.asStr(neg));
+System.println(I32.asStr(neg));
 
 let difference = a - b;
-Io.println(I32.asStr(difference));
+System.println(I32.asStr(difference));

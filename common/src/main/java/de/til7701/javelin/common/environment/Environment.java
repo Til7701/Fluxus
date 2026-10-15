@@ -5,6 +5,7 @@ import de.til7701.javelin.ast.statement.Import;
 import de.til7701.javelin.common.klass.KlassLoader;
 import de.til7701.javelin.common.klass.KlassRegister;
 import de.til7701.javelin.common.shaft.*;
+import de.til7701.javelin.common.shaft.System;
 import de.til7701.javelin.common.shaft.Void;
 import de.til7701.javelin.common.util.Natives;
 import lombok.Getter;
@@ -19,7 +20,7 @@ public class Environment {
             U.class,
             Str.class,
             Array.class,
-            Io.class,
+            System.class,
     };
 
     private final KlassRegister klassRegister = new KlassRegister();
