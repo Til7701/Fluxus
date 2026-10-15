@@ -1,6 +1,7 @@
-package de.til7701.javelin.checker;
+package de.til7701.javelin.checker.internal;
 
 import de.til7701.javelin.ast.type.Type;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -22,7 +23,7 @@ public class ScopeStack {
         scope.initializeVariable(name, type);
     }
 
-    public Type getVariable(String name) {
+    public @Nullable Type getVariable(String name) {
         for (Scope scope : stack) {
             Type type = scope.getVariable(name);
             if (type != null) {
@@ -30,11 +31,6 @@ public class ScopeStack {
             }
         }
         return null;
-    }
-
-    public void destroyVariable(String name) {
-        Scope scope = stack.peek();
-        scope.destroyVariable(name);
     }
 
 }

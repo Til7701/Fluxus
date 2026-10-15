@@ -1,6 +1,7 @@
-package de.til7701.javelin.checker;
+package de.til7701.javelin.checker.internal;
 
 import de.til7701.javelin.ast.type.Type;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +14,8 @@ public class Scope {
         variables.put(name, type);
     }
 
-    public Type getVariable(String name) {
+    public @Nullable Type getVariable(String name) {
         return variables.get(name);
-    }
-
-    public void destroyVariable(String name) {
-        variables.remove(name);
     }
 
 }

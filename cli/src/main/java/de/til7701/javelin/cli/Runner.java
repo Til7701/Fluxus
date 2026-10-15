@@ -1,7 +1,7 @@
 package de.til7701.javelin.cli;
 
 import de.til7701.javelin.ast.Ast;
-import de.til7701.javelin.checker.TypeChecker;
+import de.til7701.javelin.checker.Checker;
 import de.til7701.javelin.cli.pretty.AstPrettyPrinter;
 import de.til7701.javelin.common.environment.Environment;
 import de.til7701.javelin.common.head.Head;
@@ -52,8 +52,8 @@ public class Runner {
         for (Klass klass : head.getKlasses()) {
             env.getKlassRegister().registerKlass(klass);
         }
-        TypeChecker typeChecker = new TypeChecker(env);
-        typeChecker.check(ast);
+        Checker checker = new Checker(env);
+        checker.check(ast);
         Interpreter interpreter = new Interpreter(env);
         interpreter.interpret(ast);
         return 0;
