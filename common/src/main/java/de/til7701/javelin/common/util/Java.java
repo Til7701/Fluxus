@@ -13,9 +13,11 @@ public class Java {
 
     private static final Map<Class<?>, Type> typeMappingCache = Map.of(
             String.class, Str.TYPE,
+            Str.class, Str.TYPE,
             Class.forPrimitiveName("boolean"), Bool.TYPE,
             Class.forPrimitiveName("int"), I.TYPE,
-            Boolean.class, Bool.TYPE
+            Boolean.class, Bool.TYPE,
+            Bool.class, Bool.TYPE
     );
 
     public static Type mapTypes(Class<?> clazz) {

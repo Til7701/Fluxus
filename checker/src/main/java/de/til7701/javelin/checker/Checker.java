@@ -6,8 +6,7 @@ import de.til7701.javelin.checker.internal.ScopeStack;
 import de.til7701.javelin.common.NotImplementedException;
 import de.til7701.javelin.common.environment.Environment;
 import de.til7701.javelin.common.environment.Imports;
-import de.til7701.javelin.common.klass.Klass;
-import de.til7701.javelin.common.klass.Metod;
+import de.til7701.javelin.common.klass.*;
 import de.til7701.javelin.common.shaft.Bool;
 import de.til7701.javelin.common.shaft.Str;
 import lombok.Getter;
@@ -15,6 +14,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class Checker {
@@ -22,20 +22,14 @@ public class Checker {
     private final Environment environment;
 
     @Getter
-    private final List<TypeMismatch> mismatches = new ArrayList<>();
-    @Getter
-    private final List<SymbolNotFound> symbolNotFounds = new ArrayList<>();
-    @Getter
-    private final List<MethodNotFound> methodNotFounds = new ArrayList<>();
-    @Getter
-    private final List<KlassNotFound> klassNotFounds = new ArrayList<>();
+    private final List<Error> errors = new ArrayList<>();
 
     public Checker(Environment environment) {
         this.environment = environment;
     }
 
     private void reset() {
-        mismatches.clear();
+        errors.clear();
     }
 
     public void check(Ast ast) {
@@ -43,7 +37,7 @@ public class Checker {
 
         ScopeStack stack = new ScopeStack();
         stack.push(new Scope());
-        Imports imports = new Imports();
+        Imports imports = environment.getPrimitiveImports();
         switch (ast) {
             case Script script -> script.statements().forEach(s -> check(s, stack, imports));
             case TypeDefinition typeDefinition -> {
@@ -67,6 +61,7 @@ public class Checker {
                     checkAssignability(span, expressionType, targetType);
             }
             case ReturnStatement(Span span, Expression value) -> {
+                // TODO
             }
             case StatementList statementList -> {
                 stack.push(new Scope());
@@ -98,7 +93,7 @@ public class Checker {
             case SymbolExpression(Span span, String identifier) -> {
                 Type type = stack.getVariable(identifier);
                 if (type == null)
-                    symbolNotFounds.add(new SymbolNotFound(span, identifier));
+                    errors.add(new Error.SymbolNotFound(span, identifier));
                 yield type;
             }
             case InstanceMethodCall(Span span, Expression instance, String methodName, List<Expression> arguments) -> {
@@ -108,10 +103,81 @@ public class Checker {
                 yield null;
             }
             case StaticMethodCall(Span span, Type type, String methodName, List<Expression> arguments) ->
-                    evaluateMethodCall(span, type, methodName, arguments, stack, imports);
-//            case ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
-//
-//            }
+                    evaluateMethodCall(span, type.mapNames(imports::map), methodName, arguments, stack, imports);
+            case ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
+                type = type.mapNames(imports::map);
+                Klass klass = findKlass(span, type, imports);
+                if (klass == null) yield null;
+                Type[] argumentTypes = new Type[arguments.size()];
+                for (int i = 0; i < arguments.size(); i++) {
+                    Type t = evaluateExpressionType(arguments.get(i), stack, imports);
+                    if (t == null) yield null;
+                    argumentTypes[i] = t;
+                }
+                switch (klass) {
+                    case JavaKlass _ -> throw new NotImplementedException();
+                    case JavelinKlass javelinKlass -> {
+                        JavelinMetod method = findConstructor(span, javelinKlass, argumentTypes);
+                        if (method == null) yield null;
+
+                        checkAssignability(span, argumentTypes, method.parameterTypes());
+
+                        yield type;
+                    }
+                }
+            }
+            case BinaryExpression(Span span, Expression left, BinaryOperator operator, Expression right) -> {
+                Type leftT = evaluateExpressionType(left, stack, imports);
+                if (leftT == null) yield null;
+                Type rightT = evaluateExpressionType(right, stack, imports);
+                if (rightT == null) yield null;
+                String methodName = operator.name().toLowerCase(Locale.ROOT);
+                yield evaluateMethodCall(span, leftT, methodName, List.of(left, right), stack, imports);
+            }
+            case ArrayLiteralCreation(Span span, List<Expression> values) -> {
+                Type[] types = new Type[values.size()];
+                for (int i = 0; i < types.length; i++) {
+                    Type t = evaluateExpressionType(values.get(i), stack, imports);
+                    if (t == null) yield null;
+                    types[i] = t;
+                }
+                if (types.length > 1) {
+                    Type first = types[0];
+                    for (int i = 1; i < types.length; i++) {
+                        Type other = types[i];
+                        checkAssignability(span, other, first);
+                    }
+                }
+                yield new CollectionType(span, new UType(Span.undefined(), 32), types[0]);
+            }
+            case InstanceFieldAccess(Span span, Expression instance, String fieldName) -> {
+                Type instanceType = evaluateExpressionType(instance, stack, imports);
+                if (instanceType == null) yield null;
+                Klass klass = findKlass(span, instanceType, imports);
+                if (klass == null) yield null;
+                yield switch (klass) {
+                    case JavaKlass _ -> null;
+                    case JavelinKlass javelinKlass -> {
+                        Optional<KlassField> field = javelinKlass.fields().stream()
+                                .filter(f -> f.name().equals(fieldName))
+                                .findAny();
+                        if (field.isEmpty()) yield null;
+                        yield field.get().type();
+                    }
+                };
+            }
+            case TypeCastExpression(Span span, Type targetType, Expression valueExpression) -> {
+                targetType = targetType.mapNames(imports::map);
+                Type valueType = evaluateExpressionType(valueExpression, stack, imports);
+                if (valueType == null) yield null;
+                Klass klass = findKlass(span, valueType, imports);
+                if (klass == null) yield null;
+                String methodName = "as__" + targetType.name().replace('.', '_');
+                Metod metod = findMetod(span, klass, methodName, new Type[]{valueType});
+                if (metod == null) yield null;
+                checkAssignability(span, metod.returnType(), targetType);
+                yield targetType;
+            }
             default -> throw new NotImplementedException();
         };
     }
@@ -137,7 +203,7 @@ public class Checker {
     private @Nullable Klass findKlass(Span span, Type type, Imports imports) {
         Optional<Klass> klass = environment.getKlassRegister().getKlass(type, imports);
         if (klass.isEmpty()) {
-            klassNotFounds.add(new KlassNotFound(span, type));
+            errors.add(new Error.KlassNotFound(span, type));
             return null;
         }
         return klass.get();
@@ -146,15 +212,24 @@ public class Checker {
     private @Nullable Metod findMetod(Span span, Klass klass, String methodName, Type[] arguments) {
         Optional<Metod> metod = klass.getMethod(methodName, arguments, environment);
         if (metod.isEmpty()) {
-            methodNotFounds.add(new MethodNotFound(span, methodName, arguments, klass));
+            errors.add(new Error.MethodNotFound(span, methodName, arguments, klass));
             return null;
         }
         return metod.get();
     }
 
+    private @Nullable JavelinMetod findConstructor(Span span, JavelinKlass klass, Type[] arguments) {
+        Optional<JavelinMetod> constructor = klass.getConstructor(arguments, environment);
+        if (constructor.isEmpty()) {
+            errors.add(new Error.MethodNotFound(span, "", arguments, klass));
+            return null;
+        }
+        return constructor.get();
+    }
+
     private void checkAssignability(Span span, Type from, Type to) {
         if (!to.isAssignableTo(from)) {
-            mismatches.add(new TypeMismatch(span, from, to));
+            errors.add(new Error.TypeMismatch(span, from, to));
         }
     }
 

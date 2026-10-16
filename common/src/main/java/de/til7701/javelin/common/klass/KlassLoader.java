@@ -10,6 +10,7 @@ import de.til7701.javelin.ast.type.Type;
 import de.til7701.javelin.ast.type_definition.TypeDefinition;
 import de.til7701.javelin.ast.type_definition.TypeModifierValue;
 import de.til7701.javelin.ast.type_definition.classes.ClassDefinition;
+import de.til7701.javelin.common.environment.Imports;
 import de.til7701.javelin.common.shaft.JavelinType;
 import de.til7701.javelin.common.shaft.Void;
 import de.til7701.javelin.common.util.Ignore;
@@ -74,16 +75,17 @@ public class KlassLoader {
     }
 
     private Klass loadKlassFromClassDefinition(String klassName, ClassDefinition classDefinition) {
+        List<Import> imports = Stream.concat(Stream.of(new Import(Span.undefined(), klassName, null)), classDefinition.imports().stream())
+                .toList();
+        Imports importsMapper = new Imports(imports);
         Type klassType = new SimpleType(classDefinition.span(), klassName);
         if (!classDefinition.generics().types().isEmpty())
             klassType = new GenericType(classDefinition.span(), klassType, classDefinition.generics());
         final Type finalKlassType = klassType;
-        List<Import> imports = Stream.concat(Stream.of(new Import(Span.undefined(), klassName, null)), classDefinition.imports().stream())
-                .toList();
         List<KlassField> fields = classDefinition.fields().stream()
                 .map(fieldDefinition -> new KlassField(
                         fieldDefinition.name(),
-                        fieldDefinition.type(),
+                        fieldDefinition.type().mapNames(importsMapper::map),
                         fieldDefinition.value()
                 ))
                 .toList();
@@ -93,7 +95,7 @@ public class KlassLoader {
                         klassName,
                         finalKlassType,
                         constructorDefinition.parameters().parameters().stream()
-                                .map(MethodParameter::type)
+                                .map(methodParameter -> methodParameter.type().mapNames(importsMapper::map))
                                 .toArray(Type[]::new),
                         constructorDefinition.parameters().parameters().stream()
                                 .map(MethodParameter::name)
@@ -105,9 +107,9 @@ public class KlassLoader {
                 .map(methodDefinition -> (Metod) new JavelinMetod(
                         methodDefinition.modifiers().stream().anyMatch(m -> m.value() == MethodModifierValue.STATIC),
                         methodDefinition.name(),
-                        methodDefinition.returnType().orElse(Void.TYPE),
+                        methodDefinition.returnType().orElse(Void.TYPE).mapNames(importsMapper::map),
                         methodDefinition.parameters().parameters().stream()
-                                .map(MethodParameter::type)
+                                .map(methodParameter -> methodParameter.type().mapNames(importsMapper::map))
                                 .toArray(Type[]::new),
                         methodDefinition.parameters().parameters().stream()
                                 .map(MethodParameter::name)
