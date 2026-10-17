@@ -1,7 +1,6 @@
 package de.til7701.javelin.ast.expression;
 
 import de.til7701.javelin.ast.Span;
-import de.til7701.javelin.ast.statement.Statement;
 import de.til7701.javelin.ast.type.Type;
 
 import java.util.List;
@@ -11,5 +10,5 @@ public record StaticMethodCall(
         Type type,
         String methodName,
         List<Expression> arguments
-) implements Expression, Statement {
+) implements Expression {
 }

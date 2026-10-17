@@ -1,7 +1,6 @@
 package de.til7701.javelin.ast.expression;
 
 import de.til7701.javelin.ast.Span;
-import de.til7701.javelin.ast.statement.Statement;
 
 import java.util.List;
 
@@ -10,5 +9,5 @@ public record InstanceMethodCall(
         Expression instance,
         String methodName,
         List<Expression> arguments
-) implements Expression, Statement {
+) implements Expression {
 }
