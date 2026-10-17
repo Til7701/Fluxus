@@ -2,7 +2,7 @@ package de.til7701.javelin.common.shaft;
 
 import de.til7701.javelin.ast.Span;
 import de.til7701.javelin.ast.type.SimpleType;
-import de.til7701.javelin.ast.type.Type;
+import de.til7701.javelin.common.type.TypeDescriptor;
 import de.til7701.javelin.common.util.Ignore;
 
 @JavelinType(
@@ -12,6 +12,8 @@ public final class Void implements Primitive {
 
     static final String JAVELIN_TYPE_NAME = "javelin.shaft.Void";
     public static final SimpleType TYPE = new SimpleType(Span.undefined(), JAVELIN_TYPE_NAME);
+
+    public static final LazyConstant<TypeDescriptor> DESCRIPTOR = LazyConstant.of(() -> Primitives.loadJavaClass(Void.class, TYPE));
 
     private static final Void INSTANCE = new Void();
 
@@ -26,8 +28,8 @@ public final class Void implements Primitive {
 
     @Ignore
     @Override
-    public Type type() {
-        return TYPE;
+    public TypeDescriptor descriptor() {
+        return DESCRIPTOR.get();
     }
 
 }

@@ -20,11 +20,6 @@ public record GenericType(
     }
 
     @Override
-    public boolean isAssignableTo(Type other) {
-        return false;
-    }
-
-    @Override
     public String name() {
         return "";
     }

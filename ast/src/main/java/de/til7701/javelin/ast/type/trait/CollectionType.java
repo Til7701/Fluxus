@@ -1,6 +1,7 @@
-package de.til7701.javelin.ast.type;
+package de.til7701.javelin.ast.type.trait;
 
 import de.til7701.javelin.ast.Span;
+import de.til7701.javelin.ast.type.Type;
 
 import java.util.function.Function;
 
@@ -8,7 +9,7 @@ public record CollectionType(
         Span span,
         Type indexType,
         Type elementType
-) implements Type {
+) implements TraitType {
 
     @Override
     public Type mapNames(Function<String, String> nameMapper) {
@@ -20,13 +21,8 @@ public record CollectionType(
     }
 
     @Override
-    public boolean isAssignableTo(Type other) {
-        return other instanceof CollectionType(_, Type otherIndexType, Type otherElementType);
-    }
-
-    @Override
     public String name() {
-        return "";
+        return elementType.name() + "[" + indexType.name() + "]";
     }
 
 }

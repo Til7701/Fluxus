@@ -6,7 +6,13 @@ import de.til7701.javelin.ast.Span;
 import de.til7701.javelin.ast.expression.*;
 import de.til7701.javelin.ast.methods.*;
 import de.til7701.javelin.ast.statement.*;
-import de.til7701.javelin.ast.type.*;
+import de.til7701.javelin.ast.type.GenericType;
+import de.til7701.javelin.ast.type.SimpleType;
+import de.til7701.javelin.ast.type.Type;
+import de.til7701.javelin.ast.type.TypeList;
+import de.til7701.javelin.ast.type.trait.CollectionType;
+import de.til7701.javelin.ast.type.trait.IType;
+import de.til7701.javelin.ast.type.trait.UType;
 import de.til7701.javelin.ast.type_definition.TypeModifier;
 import de.til7701.javelin.ast.type_definition.TypeModifierValue;
 import de.til7701.javelin.ast.type_definition.classes.*;
@@ -337,7 +343,7 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
     public Node visitITypeIdentifier(JavelinParser.ITypeIdentifierContext ctx) {
         return new IType(
                 createSpan(ctx),
-                Integer.parseInt(ctx.SignedIntegerTypeIdentifier().getText().substring(1))
+                Long.parseLong(ctx.SignedIntegerTypeIdentifier().getText().substring(1))
         );
     }
 
@@ -345,7 +351,7 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
     public Node visitUTypeIdentifier(JavelinParser.UTypeIdentifierContext ctx) {
         return new UType(
                 createSpan(ctx),
-                Integer.parseInt(ctx.UnsignedIntegerTypeIdentifier().getText().substring(1))
+                Long.parseLong(ctx.UnsignedIntegerTypeIdentifier().getText().substring(1))
         );
     }
 

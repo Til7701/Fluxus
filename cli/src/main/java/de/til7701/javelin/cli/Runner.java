@@ -7,7 +7,7 @@ import de.til7701.javelin.checker.Error;
 import de.til7701.javelin.cli.pretty.AstPrettyPrinter;
 import de.til7701.javelin.common.environment.Environment;
 import de.til7701.javelin.common.head.Head;
-import de.til7701.javelin.common.klass.Klass;
+import de.til7701.javelin.common.type.klass.Klass;
 import de.til7701.javelin.common.util.Natives;
 import de.til7701.javelin.interpreter.Interpreter;
 import de.til7701.javelin.parser.Parser;

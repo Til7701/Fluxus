@@ -1,9 +1,10 @@
 package de.til7701.javelin.common.shaft;
 
 import de.til7701.javelin.ast.Span;
-import de.til7701.javelin.ast.type.CollectionType;
 import de.til7701.javelin.ast.type.SimpleType;
-import de.til7701.javelin.ast.type.Type;
+import de.til7701.javelin.common.type.TypeDescriptor;
+import de.til7701.javelin.common.type.trait.CollectionTrait;
+import de.til7701.javelin.common.type.trait.UTrait;
 import de.til7701.javelin.common.util.Ignore;
 
 import java.util.Arrays;
@@ -16,17 +17,19 @@ public final class Array implements Primitive {
     static final String JAVELIN_TYPE_NAME = "javelin.shaft.Array";
     public static final SimpleType TYPE = new SimpleType(Span.undefined(), JAVELIN_TYPE_NAME);
 
+    public static final LazyConstant<TypeDescriptor> DESCRIPTOR = LazyConstant.of(() -> Primitives.loadJavaClass(Array.class, TYPE));
+
     private final Object[] value;
-    private final CollectionType type;
+    private final CollectionTrait descriptor;
 
     @Ignore
-    private Array(Object[] value, Type elementType) {
+    private Array(Object[] value, TypeDescriptor elementType) {
         this.value = value;
-        this.type = new CollectionType(Span.undefined(), U.TYPE, elementType);
+        this.descriptor = new CollectionTrait(new UTrait(32), elementType);
     }
 
     @Ignore
-    public static Array of(Object[] value, Type elementType) {
+    public static Array of(Object[] value, TypeDescriptor elementType) {
         return new Array(value, elementType);
     }
 
@@ -41,8 +44,8 @@ public final class Array implements Primitive {
 
     @Ignore
     @Override
-    public Type type() {
-        return TYPE;
+    public TypeDescriptor descriptor() {
+        return DESCRIPTOR.get();
     }
 
 }

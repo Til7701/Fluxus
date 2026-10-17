@@ -2,7 +2,7 @@ package de.til7701.javelin.common.shaft;
 
 import de.til7701.javelin.ast.Span;
 import de.til7701.javelin.ast.type.SimpleType;
-import de.til7701.javelin.ast.type.Type;
+import de.til7701.javelin.common.type.TypeDescriptor;
 import de.til7701.javelin.common.util.Ignore;
 import lombok.Getter;
 
@@ -13,6 +13,8 @@ public final class Bool implements Primitive {
 
     static final String JAVELIN_TYPE_NAME = "javelin.shaft.Bool";
     public static final SimpleType TYPE = new SimpleType(Span.undefined(), JAVELIN_TYPE_NAME);
+
+    public static final LazyConstant<TypeDescriptor> DESCRIPTOR = LazyConstant.of(() -> Primitives.loadJavaClass(Bool.class, TYPE));
 
     @Getter(onMethod_ = {@Ignore})
     private final boolean value;
@@ -41,8 +43,8 @@ public final class Bool implements Primitive {
 
     @Ignore
     @Override
-    public Type type() {
-        return TYPE;
+    public TypeDescriptor descriptor() {
+        return DESCRIPTOR.get();
     }
 
 }

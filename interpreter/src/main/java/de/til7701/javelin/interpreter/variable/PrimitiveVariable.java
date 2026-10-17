@@ -1,7 +1,7 @@
 package de.til7701.javelin.interpreter.variable;
 
-import de.til7701.javelin.ast.type.Type;
 import de.til7701.javelin.common.shaft.Primitive;
+import de.til7701.javelin.common.type.TypeDescriptor;
 
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -17,8 +17,8 @@ public class PrimitiveVariable implements Variable {
     }
 
     @Override
-    public Type type() {
-        return value.type();
+    public TypeDescriptor descriptor() {
+        return value.descriptor();
     }
 
     @Override

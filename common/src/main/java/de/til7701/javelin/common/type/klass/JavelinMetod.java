@@ -1,7 +1,8 @@
-package de.til7701.javelin.common.klass;
+package de.til7701.javelin.common.type.klass;
 
 import de.til7701.javelin.ast.statement.Statement;
 import de.til7701.javelin.ast.type.Type;
+import de.til7701.javelin.common.type.Metod;
 
 import java.util.Arrays;
 

@@ -6,9 +6,15 @@ import de.til7701.javelin.checker.internal.ScopeStack;
 import de.til7701.javelin.common.NotImplementedException;
 import de.til7701.javelin.common.environment.Environment;
 import de.til7701.javelin.common.environment.Imports;
-import de.til7701.javelin.common.klass.*;
 import de.til7701.javelin.common.shaft.Bool;
 import de.til7701.javelin.common.shaft.Str;
+import de.til7701.javelin.common.type.Metod;
+import de.til7701.javelin.common.type.TypeDescriptor;
+import de.til7701.javelin.common.type.klass.*;
+import de.til7701.javelin.common.type.trait.CollectionTrait;
+import de.til7701.javelin.common.type.trait.ITrait;
+import de.til7701.javelin.common.type.trait.Trait;
+import de.til7701.javelin.common.type.trait.UTrait;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
@@ -50,13 +56,13 @@ public class Checker {
         switch (statement) {
             case Import i -> imports.addImport(i);
             case VariableInitialization(_, String name, Expression value) -> {
-                Type expressionType = evaluateExpressionType(value, stack, imports);
+                TypeDescriptor expressionType = evaluateExpressionType(value, stack, imports);
                 if (expressionType != null)
                     stack.initializeVariable(name, expressionType);
             }
             case Assignment(Span span, Expression target, Expression value) -> {
-                Type expressionType = evaluateExpressionType(value, stack, imports);
-                Type targetType = evaluateExpressionType(target, stack, imports);
+                TypeDescriptor expressionType = evaluateExpressionType(value, stack, imports);
+                TypeDescriptor targetType = evaluateExpressionType(target, stack, imports);
                 if (expressionType != null && targetType != null)
                     checkAssignability(span, expressionType, targetType);
             }
@@ -70,155 +76,172 @@ public class Checker {
             }
             case WhenStatement whenStatement -> {
                 Expression condition = whenStatement.condition();
-                Type conditionType = evaluateExpressionType(condition, stack, imports);
+                TypeDescriptor conditionType = evaluateExpressionType(condition, stack, imports);
                 if (conditionType != null)
-                    checkAssignability(whenStatement.span(), conditionType, Bool.TYPE);
+                    checkAssignability(whenStatement.span(), conditionType, Bool.DESCRIPTOR.get());
                 stack.push(new Scope());
                 check(whenStatement.body(), stack, imports);
                 stack.pop();
             }
             case Expression expression -> {
-                Type _ = evaluateExpressionType(expression, stack, imports);
+                TypeDescriptor _ = evaluateExpressionType(expression, stack, imports);
             }
         }
     }
 
-    private @Nullable Type evaluateExpressionType(Expression expression, ScopeStack stack, Imports imports) {
+    private @Nullable TypeDescriptor evaluateExpressionType(Expression expression, ScopeStack stack, Imports imports) {
         return switch (expression) {
             case NewExpression(_, Expression e) -> evaluateExpressionType(e, stack, imports);
-            case BooleanLiteralExpression _ -> Bool.TYPE;
-            case SignedIntegerLiteralExpression(Span span, _, long bitCount) -> new IType(span, (int) bitCount);
-            case UnsignedIntegerLiteralExpression(Span span, _, long bitCount) -> new UType(span, (int) bitCount);
-            case StringLiteralExpression _ -> Str.TYPE;
+            case BooleanLiteralExpression _ -> Bool.DESCRIPTOR.get();
+            case SignedIntegerLiteralExpression(_, _, long bitCount) -> new ITrait(bitCount);
+            case UnsignedIntegerLiteralExpression(_, _, long bitCount) -> new UTrait(bitCount);
+            case StringLiteralExpression _ -> Str.DESCRIPTOR.get();
             case SymbolExpression(Span span, String identifier) -> {
-                Type type = stack.getVariable(identifier);
+                TypeDescriptor type = stack.getVariable(identifier);
                 if (type == null)
                     errors.add(new Error.SymbolNotFound(span, identifier));
                 yield type;
             }
             case InstanceMethodCall(Span span, Expression instance, String methodName, List<Expression> arguments) -> {
-                Type instanceType = evaluateExpressionType(instance, stack, imports);
+                TypeDescriptor instanceType = evaluateExpressionType(instance, stack, imports);
                 if (instanceType != null)
                     yield evaluateMethodCall(span, instanceType, methodName, arguments, stack, imports);
                 yield null;
             }
-            case StaticMethodCall(Span span, Type type, String methodName, List<Expression> arguments) ->
-                    evaluateMethodCall(span, type.mapNames(imports::map), methodName, arguments, stack, imports);
+            case StaticMethodCall(Span span, Type type, String methodName, List<Expression> arguments) -> {
+                TypeDescriptor typeDescriptor = findTypeDescriptor(span, type.mapNames(imports::map), imports);
+                if (typeDescriptor == null) yield null;
+                yield evaluateMethodCall(span, typeDescriptor, methodName, arguments, stack, imports);
+            }
             case ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
                 type = type.mapNames(imports::map);
-                Klass klass = findKlass(span, type, imports);
-                if (klass == null) yield null;
-                Type[] argumentTypes = new Type[arguments.size()];
+                TypeDescriptor typeDescriptor = findTypeDescriptor(span, type, imports);
+                if (typeDescriptor == null) yield null;
+                TypeDescriptor[] argumentTypes = new TypeDescriptor[arguments.size()];
                 for (int i = 0; i < arguments.size(); i++) {
-                    Type t = evaluateExpressionType(arguments.get(i), stack, imports);
+                    TypeDescriptor t = evaluateExpressionType(arguments.get(i), stack, imports);
                     if (t == null) yield null;
                     argumentTypes[i] = t;
                 }
-                switch (klass) {
+                switch (typeDescriptor) {
                     case JavaKlass _ -> throw new NotImplementedException();
                     case JavelinKlass javelinKlass -> {
                         JavelinMetod method = findConstructor(span, javelinKlass, argumentTypes);
                         if (method == null) yield null;
 
-                        checkAssignability(span, argumentTypes, method.parameterTypes());
+                        TypeDescriptor[] parameterDescriptors = toDescriptors(method.parameterTypes(), imports);
+                        if (parameterDescriptors == null) yield null;
+                        checkAssignability(span, argumentTypes, parameterDescriptors);
 
-                        yield type;
+                        yield typeDescriptor;
+                    }
+                    case Trait trait -> {
+                        errors.add(new Error.Other(span, "Trait " + trait + " cannot be instantiated"));
+                        yield null;
                     }
                 }
             }
             case BinaryExpression(Span span, Expression left, BinaryOperator operator, Expression right) -> {
-                Type leftT = evaluateExpressionType(left, stack, imports);
+                TypeDescriptor leftT = evaluateExpressionType(left, stack, imports);
                 if (leftT == null) yield null;
-                Type rightT = evaluateExpressionType(right, stack, imports);
+                TypeDescriptor rightT = evaluateExpressionType(right, stack, imports);
                 if (rightT == null) yield null;
                 String methodName = operator.name().toLowerCase(Locale.ROOT);
                 yield evaluateMethodCall(span, leftT, methodName, List.of(left, right), stack, imports);
             }
             case ArrayLiteralCreation(Span span, List<Expression> values) -> {
-                Type[] types = new Type[values.size()];
+                TypeDescriptor[] types = new TypeDescriptor[values.size()];
                 for (int i = 0; i < types.length; i++) {
-                    Type t = evaluateExpressionType(values.get(i), stack, imports);
+                    TypeDescriptor t = evaluateExpressionType(values.get(i), stack, imports);
                     if (t == null) yield null;
                     types[i] = t;
                 }
                 if (types.length > 1) {
-                    Type first = types[0];
+                    TypeDescriptor first = types[0];
                     for (int i = 1; i < types.length; i++) {
-                        Type other = types[i];
+                        TypeDescriptor other = types[i];
                         checkAssignability(span, other, first);
                     }
                 }
-                yield new CollectionType(span, new UType(Span.undefined(), 32), types[0]);
+                yield new CollectionTrait(types[0], new UTrait(32));
             }
             case InstanceFieldAccess(Span span, Expression instance, String fieldName) -> {
-                Type instanceType = evaluateExpressionType(instance, stack, imports);
+                TypeDescriptor instanceType = evaluateExpressionType(instance, stack, imports);
                 if (instanceType == null) yield null;
-                Klass klass = findKlass(span, instanceType, imports);
-                if (klass == null) yield null;
-                yield switch (klass) {
+                yield switch (instanceType) {
                     case JavaKlass _ -> null;
                     case JavelinKlass javelinKlass -> {
-                        Optional<KlassField> field = javelinKlass.fields().stream()
+                        Optional<Field> field = javelinKlass.fields().stream()
                                 .filter(f -> f.name().equals(fieldName))
                                 .findAny();
                         if (field.isEmpty()) yield null;
-                        yield field.get().type();
+                        yield findTypeDescriptor(span, field.get().type(), imports);
+                    }
+                    case Trait _ -> {
+                        errors.add(new Error.Other(span, "Trait field access"));
+                        yield null;
                     }
                 };
             }
             case TypeCastExpression(Span span, Type targetType, Expression valueExpression) -> {
                 targetType = targetType.mapNames(imports::map);
-                Type valueType = evaluateExpressionType(valueExpression, stack, imports);
+                Optional<TypeDescriptor> targetDescriptor = environment.getKlassRegister().find(targetType, imports);
+                if (targetDescriptor.isEmpty()) yield null;
+                TypeDescriptor valueType = evaluateExpressionType(valueExpression, stack, imports);
                 if (valueType == null) yield null;
-                Klass klass = findKlass(span, valueType, imports);
-                if (klass == null) yield null;
                 String methodName = "as__" + targetType.name().replace('.', '_');
-                Metod metod = findMetod(span, klass, methodName, new Type[]{valueType});
+                Metod metod = findMetod(span, valueType, methodName, new TypeDescriptor[]{valueType});
                 if (metod == null) yield null;
-                checkAssignability(span, metod.returnType(), targetType);
-                yield targetType;
+                Optional<TypeDescriptor> returnDescriptor = environment.getKlassRegister().find(metod.returnType(), imports);
+                if (returnDescriptor.isEmpty()) yield null;
+                checkAssignability(span, returnDescriptor.get(), targetDescriptor.get());
+                yield targetDescriptor.get();
             }
             default -> throw new NotImplementedException();
         };
     }
 
-    private @Nullable Type evaluateMethodCall(Span span, Type type, String methodName, List<Expression> arguments,
-                                              ScopeStack stack, Imports imports) {
-        Klass klass = findKlass(span, type, imports);
-        if (klass == null) return null;
-        Type[] argumentTypes = new Type[arguments.size()];
+    private @Nullable TypeDescriptor evaluateMethodCall(Span span, TypeDescriptor type, String methodName, List<Expression> arguments,
+                                                        ScopeStack stack, Imports imports) {
+        TypeDescriptor[] argumentTypes = new TypeDescriptor[arguments.size()];
         for (int i = 0; i < arguments.size(); i++) {
-            Type t = evaluateExpressionType(arguments.get(i), stack, imports);
+            TypeDescriptor t = evaluateExpressionType(arguments.get(i), stack, imports);
             if (t == null) return null;
             argumentTypes[i] = t;
         }
-        Metod method = findMetod(span, klass, methodName, argumentTypes);
+        Metod method = findMetod(span, type, methodName, argumentTypes);
         if (method == null) return null;
 
-        checkAssignability(span, argumentTypes, method.parameterTypes());
+        TypeDescriptor[] parameterDescriptors = toDescriptors(method.parameterTypes(), imports);
+        if (parameterDescriptors == null) return null;
 
-        return method.returnType();
+        checkAssignability(span, argumentTypes, parameterDescriptors);
+
+        return environment.getKlassRegister().find(method.returnType(), imports).orElse(null);
     }
 
-    private @Nullable Klass findKlass(Span span, Type type, Imports imports) {
-        Optional<Klass> klass = environment.getKlassRegister().getKlass(type, imports);
-        if (klass.isEmpty()) {
+    private @Nullable TypeDescriptor findTypeDescriptor(Span span, Type type, Imports imports) {
+        Optional<TypeDescriptor> typeDescriptor = environment.getKlassRegister().find(type, imports);
+        if (typeDescriptor.isEmpty()) {
             errors.add(new Error.KlassNotFound(span, type));
             return null;
         }
-        return klass.get();
+        return typeDescriptor.get();
     }
 
-    private @Nullable Metod findMetod(Span span, Klass klass, String methodName, Type[] arguments) {
-        Optional<Metod> metod = klass.getMethod(methodName, arguments, environment);
+    private @Nullable Metod findMetod(Span span, TypeDescriptor typeDescriptor, String methodName, TypeDescriptor[] arguments) {
+        Optional<Metod> metod = switch (typeDescriptor) {
+            case Klass klass -> klass.findMethod(methodName, arguments, environment);
+            case Trait trait -> trait.findMethod(methodName, arguments, environment).map(m -> (Metod) m);
+        };
         if (metod.isEmpty()) {
-            errors.add(new Error.MethodNotFound(span, methodName, arguments, klass));
+            errors.add(new Error.MethodNotFound(span, methodName, arguments, typeDescriptor));
             return null;
         }
         return metod.get();
     }
 
-    private @Nullable JavelinMetod findConstructor(Span span, JavelinKlass klass, Type[] arguments) {
+    private @Nullable JavelinMetod findConstructor(Span span, JavelinKlass klass, TypeDescriptor[] arguments) {
         Optional<JavelinMetod> constructor = klass.getConstructor(arguments, environment);
         if (constructor.isEmpty()) {
             errors.add(new Error.MethodNotFound(span, "", arguments, klass));
@@ -227,16 +250,26 @@ public class Checker {
         return constructor.get();
     }
 
-    private void checkAssignability(Span span, Type from, Type to) {
-        if (!to.isAssignableTo(from)) {
+    private void checkAssignability(Span span, TypeDescriptor from, TypeDescriptor to) {
+        if (!environment.isAssignable(from, to)) {
             errors.add(new Error.TypeMismatch(span, from, to));
         }
     }
 
-    private void checkAssignability(Span span, Type[] from, Type[] to) {
+    private void checkAssignability(Span span, TypeDescriptor[] from, TypeDescriptor[] to) {
         for (int i = 0; i < from.length; i++) {
             checkAssignability(span, from[i], to[i]);
         }
+    }
+
+    private TypeDescriptor @Nullable [] toDescriptors(Type[] types, Imports imports) {
+        TypeDescriptor[] typeDescriptors = new TypeDescriptor[types.length];
+        for (int i = 0; i < types.length; i++) {
+            Optional<TypeDescriptor> t = environment.getKlassRegister().find(types[i], imports);
+            if (t.isEmpty()) return null;
+            typeDescriptors[i] = t.get();
+        }
+        return typeDescriptors;
     }
 
 }

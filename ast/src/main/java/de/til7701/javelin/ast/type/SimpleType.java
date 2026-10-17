@@ -17,10 +17,4 @@ public record SimpleType(
         );
     }
 
-    @Override
-    public boolean isAssignableTo(Type other) {
-        return other instanceof SimpleType(_, String otherName)
-                && this.name.equals(otherName);
-    }
-
 }

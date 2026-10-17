@@ -1,9 +1,9 @@
 package de.til7701.javelin.interpreter.variable;
 
-import de.til7701.javelin.ast.type.Type;
 import de.til7701.javelin.common.NotImplementedException;
 import de.til7701.javelin.common.shaft.*;
 import de.til7701.javelin.common.shaft.Void;
+import de.til7701.javelin.common.type.TypeDescriptor;
 import de.til7701.javelin.common.util.ints.IN;
 import de.til7701.javelin.common.util.ints.UN;
 import org.jspecify.annotations.Nullable;
@@ -29,7 +29,7 @@ public class VariableFactory {
         return new PrimitiveVariable(U.of(UN.of(value, bitCount)));
     }
 
-    public Variable asArray(Variable[] variables, Type elementType) {
+    public Variable asArray(Variable[] variables, TypeDescriptor elementType) {
         return new PrimitiveVariable(Array.of(variables, elementType));
     }
 

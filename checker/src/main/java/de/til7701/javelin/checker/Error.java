@@ -2,9 +2,9 @@ package de.til7701.javelin.checker;
 
 import de.til7701.javelin.ast.Span;
 import de.til7701.javelin.ast.type.Type;
-import de.til7701.javelin.common.klass.Klass;
+import de.til7701.javelin.common.type.TypeDescriptor;
 
-public sealed interface Error permits Error.KlassNotFound, Error.MethodNotFound, Error.SymbolNotFound, Error.TypeMismatch {
+public sealed interface Error {
 
     Span span();
 
@@ -17,8 +17,8 @@ public sealed interface Error permits Error.KlassNotFound, Error.MethodNotFound,
     record MethodNotFound(
             Span span,
             String methodName,
-            Type[] argumentTypes,
-            Klass klass
+            TypeDescriptor[] argumentTypes,
+            TypeDescriptor typeDescriptor
     ) implements Error {
     }
 
@@ -30,8 +30,14 @@ public sealed interface Error permits Error.KlassNotFound, Error.MethodNotFound,
 
     record TypeMismatch(
             Span span,
-            Type from,
-            Type to
+            TypeDescriptor from,
+            TypeDescriptor to
+    ) implements Error {
+    }
+
+    record Other(
+            Span span,
+            String message
     ) implements Error {
     }
 

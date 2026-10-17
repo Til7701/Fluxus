@@ -1,4 +1,4 @@
-package de.til7701.javelin.common.klass;
+package de.til7701.javelin.common.type;
 
 import de.til7701.javelin.ast.Span;
 import de.til7701.javelin.ast.methods.MethodModifierValue;
@@ -11,66 +11,23 @@ import de.til7701.javelin.ast.type_definition.TypeDefinition;
 import de.til7701.javelin.ast.type_definition.TypeModifierValue;
 import de.til7701.javelin.ast.type_definition.classes.ClassDefinition;
 import de.til7701.javelin.common.environment.Imports;
-import de.til7701.javelin.common.shaft.JavelinType;
 import de.til7701.javelin.common.shaft.Void;
-import de.til7701.javelin.common.util.Ignore;
-import de.til7701.javelin.common.util.Java;
-import de.til7701.javelin.common.util.Natives;
+import de.til7701.javelin.common.type.klass.Field;
+import de.til7701.javelin.common.type.klass.JavelinKlass;
+import de.til7701.javelin.common.type.klass.JavelinMetod;
+import de.til7701.javelin.common.type.klass.Klass;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
 public class KlassLoader {
 
-    public Klass loadJavaClass(Class<?> javaClass) {
-        JavelinType javelinType = javaClass.getAnnotation(JavelinType.class);
-        String fullyQualifiedJavelinName = javelinType.fullyQualifiedJavelinName();
-        List<Metod> methods = loadJavaMethods(javaClass);
-        Map<String, List<Metod>> methodsGroupedByName = methods.stream()
-                .collect(Collectors.groupingBy(Metod::name));
-        Klass klass = new JavaKlass(true, javaClass, fullyQualifiedJavelinName, methods, methodsGroupedByName);
-        log.debug("Loaded Klass: {}", klass);
-        return klass;
-    }
-
-    private List<Metod> loadJavaMethods(Class<?> javaClass) {
-        List<Metod> metods = new ArrayList<>();
-
-        Method[] javaMethods = javaClass.getDeclaredMethods();
-        for (Method javaMethod : javaMethods) {
-            if (((javaMethod.getModifiers() & Modifier.PUBLIC) == 0) || javaMethod.isAnnotationPresent(Ignore.class)) {
-                continue;
-            }
-
-            String methodName = javaMethod.getName();
-            Type returnType = Java.mapTypes(javaMethod.getReturnType());
-            Type[] parameterTypes = Arrays.stream(javaMethod.getParameterTypes())
-                    .filter(c -> !c.equals(Natives.class))
-                    .map(Java::mapTypes)
-                    .toArray(Type[]::new);
-
-            Metod metod = new JavaMetod(
-                    (javaMethod.getModifiers() & Modifier.STATIC) != 0,
-                    javaMethod,
-                    methodName,
-                    returnType,
-                    parameterTypes,
-                    Arrays.asList(javaMethod.getParameterTypes()).contains(Natives.class)
-            );
-            metods.add(metod);
-        }
-        return Collections.unmodifiableList(metods);
-    }
-
     public Klass loadKlassFromAst(String klassName, TypeDefinition typeDefinition) {
         return switch (typeDefinition) {
             case ClassDefinition classDefinition -> loadKlassFromClassDefinition(klassName, classDefinition);
-            default -> throw new IllegalStateException("Unexpected value: " + typeDefinition);
         };
     }
 
@@ -82,8 +39,8 @@ public class KlassLoader {
         if (!classDefinition.generics().types().isEmpty())
             klassType = new GenericType(classDefinition.span(), klassType, classDefinition.generics());
         final Type finalKlassType = klassType;
-        List<KlassField> fields = classDefinition.fields().stream()
-                .map(fieldDefinition -> new KlassField(
+        List<Field> fields = classDefinition.fields().stream()
+                .map(fieldDefinition -> new Field(
                         fieldDefinition.name(),
                         fieldDefinition.type().mapNames(importsMapper::map),
                         fieldDefinition.value()
@@ -125,7 +82,8 @@ public class KlassLoader {
                 fields,
                 constructors,
                 methods,
-                methods.stream().collect(Collectors.groupingBy(Metod::name))
+                methods.stream().collect(Collectors.groupingBy(Metod::name)),
+                finalKlassType
         );
     }
 

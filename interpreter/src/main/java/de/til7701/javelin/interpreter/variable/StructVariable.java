@@ -1,6 +1,6 @@
 package de.til7701.javelin.interpreter.variable;
 
-import de.til7701.javelin.ast.type.Type;
+import de.til7701.javelin.common.type.TypeDescriptor;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,11 +11,11 @@ public class StructVariable implements Variable {
 
     private final Collection<Runnable> listeners = new CopyOnWriteArrayList<>();
 
-    private final Type type;
+    private final TypeDescriptor typeDescriptor;
     private final Map<String, Variable> instanceFields;
 
-    public StructVariable(Type type, Map<String, Variable> instanceFields) {
-        this.type = type;
+    public StructVariable(TypeDescriptor typeDescriptor, Map<String, Variable> instanceFields) {
+        this.typeDescriptor = typeDescriptor;
         this.instanceFields = new HashMap<>(instanceFields);
         instanceFields.forEach((_, variable) -> variable.listen(() -> listeners.forEach(Runnable::run)));
     }
@@ -35,7 +35,7 @@ public class StructVariable implements Variable {
 
     @Override
     public Variable createNew() {
-        return new StructVariable(type, instanceFields);
+        return new StructVariable(typeDescriptor, instanceFields);
     }
 
     @Override
@@ -44,8 +44,8 @@ public class StructVariable implements Variable {
     }
 
     @Override
-    public Type type() {
-        return type;
+    public TypeDescriptor descriptor() {
+        return typeDescriptor;
     }
 
     public Variable getField(String fieldName) {
