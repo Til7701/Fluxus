@@ -20,4 +20,9 @@ public record JavaKlass(
         return List.of();
     }
 
+    @Override
+    public String toString() {
+        return javaClass.toString();
+    }
+
 }

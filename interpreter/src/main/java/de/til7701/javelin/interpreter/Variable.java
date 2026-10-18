@@ -1,9 +1,9 @@
-package de.til7701.javelin.interpreter.variable;
+package de.til7701.javelin.interpreter;
 
 
 import de.til7701.javelin.common.type.TypeDescriptor;
 
-public interface Variable {
+sealed interface Variable permits PrimitiveVariable, StructVariable {
 
     TypeDescriptor descriptor();
 

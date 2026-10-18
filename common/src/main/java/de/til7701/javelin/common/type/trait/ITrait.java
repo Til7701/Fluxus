@@ -40,4 +40,9 @@ public final class ITrait implements Trait {
         return new IType(Span.undefined(), bitCount);
     }
 
+    @Override
+    public String toString() {
+        return "I" + bitCount;
+    }
+
 }

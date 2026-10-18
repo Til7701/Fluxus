@@ -1,6 +1,6 @@
-let x = true;
+let x = new true;
 when x == false {
     System.println("triggered");
 }
-x = false;
-x = true;
+x = new false;
+x = new true;

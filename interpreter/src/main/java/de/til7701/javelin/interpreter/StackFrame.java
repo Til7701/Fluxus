@@ -1,8 +1,6 @@
 package de.til7701.javelin.interpreter;
 
 import de.til7701.javelin.common.shaft.Void;
-import de.til7701.javelin.interpreter.variable.PrimitiveVariable;
-import de.til7701.javelin.interpreter.variable.Variable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,12 +12,15 @@ import java.util.Map;
 
 @ToString
 @EqualsAndHashCode
-class StackFrame {
+public final class StackFrame {
 
     private final Map<String, Variable> variables;
     @Setter
     @Getter
     private Variable returnValue = new PrimitiveVariable(Void.of());
+    @Getter
+    @Setter
+    private boolean executingInterrupt;
 
     StackFrame() {
         this(new HashMap<>());

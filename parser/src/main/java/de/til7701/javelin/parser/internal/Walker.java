@@ -284,8 +284,8 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
         Span span = createSpan(ctx);
         BinaryOperator operator = switch (ctx.binaryOperator().getText()) {
             case "+" -> BinaryOperator.ADD;
-            case "-" -> BinaryOperator.SUBTRACT;
-            case "*" -> BinaryOperator.MULTIPLY;
+            case "-" -> BinaryOperator.SUB;
+            case "*" -> BinaryOperator.MUL;
             case "/" -> BinaryOperator.DIVIDE;
             case "==" -> BinaryOperator.EQ;
             case "!=" -> BinaryOperator.NEQ;
@@ -295,6 +295,9 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
             case ">=" -> BinaryOperator.GTE;
             case "&&" -> BinaryOperator.AND;
             case "||" -> BinaryOperator.OR;
+            case "&" -> BinaryOperator.BIT_AND;
+            case "|" -> BinaryOperator.BIT_OR;
+            case "^" -> BinaryOperator.BIT_XOR;
             case "<<" -> BinaryOperator.SHIFT_LEFT;
             case ">>" -> BinaryOperator.SHIFT_RIGHT;
             default -> throw new ParserException(span, "Unexpected value: " + ctx.binaryOperator().getText());

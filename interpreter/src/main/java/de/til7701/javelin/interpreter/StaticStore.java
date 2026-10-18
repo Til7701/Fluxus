@@ -1,7 +1,6 @@
 package de.til7701.javelin.interpreter;
 
 import de.til7701.javelin.common.type.TypeDescriptor;
-import de.til7701.javelin.interpreter.variable.Variable;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;

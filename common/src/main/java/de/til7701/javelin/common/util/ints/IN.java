@@ -13,18 +13,19 @@ public final class IN {
 
     private static final long ONES = 0xffffffffffffffffL;
 
+    @Getter
     private final long value;
     private final long valueBitmask;
     @Getter
-    private final int bitCount;
+    private final long bitCount;
 
-    public static IN of(long value, int bitCount) {
+    public static IN of(long value, long bitCount) {
         if (bitCount > 64)
             throw new NotImplementedException();
         return new IN(value, createBitmask(bitCount), bitCount);
     }
 
-    private static long createBitmask(int bitCount) {
+    private static long createBitmask(long bitCount) {
         long bitmask = 0;
         for (int i = 0; i < bitCount - 1; i++) {
             bitmask = bitmask << 1;
@@ -64,6 +65,64 @@ public final class IN {
         long longerBitmask = longerBitmask(left, right);
         difference = crop(difference, longerBitmask);
         return new IN(difference, longerBitmask, Long.bitCount(longerBitmask) + 1);
+    }
+
+    public static IN mul(IN left, IN right) {
+        long product = left.value * right.value;
+        long longerBitmask = longerBitmask(left, right);
+        product = crop(product, longerBitmask);
+        return new IN(product, longerBitmask, Long.bitCount(longerBitmask) + 1);
+    }
+
+    public static IN div(IN left, IN right) {
+        long quotient = left.value / right.value;
+        long longerBitmask = longerBitmask(left, right);
+        quotient = crop(quotient, longerBitmask);
+        return new IN(quotient, longerBitmask, Long.bitCount(longerBitmask) + 1);
+    }
+
+    public static IN bitAnd(IN left, IN right) {
+        return new IN(left.value & right.value, left.valueBitmask, left.bitCount);
+    }
+
+    public static IN bitOr(IN left, IN right) {
+        return new IN(left.value | right.value, left.valueBitmask, left.bitCount);
+    }
+
+    public static IN bitXOr(IN left, IN right) {
+        return new IN(left.value ^ right.value, left.valueBitmask, left.bitCount);
+    }
+
+    public static IN shiftLeft(IN value, IN amount) {
+        return new IN(value.value << amount.value, value.valueBitmask, value.bitCount);
+    }
+
+    public static IN shiftRight(IN value, IN amount) {
+        return new IN(value.value >> amount.value, value.valueBitmask, value.bitCount);
+    }
+
+    public static boolean eq(IN left, IN right) {
+        return left.value == right.value;
+    }
+
+    public static boolean neq(IN left, IN right) {
+        return left.value != right.value;
+    }
+
+    public static boolean gt(IN left, IN right) {
+        return left.value > right.value;
+    }
+
+    public static boolean gte(IN left, IN right) {
+        return left.value >= right.value;
+    }
+
+    public static boolean lt(IN left, IN right) {
+        return left.value < right.value;
+    }
+
+    public static boolean lte(IN left, IN right) {
+        return left.value <= right.value;
     }
 
     @Override

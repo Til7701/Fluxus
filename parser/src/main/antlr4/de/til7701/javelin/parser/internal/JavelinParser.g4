@@ -66,6 +66,9 @@ binaryOperator
     | AND
     | OR
     | IMPL
+    | BITAND
+    | BITOR
+    | CARET
     | SHIFT_LEFT
     | SHIFT_RIGHT
     ;

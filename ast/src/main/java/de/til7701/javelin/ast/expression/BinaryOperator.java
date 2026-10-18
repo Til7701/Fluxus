@@ -3,8 +3,8 @@ package de.til7701.javelin.ast.expression;
 public enum BinaryOperator {
 
     ADD,
-    SUBTRACT,
-    MULTIPLY,
+    SUB,
+    MUL,
     DIVIDE,
     LT,
     GT,
@@ -16,6 +16,9 @@ public enum BinaryOperator {
     AND,
     OR,
     IMPL,
+    BIT_AND,
+    BIT_OR,
+    BIT_XOR,
     SHIFT_LEFT,
     SHIFT_RIGHT
 

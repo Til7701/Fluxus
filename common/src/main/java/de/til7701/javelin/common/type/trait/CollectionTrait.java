@@ -38,8 +38,8 @@ public final class CollectionTrait implements Trait {
         return switch (typeDescriptor) {
             case Klass klass -> klass.methods().stream().anyMatch(m ->
                     m.returnType().equals(elementType.type())
-                            && m.parameterTypes().length == 1
-                            && m.parameterTypes()[0].equals(indexType.type()));
+                            && m.parameterTypes().length == 2
+                            && m.parameterTypes()[1].equals(indexType.type()));
             case Trait trait -> this.equals(trait);
         };
     }
@@ -49,4 +49,8 @@ public final class CollectionTrait implements Trait {
         return new CollectionType(Span.undefined(), indexType.type(), elementType.type());
     }
 
+    @Override
+    public String toString() {
+        return elementType + "[" + indexType + "]";
+    }
 }

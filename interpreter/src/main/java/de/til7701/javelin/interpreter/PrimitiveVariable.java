@@ -1,4 +1,4 @@
-package de.til7701.javelin.interpreter.variable;
+package de.til7701.javelin.interpreter;
 
 import de.til7701.javelin.common.shaft.Primitive;
 import de.til7701.javelin.common.type.TypeDescriptor;
@@ -6,13 +6,13 @@ import de.til7701.javelin.common.type.TypeDescriptor;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class PrimitiveVariable implements Variable {
+final class PrimitiveVariable implements Variable {
 
     private final Collection<Runnable> listeners = new CopyOnWriteArrayList<>();
 
     private Primitive value;
 
-    public PrimitiveVariable(Primitive value) {
+    PrimitiveVariable(Primitive value) {
         this.value = value;
     }
 
@@ -46,4 +46,8 @@ public class PrimitiveVariable implements Variable {
         listeners.add(onUpdate);
     }
 
+    @Override
+    public String toString() {
+        return value.toString();
+    }
 }

@@ -1,10 +1,10 @@
 package de.til7701.javelin.interpreter;
 
-import de.til7701.javelin.interpreter.variable.Variable;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
+import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Set;
@@ -16,7 +16,7 @@ import java.util.stream.Collector;
 
 @ToString
 @EqualsAndHashCode
-class Stack {
+public final class Stack {
 
     private final Deque<StackFrame> stack;
 
@@ -95,6 +95,12 @@ class Stack {
                     }
                 });
         return new Stack(snapshot);
+    }
+
+    public void print(PrintStream out) {
+        for (StackFrame frame : this.stack) {
+            out.println("    " + frame);
+        }
     }
 
 }

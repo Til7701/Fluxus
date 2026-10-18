@@ -41,4 +41,9 @@ public final class UTrait implements Trait {
         return new UType(Span.undefined(), bitCount);
     }
 
+    @Override
+    public String toString() {
+        return "U" + bitCount;
+    }
+
 }

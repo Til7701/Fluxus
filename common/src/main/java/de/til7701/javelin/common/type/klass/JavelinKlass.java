@@ -53,4 +53,8 @@ public record JavelinKlass(
         return Optional.empty();
     }
 
+    @Override
+    public String toString() {
+        return fullyQualifiedJavelinName;
+    }
 }

@@ -1,11 +1,11 @@
-package de.til7701.javelin.interpreter.variable;
+package de.til7701.javelin.interpreter;
 
 import de.til7701.javelin.common.shaft.Bool;
 
 import java.util.HashMap;
 import java.util.Map;
 
-class LiteralStore {
+public final class LiteralStore {
 
     private final Map<Boolean, Variable> booleans = new HashMap<>();
 

@@ -4,6 +4,8 @@ import de.til7701.javelin.ast.Span;
 import de.til7701.javelin.ast.type.Type;
 import de.til7701.javelin.common.type.TypeDescriptor;
 
+import java.util.Arrays;
+
 public sealed interface Error {
 
     Span span();
@@ -20,6 +22,15 @@ public sealed interface Error {
             TypeDescriptor[] argumentTypes,
             TypeDescriptor typeDescriptor
     ) implements Error {
+        @Override
+        public String toString() {
+            return "MethodNotFound{" +
+                    "span=" + span +
+                    ", methodName='" + methodName + '\'' +
+                    ", argumentTypes=" + Arrays.deepToString(argumentTypes) +
+                    ", typeDescriptor=" + typeDescriptor +
+                    '}';
+        }
     }
 
     record SymbolNotFound(

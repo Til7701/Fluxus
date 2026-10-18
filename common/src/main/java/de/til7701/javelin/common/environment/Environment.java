@@ -27,6 +27,7 @@ public class Environment {
             Str.class,
             Array.class,
             System.class,
+            PType.class,
     };
 
     private final KlassRegister klassRegister = new KlassRegister();

@@ -2,6 +2,7 @@ package de.til7701.javelin.common.shaft;
 
 import de.til7701.javelin.ast.Span;
 import de.til7701.javelin.ast.type.SimpleType;
+import de.til7701.javelin.ast.type.Type;
 import de.til7701.javelin.common.type.TypeDescriptor;
 import de.til7701.javelin.common.type.trait.CollectionTrait;
 import de.til7701.javelin.common.type.trait.UTrait;
@@ -38,7 +39,7 @@ public final class Array implements Primitive {
         return array.value[i];
     }
 
-    public static Str as__javelin_shaft_Str(Array value) {
+    public static Str as__javelin_shaft_Str(Array value, PType ignored) {
         return Str.of(Arrays.deepToString(value.value));
     }
 
@@ -46,6 +47,12 @@ public final class Array implements Primitive {
     @Override
     public TypeDescriptor descriptor() {
         return DESCRIPTOR.get();
+    }
+
+    @Ignore
+    @Override
+    public String toString() {
+        return Arrays.deepToString(value);
     }
 
 }

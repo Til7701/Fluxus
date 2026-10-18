@@ -15,15 +15,15 @@ public final class UN {
     private final long value;
     private final long valueBitmask;
     @Getter
-    private final int bitCount;
+    private final long bitCount;
 
-    public static UN of(long value, int bitCount) {
+    public static UN of(long value, long bitCount) {
         if (bitCount > 64)
             throw new NotImplementedException();
         return new UN(value, createBitmask(bitCount), bitCount);
     }
 
-    private static long createBitmask(int bitCount) {
+    private static long createBitmask(long bitCount) {
         long bitmask = 0;
         for (int i = 0; i < bitCount; i++) {
             bitmask = bitmask << 1;
@@ -57,17 +57,67 @@ public final class UN {
         return new UN(difference, longerBitmask, Long.bitCount(longerBitmask));
     }
 
-    public static UN shift_left(UN value, UN amount) {
+    public static UN mul(UN left, UN right) {
+        long product = left.value * right.value;
+        long longerBitmask = longerBitmask(left, right);
+        product = crop(product, longerBitmask);
+        return new UN(product, longerBitmask, Long.bitCount(longerBitmask));
+    }
+
+    public static UN div(UN left, UN right) {
+        long quotient = left.value / right.value;
+        long longerBitmask = longerBitmask(left, right);
+        quotient = crop(quotient, longerBitmask);
+        return new UN(quotient, longerBitmask, Long.bitCount(longerBitmask));
+    }
+
+    public static UN bitAnd(UN left, UN right) {
+        return new UN(left.value & right.value, left.valueBitmask, left.bitCount);
+    }
+
+    public static UN bitOr(UN left, UN right) {
+        return new UN(left.value | right.value, left.valueBitmask, left.bitCount);
+    }
+
+    public static UN bitXOr(UN left, UN right) {
+        return new UN(left.value ^ right.value, left.valueBitmask, left.bitCount);
+    }
+
+    public static UN shiftLeft(UN value, UN amount) {
         return new UN(value.value << amount.value, value.valueBitmask, value.bitCount);
     }
 
-    public static UN shift_right(UN value, UN amount) {
+    public static UN shiftRight(UN value, UN amount) {
         return new UN(value.value >> amount.value, value.valueBitmask, value.bitCount);
+    }
+
+    public static boolean eq(UN left, UN right) {
+        return left.value == right.value;
+    }
+
+    public static boolean neq(UN left, UN right) {
+        return left.value != right.value;
+    }
+
+    public static boolean lt(UN left, UN right) {
+        return Long.compareUnsigned(left.value, right.value) < 0;
+    }
+
+    public static boolean lte(UN left, UN right) {
+        return Long.compareUnsigned(left.value, right.value) <= 0;
+    }
+
+    public static boolean gt(UN left, UN right) {
+        return Long.compareUnsigned(left.value, right.value) > 0;
+    }
+
+    public static boolean gte(UN left, UN right) {
+        return Long.compareUnsigned(left.value, right.value) >= 0;
     }
 
     @Override
     public String toString() {
-        return Long.toString(value);
+        return Long.toUnsignedString(value);
     }
 
     @Override

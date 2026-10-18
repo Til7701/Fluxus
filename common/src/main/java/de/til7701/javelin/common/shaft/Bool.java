@@ -2,6 +2,7 @@ package de.til7701.javelin.common.shaft;
 
 import de.til7701.javelin.ast.Span;
 import de.til7701.javelin.ast.type.SimpleType;
+import de.til7701.javelin.ast.type.Type;
 import de.til7701.javelin.common.type.TypeDescriptor;
 import de.til7701.javelin.common.util.Ignore;
 import lombok.Getter;
@@ -37,7 +38,7 @@ public final class Bool implements Primitive {
         return of(left.value == right.value);
     }
 
-    public static Str as__javelin_shaft_Str(Bool value) {
+    public static Str as__javelin_shaft_Str(Bool value, PType ignored) {
         return Str.of(Boolean.toString(value.value));
     }
 

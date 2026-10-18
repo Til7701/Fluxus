@@ -17,10 +17,11 @@ static U64 c = 0xFFF7EEE000000000U64;
 static U64 f = 6364136223846793005U64;
 
 U64[U32] stateArray = [ 0U64; Random.n ];
-U32 stateIndex = 0U32;
+I32 stateIndex = 0I32;
 
 pub () {
     let seed = System.nanoTime(); // TODO switch to UNIX time or something like that
+    this.initializeState(seed);
 }
 
 pub (U64 seed) {
@@ -28,9 +29,53 @@ pub (U64 seed) {
 }
 
 initializeState(U64 seed) {
-
+    let state = this.stateArray;
+    state[0U64] = new seed;
+    let i = 1U32;
+    do when i < Random.n {
+        seed = Random.f * (seed ^ (seed >> (Random.w - 2U64))) + i;
+        state[i] = new seed;
+        i = i + 1U32;
+    }
 }
 
 pub U64 sampleU64() {
-    return 1U64;
+    let state = this.stateArray;
+    let k = this.stateIndex;
+
+    let j = k - (Random.n as I32 - 1I32);
+    let tmpJ = new j;
+    do when tmpJ < 0I32 {
+        j = j + (Random.n as I32);
+    }
+
+    let x = (state[k as U32] & Random.umask) | (state[j as U32] & Random.lmask);
+
+    let xA = x >> 1U64;
+    let tmpX = new x;
+    do when tmpX == 1U64 {
+        xA = xA ^ Random.a;
+    }
+
+    j = k - ((Random.n - Random.m) as I32);
+    let tmpJ = new j;
+    do when tmpJ < 0I32 {
+        j = j + (Random.n as I32);
+    }
+
+    x = state[j as U32] ^ xA;
+    state[k as U32] = new x;
+    k = k + 1I32;
+
+    do when k >= (Random.n as I32) {
+        k = new 0I32;
+    }
+    this.stateIndex = k;
+
+    let y = x ^ (x >> Random.u);
+    y = y ^ ((y << Random.s) & Random.b);
+    y = y ^ ((y << Random.t) & Random.c);
+    let z = y ^ (y >> Random.l);
+
+    return z;
 }

@@ -10,6 +10,7 @@ import de.til7701.javelin.common.head.Head;
 import de.til7701.javelin.common.type.klass.Klass;
 import de.til7701.javelin.common.util.Natives;
 import de.til7701.javelin.interpreter.Interpreter;
+import de.til7701.javelin.interpreter.InterpreterException;
 import de.til7701.javelin.parser.Parser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +65,11 @@ public class Runner {
             return 1;
         }
         Interpreter interpreter = new Interpreter(env);
-        interpreter.interpret(ast);
+        try {
+            interpreter.interpret(ast);
+        } catch (InterpreterException e) {
+            printInterpreterException(e);
+        }
         return 0;
     }
 
@@ -72,6 +77,13 @@ public class Runner {
         stdOut.println(error);
         String spannedLines = extractSpanFullLines(code, error.span());
         stdOut.println(spannedLines);
+    }
+
+    private void printInterpreterException(InterpreterException e) {
+        stdOut.println(e.getMessage());
+        stdOut.println("at " + e.getSpan());
+        e.getStack().print(stdOut);
+        stdOut.println(e.getLiteralStore().valuesToString());
     }
 
     private String extractSpanFullLines(String code, Span span) {

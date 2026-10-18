@@ -23,7 +23,8 @@ public class Primitives {
             I.class, I.TYPE,
             U.class, U.TYPE,
             Array.class, Array.TYPE,
-            Object.class, Void.TYPE
+            Object.class, Void.TYPE,
+            PType.class, PType.TYPE
     );
 
     public static JavaKlass loadJavaClass(Class<?> javaClass, Type type) {

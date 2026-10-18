@@ -7,10 +7,14 @@ import de.til7701.javelin.common.NotImplementedException;
 import de.til7701.javelin.common.environment.Environment;
 import de.til7701.javelin.common.environment.Imports;
 import de.til7701.javelin.common.shaft.Bool;
+import de.til7701.javelin.common.shaft.PType;
 import de.til7701.javelin.common.shaft.Str;
 import de.til7701.javelin.common.type.Metod;
 import de.til7701.javelin.common.type.TypeDescriptor;
-import de.til7701.javelin.common.type.klass.*;
+import de.til7701.javelin.common.type.klass.Field;
+import de.til7701.javelin.common.type.klass.JavaKlass;
+import de.til7701.javelin.common.type.klass.JavelinKlass;
+import de.til7701.javelin.common.type.klass.JavelinMetod;
 import de.til7701.javelin.common.type.trait.CollectionTrait;
 import de.til7701.javelin.common.type.trait.ITrait;
 import de.til7701.javelin.common.type.trait.Trait;
@@ -198,17 +202,22 @@ public class Checker {
             }
             case TypeCastExpression(Span span, Type targetType, Expression valueExpression) -> {
                 targetType = targetType.mapNames(imports::map);
-                Optional<TypeDescriptor> targetDescriptor = environment.getKlassRegister().find(targetType, imports);
-                if (targetDescriptor.isEmpty()) yield null;
+                TypeDescriptor targetDescriptor = findTypeDescriptor(span, targetType, imports);
+                if (targetDescriptor == null) yield null;
                 TypeDescriptor valueType = evaluateExpressionType(valueExpression, stack, imports);
                 if (valueType == null) yield null;
                 String methodName = "as__" + targetType.name().replace('.', '_');
-                Metod metod = findMetod(span, valueType, methodName, new TypeDescriptor[]{valueType});
+                Metod metod = switch (valueType) {
+                    case CollectionTrait _, JavelinKlass _ ->
+                            findMetod(span, valueType, methodName, new TypeDescriptor[]{valueType});
+                    case ITrait _, UTrait _, JavaKlass _ ->
+                            findMetod(span, valueType, methodName, new TypeDescriptor[]{valueType, PType.DESCRIPTOR.get()});
+                };
                 if (metod == null) yield null;
-                Optional<TypeDescriptor> returnDescriptor = environment.getKlassRegister().find(metod.returnType(), imports);
-                if (returnDescriptor.isEmpty()) yield null;
-                checkAssignability(span, returnDescriptor.get(), targetDescriptor.get());
-                yield targetDescriptor.get();
+                TypeDescriptor returnDescriptor = findTypeDescriptor(span, metod.returnType(), imports);
+                if (returnDescriptor == null) yield null;
+                checkAssignability(span, returnDescriptor, targetDescriptor);
+                yield targetDescriptor;
             }
             default -> throw new NotImplementedException();
         };
@@ -243,10 +252,7 @@ public class Checker {
     }
 
     private @Nullable Metod findMetod(Span span, TypeDescriptor typeDescriptor, String methodName, TypeDescriptor[] arguments) {
-        Optional<Metod> metod = switch (typeDescriptor) {
-            case Klass klass -> klass.findMethod(methodName, arguments, environment);
-            case Trait trait -> trait.findMethod(methodName, arguments, environment).map(m -> (Metod) m);
-        };
+        Optional<Metod> metod = typeDescriptor.findMethod(methodName, arguments, environment);
         if (metod.isEmpty()) {
             errors.add(new Error.MethodNotFound(span, methodName, arguments, typeDescriptor));
             return null;
