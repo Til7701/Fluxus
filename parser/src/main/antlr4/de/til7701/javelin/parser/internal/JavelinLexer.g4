@@ -57,6 +57,8 @@ MOD        : '%';
 ARROW      : '->';
 COLONCOLON : '::';
 AT         : '@';
+SHIFT_LEFT : '<<';
+SHIFT_RIGHT: '>>';
 
 ADD_ASSIGN     : '+=';
 SUB_ASSIGN     : '-=';
@@ -68,13 +70,19 @@ XOR_ASSIGN     : '^=';
 MOD_ASSIGN     : '%=';
 
 INTEGER : [0-9]+;
+INTEGER_VALUE
+    : INTEGER
+    | '0b' ('0' | '1')+
+    | '0x' ([0-9] | [A-F])+
+    | 'MAX'
+    ;
 I : 'I';
 U : 'U';
 
 UnsignedIntegerTypeIdentifier : U INTEGER;
 SignedIntegerTypeIdentifier : I INTEGER;
-SignedIntegerLiteral : SUB? INTEGER I INTEGER;
-UnsignedIntegerLiteral : INTEGER U INTEGER;
+SignedIntegerLiteral : SUB? INTEGER_VALUE I INTEGER;
+UnsignedIntegerLiteral : INTEGER_VALUE U INTEGER;
 
 StringLiteral : '"' ( ~["\\] | '\\' . )* '"';
 BooleanLiteral : 'true' | 'false';

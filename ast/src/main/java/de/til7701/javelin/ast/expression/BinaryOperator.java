@@ -16,5 +16,7 @@ public enum BinaryOperator {
     AND,
     OR,
     IMPL,
+    SHIFT_LEFT,
+    SHIFT_RIGHT
 
 }

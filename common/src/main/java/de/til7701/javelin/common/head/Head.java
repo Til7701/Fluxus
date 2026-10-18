@@ -21,7 +21,8 @@ import java.util.List;
 public class Head {
 
     private static final String[] sdkClassNames = {
-            "javelin.head.UUID"
+            "javelin.head.UUID",
+            "javelin.head.Random",
     };
 
     @Getter

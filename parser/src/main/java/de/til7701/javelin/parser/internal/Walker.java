@@ -23,10 +23,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.jspecify.annotations.NullMarked;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -140,9 +137,24 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
     public Node visitUnsignedIntegerLiteralExpression(JavelinParser.UnsignedIntegerLiteralExpressionContext ctx) {
         String literal = ctx.UnsignedIntegerLiteral().getText();
         String[] split = literal.split("U", 2);
+        long value = switch (split[0]) {
+            case "MAX" -> 0xffffffffffffffffL;
+            default -> {
+                String number = split[0];
+                int radix = 10;
+                if (number.startsWith("0b")) {
+                    number = number.substring(2);
+                    radix = 2;
+                } else if (number.startsWith("0x")) {
+                    number = number.substring(2);
+                    radix = 16;
+                }
+                yield Long.parseUnsignedLong(number, radix);
+            }
+        };
         return new UnsignedIntegerLiteralExpression(
                 createSpan(ctx),
-                Long.parseLong(split[0]),
+                value,
                 Long.parseLong(split[1])
         );
     }
@@ -151,9 +163,13 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
     public Node visitSignedIntegerLiteralExpression(JavelinParser.SignedIntegerLiteralExpressionContext ctx) {
         String literal = ctx.SignedIntegerLiteral().getText();
         String[] split = literal.split("I", 2);
+        long value = switch (split[0]) {
+            case "MAX" -> Long.MAX_VALUE;
+            default -> Long.parseLong(split[0].toLowerCase(Locale.ROOT));
+        };
         return new SignedIntegerLiteralExpression(
                 createSpan(ctx),
-                Long.parseLong(split[0]),
+                value,
                 Long.parseLong(split[1])
         );
     }
@@ -279,6 +295,8 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
             case ">=" -> BinaryOperator.GTE;
             case "&&" -> BinaryOperator.AND;
             case "||" -> BinaryOperator.OR;
+            case "<<" -> BinaryOperator.SHIFT_LEFT;
+            case ">>" -> BinaryOperator.SHIFT_RIGHT;
             default -> throw new ParserException(span, "Unexpected value: " + ctx.binaryOperator().getText());
         };
         Expression left = (Expression) visit(ctx.expression(0));
@@ -298,7 +316,11 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
 
     @Override
     public Node visitArrayCreation(JavelinParser.ArrayCreationContext ctx) {
-        return super.visitArrayCreation(ctx);
+        return new ArrayCreation(
+                createSpan(ctx),
+                (Expression) visit(ctx.expression(0)),
+                (Expression) visit(ctx.expression(1))
+        );
     }
 
     @Override
@@ -460,7 +482,7 @@ public class Walker extends JavelinParserBaseVisitor<Node> {
                 fieldModifiers,
                 (Type) visit(ctx.typeIdentifier()),
                 ctx.SymbolIdentifier().getText(),
-                (Expression) visit(ctx.expression())
+                Objects.requireNonNull((Expression) visit(ctx.expression()))
         );
     }
 

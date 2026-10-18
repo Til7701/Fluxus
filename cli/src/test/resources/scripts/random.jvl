@@ -1,0 +1,4 @@
+import javelin.head.Random;
+
+let random = Random(42U64);
+System.println(random.sampleU64() as Str);

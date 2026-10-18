@@ -183,6 +183,19 @@ public class Checker {
                     }
                 };
             }
+            case StaticFieldAccess(Span span, Type type, String fieldName) -> {
+                TypeDescriptor typeDescriptor = findTypeDescriptor(span, type, imports);
+                if (typeDescriptor == null) yield null;
+                Field field = switch (typeDescriptor) {
+                    case JavelinKlass klass -> klass.fields().stream()
+                            .filter(f -> f.name().equals(fieldName))
+                            .findAny()
+                            .orElse(null);
+                    case JavaKlass _, Trait _ -> null;
+                };
+                if (field == null) yield null;
+                yield findTypeDescriptor(span, field.type(), imports);
+            }
             case TypeCastExpression(Span span, Type targetType, Expression valueExpression) -> {
                 targetType = targetType.mapNames(imports::map);
                 Optional<TypeDescriptor> targetDescriptor = environment.getKlassRegister().find(targetType, imports);

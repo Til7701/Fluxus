@@ -57,6 +57,14 @@ public final class UN {
         return new UN(difference, longerBitmask, Long.bitCount(longerBitmask));
     }
 
+    public static UN shift_left(UN value, UN amount) {
+        return new UN(value.value << amount.value, value.valueBitmask, value.bitCount);
+    }
+
+    public static UN shift_right(UN value, UN amount) {
+        return new UN(value.value >> amount.value, value.valueBitmask, value.bitCount);
+    }
+
     @Override
     public String toString() {
         return Long.toString(value);

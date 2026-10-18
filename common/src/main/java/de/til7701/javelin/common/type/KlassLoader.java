@@ -10,6 +10,7 @@ import de.til7701.javelin.ast.type.Type;
 import de.til7701.javelin.ast.type_definition.TypeDefinition;
 import de.til7701.javelin.ast.type_definition.TypeModifierValue;
 import de.til7701.javelin.ast.type_definition.classes.ClassDefinition;
+import de.til7701.javelin.ast.type_definition.classes.FieldModifierValue;
 import de.til7701.javelin.common.environment.Imports;
 import de.til7701.javelin.common.shaft.Void;
 import de.til7701.javelin.common.type.klass.Field;
@@ -41,6 +42,7 @@ public class KlassLoader {
         final Type finalKlassType = klassType;
         List<Field> fields = classDefinition.fields().stream()
                 .map(fieldDefinition -> new Field(
+                        fieldDefinition.modifiers().stream().anyMatch(f -> f.value() == FieldModifierValue.STATIC),
                         fieldDefinition.name(),
                         fieldDefinition.type().mapNames(importsMapper::map),
                         fieldDefinition.value()

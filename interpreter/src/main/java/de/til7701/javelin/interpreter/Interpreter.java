@@ -7,6 +7,7 @@ import de.til7701.javelin.interpreter.variable.StructVariable;
 import de.til7701.javelin.interpreter.variable.Variable;
 import de.til7701.javelin.interpreter.variable.VariableFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,11 +15,12 @@ import java.util.*;
 import java.util.stream.Stream;
 
 @Slf4j
-public class Interpreter {
+public final class Interpreter {
 
     private final Environment environment;
     private final VariableFactory variableFactory = new VariableFactory();
     private final Deque<Interrupt> interruptQueue = new ArrayDeque<>();
+    private final StaticStore staticStore = new StaticStore();
     private boolean executingInterrupt = false;
 
     private Imports currentImports;
@@ -84,7 +86,24 @@ public class Interpreter {
                     variableFactory.fromULiteral(value, (int) bitCount);
             case StringLiteralExpression(_, String value) -> variableFactory.fromStrLiteral(value);
             case SymbolExpression(_, String identifier) -> Objects.requireNonNull(stack.getVariable(identifier));
-            case InstanceMethodCall _ -> throw new NotImplementedException();
+            case InstanceMethodCall(_, Expression instance, String name, List<Expression> arguments) -> {
+                Variable instanceVariable = evaluateExpression(instance, stack);
+                TypeDescriptor typeDescriptor = instanceVariable.descriptor();
+                List<Variable> argumentValues = arguments.stream()
+                        .map((Expression e) -> evaluateExpression(e, stack))
+                        .toList();
+                TypeDescriptor[] argumentTypes = argumentValues.stream()
+                        .map(Variable::descriptor)
+                        .toArray(TypeDescriptor[]::new);
+                Metod method = typeDescriptor.findMethod(name, argumentTypes, environment)
+                        .orElseThrow(() -> new RuntimeException("Method: " + name + " with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + typeDescriptor));
+                yield switch (method) {
+                    case JavaMetod javaMetod -> executeJavaMethod(javaMetod, argumentValues, instanceVariable);
+                    case JavelinMetod javelinMetod ->
+                            executeJavelinMethod(javelinMetod, argumentValues, instanceVariable, stack);
+                    case TraitMetod _ -> throw new UnsupportedOperationException();
+                };
+            }
             case StaticMethodCall(_, Type type, String methodName, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
                         .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
@@ -97,8 +116,8 @@ public class Interpreter {
                 Metod method = typeDescriptor.findMethod(methodName, argumentTypes, environment)
                         .orElseThrow(() -> new RuntimeException("Method: " + methodName + " with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + typeDescriptor));
                 yield switch (method) {
-                    case JavaMetod javaMetod -> executeJavaMethod(javaMetod, argumentValues);
-                    case JavelinMetod javelinMetod -> executeJavelinMethod(javelinMetod, argumentValues, stack);
+                    case JavaMetod javaMetod -> executeJavaMethod(javaMetod, argumentValues, null);
+                    case JavelinMetod javelinMetod -> executeJavelinMethod(javelinMetod, argumentValues, null, stack);
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
@@ -111,8 +130,9 @@ public class Interpreter {
                 Metod method = type.findMethod(methodName, argumentTypes, environment)
                         .orElseThrow(() -> new RuntimeException("Method: " + methodName + " with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + type));
                 yield switch (method) {
-                    case JavaMetod javaMetod -> executeJavaMethod(javaMetod, List.of(leftV, rightV));
-                    case JavelinMetod javelinMetod -> executeJavelinMethod(javelinMetod, List.of(leftV, rightV), stack);
+                    case JavaMetod javaMetod -> executeJavaMethod(javaMetod, List.of(leftV, rightV), null);
+                    case JavelinMetod javelinMetod ->
+                            executeJavelinMethod(javelinMetod, List.of(leftV, rightV), null, stack);
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
@@ -122,6 +142,14 @@ public class Interpreter {
                         .toArray(Variable[]::new);
                 TypeDescriptor elementType = variables[0].descriptor();
                 yield variableFactory.asArray(variables, elementType);
+            }
+            case ArrayCreation(_, Expression defaultValue, Expression length) -> {
+                Variable lengthVar = evaluateExpression(length, stack);
+                int l = (int) ((U) lengthVar.javaValue()).getValue().getValue();
+                Variable d = evaluateExpression(defaultValue, stack);
+                Variable[] array = new Variable[l];
+                Arrays.fill(array, d);
+                yield variableFactory.asArray(array, d.descriptor());
             }
             case ConstructorCall(_, Type type, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
@@ -141,7 +169,7 @@ public class Interpreter {
                         Stack s = new Stack();
                         s.push(new StackFrame());
                         s.initializeVariable("this", struct);
-                        executeJavelinMethod(method, argumentValues, s);
+                        executeJavelinMethod(method, argumentValues, null, s);
                         yield struct;
                     }
                     default -> throw new UnsupportedOperationException();
@@ -155,6 +183,13 @@ public class Interpreter {
                     throw new RuntimeException("Instance is not a struct");
                 }
             }
+            case StaticFieldAccess(_, Type type, String fieldName) -> {
+                TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
+                        .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
+                if (!staticStore.has(typeDescriptor)) staticStore.init(typeDescriptor, populateStatics(typeDescriptor));
+                Variable value = staticStore.get(typeDescriptor, fieldName);
+                yield Objects.requireNonNull(value);
+            }
             case TypeCastExpression(_, Type targetType, Expression valueExpression) -> {
                 Variable value = evaluateExpression(valueExpression, stack);
                 TypeDescriptor valueType = value.descriptor();
@@ -164,8 +199,8 @@ public class Interpreter {
                 Metod method = valueType.findMethod(methodName, new TypeDescriptor[]{valueType}, environment)
                         .orElseThrow(() -> new RuntimeException("Method: " + methodName + " with args: " + valueType + " not found for class: " + valueType));
                 yield switch (method) {
-                    case JavaMetod javaMetod -> executeJavaMethod(javaMetod, List.of(value));
-                    case JavelinMetod javelinMetod -> executeJavelinMethod(javelinMetod, List.of(value), stack);
+                    case JavaMetod javaMetod -> executeJavaMethod(javaMetod, List.of(value), null);
+                    case JavelinMetod javelinMetod -> executeJavelinMethod(javelinMetod, List.of(value), null, stack);
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
@@ -176,36 +211,54 @@ public class Interpreter {
     private Variable initStruct(JavelinKlass javelinKlass) {
         Map<String, Variable> fields = new HashMap<>();
         for (Field field : javelinKlass.fields()) {
+            if (field.isStatic()) continue;
             String name = field.name();
-            Stack staticKlassStack = new Stack(); // TODO replace when implementing static members
-            staticKlassStack.push(new StackFrame());
-            Variable fieldInit = evaluateExpression(field.init(), staticKlassStack);
+            Stack instanceInitStack = new Stack();
+            instanceInitStack.push(new StackFrame());
+            Variable fieldInit = evaluateExpression(field.init(), instanceInitStack);
             fields.put(name, fieldInit);
         }
         return new StructVariable(javelinKlass, fields);
     }
 
-    private Variable executeJavaMethod(JavaMetod javaMetod, List<Variable> argumentValues) {
+    private Map<String, Variable> populateStatics(TypeDescriptor typeDescriptor) {
+        Map<String, Variable> variables = new HashMap<>();
+        Stack staticInitStack = new Stack();
+        staticInitStack.push(new StackFrame());
+        if (typeDescriptor instanceof JavelinKlass klass) {
+            klass.fields().stream()
+                    .filter(Field::isStatic)
+                    .forEach(f -> {
+                        Variable value = evaluateExpression(f.init(), staticInitStack);
+                        variables.put(f.name(), value);
+                        staticInitStack.initializeVariable(f.name(), value);
+                    });
+        }
+        return variables;
+    }
+
+    private Variable executeJavaMethod(JavaMetod javaMetod, List<Variable> argumentValues, @Nullable Variable instance) {
         Object result;
         try {
             Method method = javaMetod.javaMethod();
-            Object instance = null;
-            if (!javaMetod.isStatic()) {
-                // TODO
+            Object javaInstance = null;
+            if (!javaMetod.isStatic() && instance != null) {
+                javaInstance = instance.javaValue();
             }
             log.debug(javaMetod.toString());
             if (javaMetod.needsNatives())
-                result = method.invoke(instance, Stream.concat(Stream.of(environment.getNatives()), argumentValues.stream().map(Variable::javaValue)).toArray());
+                result = method.invoke(javaInstance, Stream.concat(Stream.of(environment.getNatives()), argumentValues.stream().map(Variable::javaValue)).toArray());
             else
-                result = method.invoke(instance, argumentValues.stream().map(Variable::javaValue).toArray());
+                result = method.invoke(javaInstance, argumentValues.stream().map(Variable::javaValue).toArray());
         } catch (InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
         return variableFactory.fromJavaValue(result);
     }
 
-    private Variable executeJavelinMethod(JavelinMetod javelinMetod, List<Variable> argumentValues, Stack stack) {
+    private Variable executeJavelinMethod(JavelinMetod javelinMetod, List<Variable> argumentValues, @Nullable Variable instance, Stack stack) {
         stack.push(new StackFrame());
+        if (instance != null) stack.initializeVariable("this", instance);
         for (int i = 0; i < javelinMetod.parameterNames().length; i++) {
             stack.initializeVariable(javelinMetod.parameterNames()[i], argumentValues.get(i));
         }

@@ -4,6 +4,7 @@ import de.til7701.javelin.ast.expression.Expression;
 import de.til7701.javelin.ast.type.Type;
 
 public record Field(
+        boolean isStatic,
         String name,
         Type type,
         Expression init

@@ -6,6 +6,7 @@ import de.til7701.javelin.ast.type.Type;
 import de.til7701.javelin.common.type.TypeDescriptor;
 import de.til7701.javelin.common.util.Ignore;
 import de.til7701.javelin.common.util.Natives;
+import de.til7701.javelin.common.util.ints.UN;
 
 @JavelinType(
         fullyQualifiedJavelinName = System.JAVELIN_TYPE_NAME
@@ -23,6 +24,11 @@ public final class System {
 
     public static void println(Natives natives, Str line) {
         natives.getStdOut().println(line.getValue());
+    }
+
+    public static U nanoTime() {
+        long time = java.lang.System.nanoTime();
+        return U.of(UN.of(time, 64));
     }
 
 }

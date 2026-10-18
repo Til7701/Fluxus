@@ -1,0 +1,36 @@
+/// PRNG based on https://en.wikipedia.org/wiki/Mersenne_Twister
+pub class;
+
+static U64 n = 312U64;
+static U64 m = 156U64;
+static U64 w = 64U64;
+static U64 r = 31U64;
+static U64 umask = MAXU64 << r;
+static U64 lmask = MAXU64 >> (w - r);
+static U64 a = 0xB5026F5AA96619E5U64;
+static U64 u = 29U64;
+static U64 s = 17U64;
+static U64 t = 15U64;
+static U64 l = 18U64;
+static U64 b = 0x71D67FFFEDA60000U64;
+static U64 c = 0xFFF7EEE000000000U64;
+static U64 f = 6364136223846793005U64;
+
+U64[U32] stateArray = [ 0U64; Random.n ];
+U32 stateIndex = 0U32;
+
+pub () {
+    let seed = System.nanoTime(); // TODO switch to UNIX time or something like that
+}
+
+pub (U64 seed) {
+    this.initializeState(seed);
+}
+
+initializeState(U64 seed) {
+
+}
+
+pub U64 sampleU64() {
+    return 1U64;
+}
