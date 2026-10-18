@@ -22,7 +22,8 @@ public class Primitives {
             Bool.class, Bool.TYPE,
             I.class, I.TYPE,
             U.class, U.TYPE,
-            Array.class, Array.TYPE
+            Array.class, Array.TYPE,
+            Object.class, Void.TYPE
     );
 
     public static JavaKlass loadJavaClass(Class<?> javaClass, Type type) {
@@ -41,9 +42,7 @@ public class Primitives {
 
         Method[] javaMethods = javaClass.getDeclaredMethods();
         for (Method javaMethod : javaMethods) {
-            if (((javaMethod.getModifiers() & Modifier.PUBLIC) == 0) || javaMethod.isAnnotationPresent(Ignore.class)
-                    || javaMethod.getReturnType().equals(Object.class)
-            ) {
+            if (((javaMethod.getModifiers() & Modifier.PUBLIC) == 0) || javaMethod.isAnnotationPresent(Ignore.class)) {
                 continue;
             }
 

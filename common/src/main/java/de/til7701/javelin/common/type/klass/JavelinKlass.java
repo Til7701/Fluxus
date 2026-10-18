@@ -25,12 +25,10 @@ public record JavelinKlass(
 ) implements Klass {
 
     public Optional<JavelinMetod> getConstructor(TypeDescriptor[] argumentTypes, Environment environment) {
-        System.out.println(fullyQualifiedJavelinName + " " + Arrays.deepToString(argumentTypes));
         Imports imports = environment.getPrimitiveImports();
         this.imports().forEach(imports::addImport);
 
         for (JavelinMetod metod : constructors) {
-            System.out.println(metod);
             TypeDescriptor[] parameterTypes = Arrays.stream(metod.parameterTypes())
                     .map(type -> type.mapNames(imports::map))
                     .map(type -> environment.getKlassRegister().find(type, imports))
