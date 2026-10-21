@@ -15,7 +15,7 @@ public final class Interpreter {
 
     private final Environment environment;
     private final VariableFactory variableFactory = new VariableFactory();
-    private final Deque<Interrupt> interruptQueue = new ArrayDeque<>();
+    private final Set<Long> runningInterrupts = new HashSet<>();
     private final StaticStore staticStore = new StaticStore();
 
     private Imports currentImports;
@@ -30,16 +30,18 @@ public final class Interpreter {
     }
 
     public void interpret(Ast ast) {
-        Stack context = new Stack();
-        context.push(new StackFrame());
+        Stack stack = new Stack();
+        stack.push(new StackFrame());
         switch (ast) {
             case Script script -> {
                 List<Statement> statements = script.statements();
-                statements.forEach(statement -> executeStatement(statement, context));
+                for (Statement statement : statements) {
+                    executeStatement(statement, stack);
+                }
             }
             case TypeDefinition _ -> throw new NotImplementedException();
         }
-        log.debug("Context: {}", context);
+        log.debug("Stack: {}", stack);
         log.debug("Literals: {}", variableFactory.literalsToString());
     }
 
@@ -60,12 +62,14 @@ public final class Interpreter {
                     if (frame != null) frame.setReturnValue(result);
                 }
             }
-            case StatementList(_, List<Statement> statements) -> statements.forEach(s -> executeStatement(s, stack));
-            case WhenStatement(_, boolean evalInstantly, Expression condition, Statement body) -> {
-                Set<Variable> topVariables = topVariables(condition, stack);
-                Stack stackSnapshot = stack.snapshot();
-                Imports importsSnapshot = currentImports.snapshot();
-                setupWhen(evalInstantly, stackSnapshot, importsSnapshot, condition, body, topVariables);
+            case StatementList(_, List<Statement> statements) -> {
+                for (Statement s : statements) {
+                    executeStatement(s, stack);
+                }
+            }
+            case WhenStatement(long id, _, boolean evalInstantly, Expression condition, Statement body) -> {
+                When when = new When(this, id, evalInstantly, stack.snapshot(), condition, body, currentImports.snapshot());
+                stack.peek().getWhens().add(when);
             }
             case Expression e -> evaluateExpression(e, stack);
         }
@@ -170,6 +174,7 @@ public final class Interpreter {
                         s.push(new StackFrame());
                         s.initializeVariable("this", struct);
                         executeJavelinMethod(method, argumentValues, null, s);
+                        s.popDestroy();
                         yield struct;
                     }
                     default -> throw new UnsupportedOperationException();
@@ -216,13 +221,14 @@ public final class Interpreter {
 
     private Variable initStruct(JavelinKlass javelinKlass) {
         Map<String, Variable> fields = new HashMap<>();
+        Stack instanceInitStack = new Stack();
+        instanceInitStack.push(new StackFrame());
         for (Field field : javelinKlass.fields()) {
             if (field.isStatic()) continue;
             String name = field.name();
-            Stack instanceInitStack = new Stack();
-            instanceInitStack.push(new StackFrame());
             Variable fieldInit = evaluateExpression(field.init(), instanceInitStack);
             fields.put(name, fieldInit);
+            instanceInitStack.initializeVariable(name, fieldInit);
         }
         return new StructVariable(javelinKlass, fields);
     }
@@ -259,15 +265,14 @@ public final class Interpreter {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof ArrayIndexOutOfBoundsException ae
-                    && !argumentValues.isEmpty()
-                    && argumentValues.getFirst() instanceof PrimitiveVariable primitiveVariable
-                    && primitiveVariable.javaValue() instanceof Array) {
-                throw new InterpreterException.CollectionAccessOutOfBounds(span, stack, variableFactory.getLiteralStore(), ae.getMessage());
-            } else if (e.getCause() instanceof CastNegativeToUnsignedException ce) {
-                throw new InterpreterException.CastNegativeToUnsigned(span, stack, variableFactory.getLiteralStore(), ce.getMessage());
-            } else {
-                throw new RuntimeException(e);
+            switch (e.getCause()) {
+                case ArrayIndexOutOfBoundsException ae when !argumentValues.isEmpty() && argumentValues.getFirst() instanceof PrimitiveVariable primitiveVariable && primitiveVariable.javaValue() instanceof Array ->
+                        throw new InterpreterException.CollectionAccessOutOfBounds(span, stack, variableFactory.getLiteralStore(), ae.getMessage());
+                case CastNegativeToUnsignedException ce ->
+                        throw new InterpreterException.CastNegativeToUnsigned(span, stack, variableFactory.getLiteralStore(), ce.getMessage());
+                case StringIndexOutOfBoundsException se ->
+                        throw new InterpreterException.CastNegativeToUnsigned(span, stack, variableFactory.getLiteralStore(), se.getMessage());
+                case null, default -> throw new RuntimeException(span.toString(), e);
             }
         }
         return variableFactory.fromJavaValue(result);
@@ -280,68 +285,41 @@ public final class Interpreter {
             stack.initializeVariable(javelinMetod.parameterNames()[i], argumentValues.get(i));
         }
         executeStatement(javelinMetod.body(), stack);
-        StackFrame frame = stack.pop();
+        StackFrame frame = stack.popDestroy();
         return frame.getReturnValue();
     }
 
-    private Set<Variable> topVariables(Expression expression, Stack context) {
-        return switch (expression) {
-            case SymbolExpression(_, String name) -> Set.of(Objects.requireNonNull(context.getVariable(name)));
-            case NewExpression _,
-                 BooleanLiteralExpression _,
-                 StringLiteralExpression _,
-                 SignedIntegerLiteralExpression _,
-                 UnsignedIntegerLiteralExpression _,
-                 TypeCastExpression _,
-                 StaticFieldAccess _ -> Set.of(evaluateExpression(expression, context));
-            case BinaryExpression(_, Expression left, _, Expression right) -> {
-                Collection<Variable> l = topVariables(left, context);
-                Collection<Variable> r = topVariables(right, context);
-                Set<Variable> result = new HashSet<>();
-                result.addAll(l);
-                result.addAll(r);
-                yield result;
-            }
-            default -> throw new NotImplementedException(expression.toString());
-        };
-    }
-
-    void interrupt(Interrupt item) {
-        this.interruptQueue.addLast(item);
-    }
-
-    private void setupWhen(boolean evalInstantly, Stack stack, Imports imports, Expression condition, Statement body, Collection<Variable> topVariables) {
-        Stack whenStack = stack.snapshot();
-        topVariables.forEach(v -> v.listen(() -> evalWhen(whenStack, imports, condition, body)));
-        if (evalInstantly) evalWhen(whenStack, imports, condition, body);
-    }
-
-    private void evalWhen(Stack stack, Imports imports, Expression condition, Statement body) {
-        Variable result = this.evaluateExpression(condition, stack);
-        if (result instanceof PrimitiveVariable primitiveVariable
-                && primitiveVariable.javaValue() instanceof Bool bool
-                && bool.isValue()) {
-            this.interrupt(new Interrupt(body, stack, imports));
-        }
-    }
-
     private void handleInterrupts(Stack stack) {
-        if (!stack.peek().isExecutingInterrupt()) {
-            while (!interruptQueue.isEmpty()) {
-                Interrupt interrupt = this.interruptQueue.pollFirst();
-                Imports oldImports = currentImports;
-                currentImports = interrupt.imports();
-
-                interrupt.stack().peek().setExecutingInterrupt(true);
-                Stack interruptStack = interrupt.stack();
-                interruptStack.push(new StackFrame());
-                executeStatement(interrupt.unterbrechungsbehandlungsprozedur(), interruptStack);
-                interruptStack.pop();
-                interruptStack.peek().setExecutingInterrupt(false);
-
-                currentImports = oldImports;
+        outer:
+        while (true) {
+            for (StackFrame frame : stack) {
+                if (frame.getInterruptQueue().isEmpty())
+                    continue;
+                Interrupt interrupt = frame.getInterruptQueue().peek();
+                if (!runningInterrupts.contains(interrupt.mutexID())) {
+                    frame.getInterruptQueue().pop();
+                    executeInterrupt(interrupt);
+                    continue outer;
+                }
             }
+            break;
         }
+    }
+
+    private void executeInterrupt(Interrupt interrupt) {
+        Imports oldImports = currentImports;
+        currentImports = interrupt.imports();
+
+        runningInterrupts.add(interrupt.mutexID());
+
+        Stack interruptStack = interrupt.stack();
+        interruptStack.push(new StackFrame());
+        executeStatement(interrupt.unterbrechungsbehandlungsprozedur(), interruptStack);
+        interruptStack.popDestroy();
+
+        runningInterrupts.remove(interrupt.mutexID());
+
+        currentImports = oldImports;
     }
 
 }

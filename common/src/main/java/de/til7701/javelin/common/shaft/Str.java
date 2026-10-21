@@ -4,6 +4,7 @@ import de.til7701.javelin.ast.Span;
 import de.til7701.javelin.ast.type.SimpleType;
 import de.til7701.javelin.common.type.TypeDescriptor;
 import de.til7701.javelin.common.util.Ignore;
+import de.til7701.javelin.common.util.ints.UN;
 import lombok.Getter;
 
 @JavelinType(
@@ -35,6 +36,14 @@ public final class Str implements Primitive {
 
     public static Bool eq(Str left, Str right) {
         return Bool.of(left.value.equals(right.value));
+    }
+
+    public static Str index(Str str, U i) {
+        return Str.of(String.valueOf(str.value.charAt((int) i.getValue().getValue())));
+    }
+
+    public U length() {
+        return U.of(UN.of(value.length(), 32));
     }
 
     @Ignore

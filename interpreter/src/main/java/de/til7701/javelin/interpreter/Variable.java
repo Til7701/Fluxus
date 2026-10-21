@@ -3,7 +3,7 @@ package de.til7701.javelin.interpreter;
 
 import de.til7701.javelin.common.type.TypeDescriptor;
 
-sealed interface Variable permits PrimitiveVariable, StructVariable {
+sealed interface Variable permits AbstractVariable {
 
     TypeDescriptor descriptor();
 
@@ -14,6 +14,8 @@ sealed interface Variable permits PrimitiveVariable, StructVariable {
 
     Object javaValue();
 
-    void listen(Runnable onUpdate);
+    void listen(VariableObserver onUpdate);
+
+    void stopListening(VariableObserver obs);
 
 }

@@ -3,12 +3,7 @@ package de.til7701.javelin.interpreter;
 import de.til7701.javelin.common.shaft.Primitive;
 import de.til7701.javelin.common.type.TypeDescriptor;
 
-import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-final class PrimitiveVariable implements Variable {
-
-    private final Collection<Runnable> listeners = new CopyOnWriteArrayList<>();
+final class PrimitiveVariable extends AbstractVariable {
 
     private Primitive value;
 
@@ -28,7 +23,7 @@ final class PrimitiveVariable implements Variable {
         } else {
             throw new IllegalArgumentException();
         }
-        listeners.forEach(Runnable::run);
+        emitChange();
     }
 
     @Override
@@ -39,11 +34,6 @@ final class PrimitiveVariable implements Variable {
     @Override
     public Object javaValue() {
         return value;
-    }
-
-    @Override
-    public void listen(Runnable onUpdate) {
-        listeners.add(onUpdate);
     }
 
     @Override

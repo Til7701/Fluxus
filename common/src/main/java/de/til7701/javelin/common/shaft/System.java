@@ -8,6 +8,10 @@ import de.til7701.javelin.common.util.Ignore;
 import de.til7701.javelin.common.util.Natives;
 import de.til7701.javelin.common.util.ints.UN;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @JavelinType(
         fullyQualifiedJavelinName = System.JAVELIN_TYPE_NAME
 )
@@ -29,6 +33,14 @@ public final class System {
     public static U nanoTime() {
         long time = java.lang.System.nanoTime();
         return U.of(UN.of(time, 64));
+    }
+
+    public static Str readFile(Str path) {
+        try {
+            return Str.of(Files.readString(Path.of(path.getValue())));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

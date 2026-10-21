@@ -7,6 +7,7 @@ import org.jspecify.annotations.Nullable;
 import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -16,7 +17,7 @@ import java.util.stream.Collector;
 
 @ToString
 @EqualsAndHashCode
-public final class Stack {
+public final class Stack implements Iterable<StackFrame> {
 
     private final Deque<StackFrame> stack;
 
@@ -32,10 +33,12 @@ public final class Stack {
         stack.push(stackFrame);
     }
 
-    @Nullable StackFrame pop() {
+    @Nullable StackFrame popDestroy() {
         if (stack.isEmpty())
             return null;
-        return stack.pop();
+        StackFrame frame = stack.pop();
+        frame.destroy();
+        return frame;
     }
 
     @Nullable StackFrame peek() {
@@ -103,4 +106,8 @@ public final class Stack {
         }
     }
 
+    @Override
+    public Iterator<StackFrame> iterator() {
+        return stack.iterator();
+    }
 }

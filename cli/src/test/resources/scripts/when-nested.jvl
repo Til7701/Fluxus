@@ -1,0 +1,11 @@
+let x = new true;
+when x == false {
+    System.println("triggered outer");
+    let a = new false;
+    when a == true {
+        System.println("triggered inner");
+    }
+    a = new true;
+}
+x = new false;
+x = new true;

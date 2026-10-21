@@ -1,0 +1,28 @@
+let x = new false;
+
+when x {
+    System.println("1");
+}
+when x {
+    System.println("2");
+}
+when x {
+    System.println("3");
+}
+when x {
+    System.println("4");
+}
+when x {
+    System.println("5");
+}
+when x {
+    System.println("6");
+}
+when x {
+    System.println("7");
+}
+when x {
+    System.println("8");
+}
+
+x = new true;

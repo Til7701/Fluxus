@@ -1,0 +1,16 @@
+let content = ")())())";
+
+let i = 0U32;
+let floor = 0I32;
+do when i < content.length() {
+    let char = content[i];
+    do when char == "(" {
+        floor = floor + 1I32;
+    }
+    do when char == ")" {
+        floor = floor - 1I32;
+    }
+    i = i + 1U32;
+}
+
+System.println(floor as Str);

@@ -1,0 +1,11 @@
+let x = new false;
+let y = new false;
+
+when x {
+    when y {
+        System.println("fail");
+    }
+}
+
+x = new true;
+y = new true;

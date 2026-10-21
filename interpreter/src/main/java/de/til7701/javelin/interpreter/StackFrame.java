@@ -4,13 +4,10 @@ import de.til7701.javelin.common.shaft.Void;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-@ToString
 @EqualsAndHashCode
 public final class StackFrame {
 
@@ -19,15 +16,18 @@ public final class StackFrame {
     @Getter
     private Variable returnValue = new PrimitiveVariable(Void.of());
     @Getter
-    @Setter
-    private boolean executingInterrupt;
+    private final Deque<Interrupt> interruptQueue;
+    @Getter
+    private final List<When> whens;
 
     StackFrame() {
-        this(new HashMap<>());
+        this(new HashMap<>(), new ArrayDeque<>(), new ArrayList<>());
     }
 
-    private StackFrame(Map<String, Variable> variables) {
+    private StackFrame(Map<String, Variable> variables, Deque<Interrupt> interruptQueue, List<When> whens) {
         this.variables = variables;
+        this.interruptQueue = interruptQueue;
+        this.whens = whens;
     }
 
     void initializeVariable(String name, Variable variable) {
@@ -40,7 +40,20 @@ public final class StackFrame {
 
     StackFrame snapshot() {
         Map<String, Variable> snapshot = new HashMap<>(variables);
-        return new StackFrame(snapshot);
+        return new StackFrame(snapshot, interruptQueue, whens);
+    }
+
+    void destroy() {
+        for (When when : whens)
+            when.destroy();
+    }
+
+    @Override
+    public String toString() {
+        return "StackFrame{" +
+                "variables=" + variables +
+                ", returnValue=" + returnValue +
+                '}';
     }
 
 }
