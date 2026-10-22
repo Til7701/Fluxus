@@ -12,3 +12,9 @@ System.println(neg as Str);
 
 let difference = a - b;
 System.println(difference as Str);
+
+a = 5I32;
+System.println(a as Str);
+
+5I32 = new 42I32;
+System.println(5I32 as Str);

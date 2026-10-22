@@ -17,7 +17,7 @@ static U64 c = 0xFFF7EEE000000000U64;
 static U64 f = 6364136223846793005U64;
 
 U64[U32] stateArray = [ 0U64; Random.n ];
-I32 stateIndex = 0I32;
+I32 stateIndex = new 0I32;
 
 pub () {
     let seed = System.nanoTime(); // TODO switch to UNIX time or something like that
@@ -31,7 +31,7 @@ pub (U64 seed) {
 initializeState(U64 seed) {
     let state = this.stateArray;
     state[0U64] = new seed;
-    let i = 1U32;
+    let i = new 1U32;
     do when i < Random.n {
         seed = Random.f * (seed ^ (seed >> (Random.w - 2U64))) + i;
         state[i] = new seed;

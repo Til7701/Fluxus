@@ -1,7 +1,7 @@
 let content = ")())())";
 
-let i = 0U32;
-let floor = 0I32;
+let i = new 0U32;
+let floor = new 0I32;
 do when i < content.length() {
     let char = content[i];
     do when char == "(" {

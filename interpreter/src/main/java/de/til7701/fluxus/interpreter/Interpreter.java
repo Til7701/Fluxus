@@ -41,8 +41,6 @@ public final class Interpreter {
             }
             case TypeDefinition _ -> throw new NotImplementedException();
         }
-        log.debug("Stack: {}", stack);
-        log.debug("Literals: {}", variableFactory.literalsToString());
     }
 
     private void executeStatement(Statement statement, Stack stack) {

@@ -1,0 +1,17 @@
+let a = 1U32;
+let b = 2U32;
+
+System.println(a as Str);
+System.println(b as Str);
+
+let sum = a + b;
+System.println(sum as Str);
+
+let difference = b - a;
+System.println(difference as Str);
+
+a = 5U32;
+System.println(a as Str);
+
+5U32 = new 42U32;
+System.println(5U32 as Str);

@@ -1,11 +1,11 @@
 package de.til7701.fluxus.interpreter;
 
 import de.til7701.fluxus.common.NotImplementedException;
-import de.til7701.fluxus.common.fons.*;
+import de.til7701.fluxus.common.fons.Array;
+import de.til7701.fluxus.common.fons.Primitive;
+import de.til7701.fluxus.common.fons.Str;
 import de.til7701.fluxus.common.fons.Void;
 import de.til7701.fluxus.common.type.TypeDescriptor;
-import de.til7701.fluxus.common.util.ints.IN;
-import de.til7701.fluxus.common.util.ints.UN;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
@@ -24,19 +24,15 @@ final class VariableFactory {
     }
 
     Variable fromILiteral(long value, int bitCount) {
-        return new PrimitiveVariable(I.of(IN.of(value, bitCount)));
+        return literalStore.forI(value, bitCount);
     }
 
     Variable fromULiteral(long value, int bitCount) {
-        return new PrimitiveVariable(U.of(UN.of(value, bitCount)));
+        return literalStore.forU(value, bitCount);
     }
 
     Variable asArray(Variable[] variables, TypeDescriptor elementType) {
         return new PrimitiveVariable(Array.of(variables, elementType));
-    }
-
-    String literalsToString() {
-        return literalStore.valuesToString();
     }
 
     Variable fromJavaValue(@Nullable Object result) {
