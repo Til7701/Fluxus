@@ -1,6 +1,6 @@
-# Javelin
+# Fluxus
 
-Javelin is an absolutely serious low performance programming language.
+Fluxus is an absolutely serious low performance programming language.
 It does not have any loops or if-statements. Instead `when`-statements are used to react to changes.
 
 ## Language Overview
@@ -9,7 +9,7 @@ TODO
 
 ## Build
 
-To build Javelin you need Java 27 or newer installed.
+To build Fluxus you need Java 27 or newer installed.
 Then you can run:
 
 ```shell

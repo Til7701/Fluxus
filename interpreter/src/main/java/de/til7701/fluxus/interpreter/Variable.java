@@ -1,0 +1,21 @@
+package de.til7701.fluxus.interpreter;
+
+
+import de.til7701.fluxus.common.type.TypeDescriptor;
+
+sealed interface Variable permits AbstractVariable {
+
+    TypeDescriptor descriptor();
+
+    /// Sets the value of the variable using the given variable with copy semantics
+    void set(Variable variable);
+
+    Variable createNew();
+
+    Object javaValue();
+
+    void listen(VariableObserver onUpdate);
+
+    void stopListening(VariableObserver obs);
+
+}

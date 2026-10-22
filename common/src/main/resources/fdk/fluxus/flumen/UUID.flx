@@ -1,0 +1,21 @@
+pub class;
+
+U64 mostSigBits = 0U64;
+U64 leastSigBits = 0U64;
+
+pub (U64 mostSigBits, U64 leastSigBits) {
+    this.mostSigBits = mostSigBits;
+    this.leastSigBits = leastSigBits;
+}
+
+pub static UUID random() {
+    return UUID(1U64, 2U64);
+}
+
+pub static Bool eq(UUID left, UUID right) {
+    return left.mostSigBits == right.mostSigBits && left.leastSigBits == right.leastSigBits;
+}
+
+pub static Str as__fluxus_fons_Str(UUID id) {
+    return (id.mostSigBits as Str) + ", " + (id.leastSigBits as Str);
+}

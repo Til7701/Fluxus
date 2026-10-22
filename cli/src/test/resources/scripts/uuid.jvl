@@ -1,6 +1,0 @@
-import javelin.head.UUID;
-
-let id = UUID(42U64, 14U64);
-System.println(id as Str);
-
-System.println(UUID.random() as Str);

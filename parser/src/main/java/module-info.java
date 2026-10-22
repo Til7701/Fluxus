@@ -1,5 +1,5 @@
-module de.til7701.javelin.parser {
-    requires transitive de.til7701.javelin.ast;
+module de.til7701.fluxus.parser {
+    requires transitive de.til7701.fluxus.ast;
 
     requires static lombok;
 
@@ -7,5 +7,5 @@ module de.til7701.javelin.parser {
     requires org.antlr.antlr4.runtime;
     requires org.jspecify;
 
-    exports de.til7701.javelin.parser;
+    exports de.til7701.fluxus.parser;
 }

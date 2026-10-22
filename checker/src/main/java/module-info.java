@@ -1,11 +1,11 @@
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-module de.til7701.javelin.checker {
-    requires de.til7701.javelin.ast;
-    requires de.til7701.javelin.common;
+module de.til7701.fluxus.checker {
+    requires de.til7701.fluxus.ast;
+    requires de.til7701.fluxus.common;
     requires org.jspecify;
     requires static lombok;
 
-    exports de.til7701.javelin.checker;
+    exports de.til7701.fluxus.checker;
 }

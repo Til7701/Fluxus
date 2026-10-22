@@ -1,0 +1,10 @@
+import fluxus.flumen.Random;
+
+let random = Random(42U64);
+let i = 0U32;
+do when i < 100U32 {
+    System.println(random.sampleU64() as Str);
+    i = i + 1U32;
+}
+
+System.nanoTime(); // FIXME remove
