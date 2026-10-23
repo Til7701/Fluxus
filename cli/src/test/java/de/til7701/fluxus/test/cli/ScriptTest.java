@@ -35,7 +35,7 @@ class ScriptTest {
     private static Stream<File> findScriptFiles() throws URISyntaxException, IOException {
         URL folderUrl = ScriptTest.class.getResource("/scripts");
         assertNotNull(folderUrl);
-        return Files.find(Path.of(folderUrl.toURI()), 1,
+        return Files.find(Path.of(folderUrl.toURI()), 10,
                         ((path, _) -> path.toString().endsWith(".flx")))
                 .map(Path::toFile);
     }
