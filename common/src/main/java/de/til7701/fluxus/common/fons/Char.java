@@ -7,6 +7,7 @@ import de.til7701.fluxus.common.fons.util.Primitive;
 import de.til7701.fluxus.common.fons.util.Primitives;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
+import de.til7701.fluxus.common.util.n.IN;
 import lombok.Getter;
 
 @FluxusType(
@@ -38,6 +39,22 @@ public final class Char implements Primitive {
 
     public static Bool neq(Char left, Char right) {
         return Bool.of(left.value != right.value);
+    }
+
+    public Bool isBlank() {
+        return Bool.of(Character.isWhitespace(this.value));
+    }
+
+    public Bool isDigit() {
+        return Bool.of(Character.isDigit(this.value));
+    }
+
+    public I asDigit() {
+        return I.of(IN.of(Character.digit(this.value, 10), 64));
+    }
+
+    public static String as__fluxus_flumen_Str(Char value, PType ignored) {
+        return String.valueOf(value.value);
     }
 
     @Ignore

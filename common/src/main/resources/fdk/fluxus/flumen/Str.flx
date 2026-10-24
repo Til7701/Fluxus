@@ -50,3 +50,81 @@ static Str eq(Str left, Str right) {
     }
     return true;
 }
+
+Bool isBlank() {
+    let i = new 0U31;
+    do when i < this.length() {
+        let tmpI = new i;
+        do when !(this[tmpI].isBlank()) {
+            return false;
+        }
+        i = i + 1U31;
+    }
+    return true;
+}
+
+U32 count(Char c) {
+    let count = new 0U32;
+    let i = new 0U31;
+    do when i < this.length() {
+        let tmpI = new i;
+        do when this[tmpI] == c {
+            count = count + 1U32;
+        }
+        i = i + 1U31;
+    }
+    return count;
+}
+
+Str[U31] split(Char pattern) {
+    let elementCount = this.count(pattern) + 1U31;
+    let split = [""; elementCount as U31];
+
+    let thisI = new 0U31;
+    let splitI = new 0U31;
+    do when thisI < this.length() {
+        let char = this[thisI];
+        do when char == pattern {
+            splitI = splitI + 1U31;
+        }
+        do when char != pattern {
+            split[splitI] = split[splitI] + (this[thisI] as Str);
+        }
+        thisI = thisI + 1U31;
+    }
+    return split;
+}
+
+I64 parseI64() {
+    do when this.length() == 0U31 {
+        Native.panic();
+    }
+
+    let positive = new true;
+    do when this[0U31] == '-' {
+        positive = new false;
+    }
+
+    let i = new 0U31;
+    do when !positive {
+        i = i + 1U31;
+    }
+
+    let value = new 0I64;
+    do when i < this.length() {
+        let char = this[i];
+        do when !(char.isDigit()) {
+            Native.panic();
+        }
+        let digit = char.asDigit() as I64;
+        value = value * 10I64;
+        value = value + digit;
+
+        i = i + 1U31;
+    }
+
+    do when !positive {
+        return 0I64 - value;
+    }
+    return value;
+}

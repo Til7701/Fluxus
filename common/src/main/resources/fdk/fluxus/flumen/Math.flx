@@ -1,0 +1,15 @@
+class;
+
+static U64 min(U64 a, U64 b) {
+    do when a < b {
+        return a;
+    }
+    return b;
+}
+
+static U64 max(U64 a, U64 b) {
+    do when a > b {
+        return a;
+    }
+    return b;
+}

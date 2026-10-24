@@ -40,6 +40,10 @@ public final class Bool implements Primitive {
         return of(left.value == right.value);
     }
 
+    public static Bool not(Bool value) {
+        return of(!value.value);
+    }
+
     public static String as__fluxus_flumen_Str(Bool value, PType ignored) {
         return Boolean.toString(value.value);
     }

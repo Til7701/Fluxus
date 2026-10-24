@@ -4,3 +4,6 @@ ab
 true
 false
 false
+a
+b
+c

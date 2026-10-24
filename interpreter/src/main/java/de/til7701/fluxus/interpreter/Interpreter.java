@@ -134,6 +134,20 @@ public final class Interpreter {
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
+            case LeftUnaryExpression(Span span, LeftUnaryOperator operator, Expression value) -> {
+                Variable valueV = evaluateExpression(value, stack);
+                String methodName = operator.name().toLowerCase(Locale.ROOT);
+                TypeDescriptor type = valueV.descriptor();
+                TypeDescriptor[] argumentTypes = {valueV.descriptor()};
+                Metod method = type.findMethod(methodName, argumentTypes, environment)
+                        .orElseThrow(() -> new RuntimeException(span + " Method: " + methodName + " with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + type));
+                yield switch (method) {
+                    case JavaMetod javaMetod -> executeJavaMethod(span, javaMetod, new Variable[]{valueV}, null, stack);
+                    case FluxusMetod fluxusMetod ->
+                            executeFluxusMethod(fluxusMetod, new Variable[]{valueV}, null, stack);
+                    case TraitMetod _ -> throw new UnsupportedOperationException();
+                };
+            }
             case BinaryExpression(Span span, Expression left, BinaryOperator binaryOperator, Expression right) -> {
                 Variable leftV = evaluateExpression(left, stack);
                 Variable rightV = evaluateExpression(right, stack);
@@ -176,24 +190,7 @@ public final class Interpreter {
                     Variable variable = evaluateExpression(e, stack);
                     argumentValues[i] = variable;
                 }
-                TypeDescriptor[] argumentTypes = new TypeDescriptor[argumentValues.length];
-                for (int i = 0; i < argumentTypes.length; i++) {
-                    argumentTypes[i] = argumentValues[i].descriptor();
-                }
-                yield switch (typeDescriptor) {
-                    case JavaKlass _ -> throw new NotImplementedException();
-                    case FluxusKlass fluxusKlass -> {
-                        FluxusMetod method = fluxusKlass.getConstructor(argumentTypes, environment)
-                                .orElseThrow(() -> new RuntimeException("Constructor: with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + typeDescriptor));
-                        Variable struct = initStruct(span, fluxusKlass);
-                        stack.push(new StackFrame(span));
-                        stack.initializeVariable("this", struct);
-                        executeFluxusMethod(method, argumentValues, null, stack);
-                        stack.popDestroy();
-                        yield struct;
-                    }
-                    default -> throw new UnsupportedOperationException();
-                };
+                yield callConstructor(span, typeDescriptor, argumentValues, stack);
             }
             case InstanceFieldAccess(_, Expression instance, String fieldName) -> {
                 Variable inst = evaluateExpression(instance, stack);
@@ -231,7 +228,27 @@ public final class Interpreter {
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
-            case LeftUnaryExpression _ -> throw new NotImplementedException(expression.toString());
+        };
+    }
+
+    private Variable callConstructor(Span span, TypeDescriptor typeDescriptor, Variable[] argumentValues, Stack stack) {
+        TypeDescriptor[] argumentTypes = new TypeDescriptor[argumentValues.length];
+        for (int i = 0; i < argumentTypes.length; i++) {
+            argumentTypes[i] = argumentValues[i].descriptor();
+        }
+        return switch (typeDescriptor) {
+            case JavaKlass _ -> throw new NotImplementedException();
+            case FluxusKlass fluxusKlass -> {
+                FluxusMetod method = fluxusKlass.getConstructor(argumentTypes, environment)
+                        .orElseThrow(() -> new RuntimeException("Constructor: with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + typeDescriptor));
+                Variable struct = initStruct(span, fluxusKlass);
+                stack.push(new StackFrame(span));
+                stack.initializeVariable("this", struct);
+                executeFluxusMethod(method, argumentValues, null, stack);
+                stack.popDestroy();
+                yield struct;
+            }
+            default -> throw new UnsupportedOperationException();
         };
     }
 
@@ -307,11 +324,12 @@ public final class Interpreter {
     }
 
     private Variable createString(Stack stack, Span span, String value) {
-        Expression charArrayLiteral = new ArrayLiteralCreation(span, value.chars()
-                .mapToObj(c -> (Expression) new CharLiteralExpression(span, String.valueOf((char) c)))
-                .toList());
-        ConstructorCall constructorCall = new ConstructorCall(span, new SimpleType(span, "fluxus.flumen.Str"), List.of(charArrayLiteral));
-        return evaluateExpression(constructorCall, stack);
+        Variable array = variableFactory.asArray(value.chars()
+                .mapToObj(c -> variableFactory.fromCharLiteral(String.valueOf((char) c)))
+                .toArray(Variable[]::new), Char.DESCRIPTOR.get());
+        TypeDescriptor typeDescriptor = environment.getKlassRegister().find(new SimpleType(span, "fluxus.flumen.Str"), currentImports)
+                .orElseThrow(() -> new RuntimeException("Str class not found"));
+        return callConstructor(span, typeDescriptor, new Variable[]{array}, stack);
     }
 
     private Variable executeFluxusMethod(FluxusMetod fluxusMetod, Variable[] argumentValues, @Nullable Variable instance, Stack stack) {

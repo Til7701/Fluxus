@@ -1,0 +1,32 @@
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+import fluxus.flumen.Math;
+
+let input = "2x3x4
+1x1x10
+";
+
+let split = input.split('\n');
+
+let sum = new 0U64;
+let i = new 0U31;
+do when i < split.length() {
+    let line = split[i];
+    do when !(line.isBlank()) {
+        let strNumbers = line.split('x');
+
+        let x = strNumbers[0U31].parseI64() as U64;
+        let y = strNumbers[1U31].parseI64() as U64;
+        let z = strNumbers[2U31].parseI64() as U64;
+
+        let sideA = x * y;
+        let sideB = y * z;
+        let sideC = x * z;
+        let min = Math.min(Math.min(sideA, sideB), sideC);
+
+        sum = sum + (2U64 * sideA) + (2U64 * sideB) + (2U64 * sideC) + min;
+    }
+    i = i + 1U31;
+}
+
+System.println(sum as Str);

@@ -25,6 +25,7 @@ public final class Flumen {
             "fluxus.flumen.System",
             "fluxus.flumen.UUID",
             "fluxus.flumen.Random",
+            "fluxus.flumen.Math",
     };
 
     @Getter

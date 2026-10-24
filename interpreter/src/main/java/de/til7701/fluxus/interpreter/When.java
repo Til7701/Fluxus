@@ -44,7 +44,10 @@ final class When implements VariableObserver {
                  CharLiteralExpression _,
                  SignedIntegerLiteralExpression _,
                  UnsignedIntegerLiteralExpression _,
+                 FloatLiteralExpression _,
+                 InstanceFieldAccess _,
                  StaticFieldAccess _ -> Set.of(interpreter.evaluateExpression(expression, stack));
+            case LeftUnaryExpression(_, _, Expression e) -> topVariables(e, stack);
             case BinaryExpression(_, Expression left, _, Expression right) -> {
                 Collection<Variable> l = topVariables(left, stack);
                 Collection<Variable> r = topVariables(right, stack);
@@ -62,7 +65,23 @@ final class When implements VariableObserver {
                 }
                 yield variables;
             }
-            default -> throw new NotImplementedException(expression.toString());
+            case ArrayCreation(_, Expression defaultValue, Expression length) -> {
+                Collection<Variable> d = topVariables(defaultValue, stack);
+                Collection<Variable> l = topVariables(length, stack);
+                Set<Variable> result = new HashSet<>();
+                result.addAll(d);
+                result.addAll(l);
+                yield result;
+            }
+            case ArrayLiteralCreation(_, List<Expression> values) -> {
+                Set<Variable> variables = new HashSet<>();
+                for (Expression e : values) {
+                    variables.addAll(topVariables(e, stack));
+                }
+                yield variables;
+            }
+            case ConstructorCall _ -> throw new NotImplementedException();
+            case StaticMethodCall _ -> throw new NotImplementedException();
         };
     }
 

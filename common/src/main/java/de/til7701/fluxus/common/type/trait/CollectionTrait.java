@@ -1,10 +1,12 @@
 package de.til7701.fluxus.common.type.trait;
 
 import de.til7701.fluxus.ast.Span;
+import de.til7701.fluxus.ast.type.SimpleType;
 import de.til7701.fluxus.ast.type.Type;
 import de.til7701.fluxus.ast.type.trait.CollectionType;
 import de.til7701.fluxus.common.environment.Environment;
 import de.til7701.fluxus.common.fons.Array;
+import de.til7701.fluxus.common.fons.U;
 import de.til7701.fluxus.common.type.Metod;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.type.klass.Klass;
@@ -15,12 +17,27 @@ public record CollectionTrait(TypeDescriptor elementType, TypeDescriptor indexTy
 
     @Override
     public Optional<Metod> findMethod(String methodName, TypeDescriptor[] argumentTypes, Environment environment) {
-        return Optional.of(new TraitMetod(
-                true,
-                "index",
-                elementType.type(),
-                new Type[]{this.type(), indexType.type()}
-        ));
+        return switch (methodName) {
+            case "index" -> Optional.of(new TraitMetod(
+                    true,
+                    "index",
+                    elementType.type(),
+                    new Type[]{this.type(), indexType.type()}
+            ));
+            case "length" -> Optional.of(new TraitMetod(
+                    false,
+                    "length",
+                    U.TYPE,
+                    new Type[]{}
+            ));
+            case "as__fluxus_flumen_Str" -> Optional.of(new TraitMetod(
+                    false,
+                    "length",
+                    new SimpleType(Span.undefined(), "fluxus.flumen.Str"),
+                    new Type[]{this.type()}
+            ));
+            default -> Optional.empty();
+        };
     }
 
     @Override

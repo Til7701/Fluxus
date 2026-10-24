@@ -206,6 +206,12 @@ public class Checker {
                     }
                 }
             }
+            case LeftUnaryExpression(Span span, LeftUnaryOperator operator, Expression value) -> {
+                TypeDescriptor valueT = evaluateExpressionType(value, stack, imports);
+                if (valueT == null) yield null;
+                String methodName = operator.name().toLowerCase(Locale.ROOT);
+                yield evaluateMethodCall(span, valueT, methodName, List.of(value), stack, imports);
+            }
             case BinaryExpression(Span span, Expression left, BinaryOperator operator, Expression right) -> {
                 TypeDescriptor leftT = evaluateExpressionType(left, stack, imports);
                 if (leftT == null) yield null;
@@ -289,7 +295,6 @@ public class Checker {
                 checkAssignability(span, returnDescriptor, targetDescriptor);
                 yield targetDescriptor;
             }
-            default -> throw new NotImplementedException(expression.toString());
         };
     }
 

@@ -11,3 +11,11 @@ System.println(a + b);
 System.println(a == a);
 System.println(a == b);
 System.println("ab" == "a");
+
+let str = "a,b,c";
+let split = str.split(',');
+let i = new 0U31;
+do when i < split.length() {
+    System.println(split[i]);
+    i = i + 1U31;
+}
