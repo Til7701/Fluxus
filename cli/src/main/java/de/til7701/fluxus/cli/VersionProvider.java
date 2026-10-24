@@ -6,7 +6,7 @@ public class VersionProvider implements CommandLine.IVersionProvider {
 
     @Override
     public String[] getVersion() {
-        return new String[]{System.getProperty("continu_num.version")};
+        return new String[]{System.getProperty("fluxus.version")};
     }
 
 }

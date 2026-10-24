@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @NoArgsConstructor
-public class Imports {
+public final class Imports {
 
     /// Maps from the local names to the real type names.
     private final Map<String, String> nameMapping = new HashMap<>();

@@ -1,6 +1,6 @@
 package de.til7701.fluxus.common;
 
-public class NotImplementedException extends RuntimeException {
+public final class NotImplementedException extends RuntimeException {
 
     public NotImplementedException() {
         super();

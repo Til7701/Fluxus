@@ -28,7 +28,6 @@ expression
     | expression DOT SymbolIdentifier LPAREN (expression (COMMA expression)*)? RPAREN #instanceMethodCall
     | typeIdentifier LPAREN (expression (COMMA expression)*)? RPAREN #constructorCall
     | leftUnaryOperator expression #leftUnaryOperationExpression
-    | expression rightUnaryOperator #rightUnaryOperationExpression
     | expression binaryOperator expression #binaryOperationExpression
     | LPAREN expression RPAREN #parenExpression
     | LBRACK expression (COMMA expression)* RBRACK #literalArrayCreation
@@ -41,16 +40,9 @@ expression
     ;
 
 leftUnaryOperator
-    : INC
-    | DEC
-    | SUB
+    : SUB
     | BANG
     | HASH
-    ;
-
-rightUnaryOperator
-    : INC
-    | DEC
     ;
 
 binaryOperator
@@ -79,7 +71,6 @@ typeIdentifier
     | UnsignedIntegerTypeIdentifier #uTypeIdentifier
     | TypeIdentifier #simpleTypeIdentifier
     | typeIdentifier LBRACK typeIdentifier RBRACK #collectionTypeIdentifier
-    | typeIdentifier genericTypeList #genericTypeIdentifier
     ;
 
 importStatement : IMPORT FullyQualifiedTypeIdentifier (AS TypeIdentifier)? SEMI;
@@ -88,12 +79,8 @@ typeDefinition
     : classTypeDefinition
     ;
 
-typeModifier
-    : PUB
-    ;
-
 classTypeDefinition
-    : importStatement* typeModifier* CLASS genericTypeList? SEMI fieldDefinition* constructorDefinition* methodDefinition*
+    : importStatement* CLASS genericTypeList? SEMI fieldDefinition* constructorDefinition* methodDefinition*
     ;
 
 genericTypeList
@@ -118,7 +105,6 @@ methodDefinition
 
 methodModifier
     : STATIC
-    | PUB
     ;
 
 parameter

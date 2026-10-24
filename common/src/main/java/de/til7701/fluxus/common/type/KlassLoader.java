@@ -4,11 +4,9 @@ import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.methods.MethodModifierValue;
 import de.til7701.fluxus.ast.methods.MethodParameter;
 import de.til7701.fluxus.ast.statement.Import;
-import de.til7701.fluxus.ast.type.GenericType;
 import de.til7701.fluxus.ast.type.SimpleType;
 import de.til7701.fluxus.ast.type.Type;
 import de.til7701.fluxus.ast.type_definition.TypeDefinition;
-import de.til7701.fluxus.ast.type_definition.TypeModifierValue;
 import de.til7701.fluxus.ast.type_definition.classes.ClassDefinition;
 import de.til7701.fluxus.ast.type_definition.classes.FieldModifierValue;
 import de.til7701.fluxus.common.environment.Imports;
@@ -24,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-public class KlassLoader {
+public final class KlassLoader {
 
     public Klass loadKlassFromAst(String klassName, TypeDefinition typeDefinition) {
         return switch (typeDefinition) {
@@ -37,8 +35,6 @@ public class KlassLoader {
                 .toList();
         Imports importsMapper = new Imports(imports);
         Type klassType = new SimpleType(classDefinition.span(), klassName);
-        if (!classDefinition.generics().types().isEmpty())
-            klassType = new GenericType(classDefinition.span(), klassType, classDefinition.generics());
         final Type finalKlassType = klassType;
         List<Field> fields = classDefinition.fields().stream()
                 .map(fieldDefinition -> new Field(
@@ -78,8 +74,6 @@ public class KlassLoader {
                 .toList();
         return new FluxusKlass(
                 imports,
-                classDefinition.modifiers().stream().anyMatch(m -> m.value() == TypeModifierValue.PUB),
-                classDefinition.modifiers().stream().anyMatch(m -> m.value() == TypeModifierValue.NATIVE),
                 klassName,
                 fields,
                 constructors,

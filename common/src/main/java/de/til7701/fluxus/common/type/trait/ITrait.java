@@ -9,16 +9,10 @@ import de.til7701.fluxus.common.type.Metod;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.type.klass.FluxusKlass;
 import de.til7701.fluxus.common.type.klass.JavaKlass;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 
-@EqualsAndHashCode
-@RequiredArgsConstructor
-public final class ITrait implements Trait {
-
-    private final long bitCount;
+public record ITrait(long bitCount) implements Trait {
 
     @Override
     public Optional<Metod> findMethod(String methodName, TypeDescriptor[] argumentTypes, Environment environment) {

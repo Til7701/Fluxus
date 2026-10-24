@@ -9,7 +9,7 @@ import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 @RequiredArgsConstructor
-public class ErrorListener extends BaseErrorListener {
+public final class ErrorListener extends BaseErrorListener {
 
     private final String sourceName;
 

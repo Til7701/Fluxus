@@ -5,7 +5,7 @@ import org.jspecify.annotations.NullMarked;
 
 @Getter
 @NullMarked
-public class SyntaxErrorException extends RuntimeException {
+public final class SyntaxErrorException extends RuntimeException {
 
     private final String sourceName;
     private final transient Object offendingSymbol;

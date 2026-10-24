@@ -10,7 +10,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
-class When implements VariableObserver {
+final class When implements VariableObserver {
 
     private final Interpreter interpreter;
     private final long interruptMutexID;

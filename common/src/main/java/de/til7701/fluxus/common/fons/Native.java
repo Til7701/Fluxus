@@ -30,7 +30,7 @@ public final class Native {
     }
 
     public static void printChar(Natives natives, Char c) {
-        natives.getStdOut().print(c.getValue());
+        natives.stdOut().print(c.getValue());
     }
 
     public static U nanoTime() {

@@ -14,8 +14,6 @@ import java.util.Optional;
 
 public record FluxusKlass(
         List<Import> imports,
-        boolean isPub,
-        boolean isNative,
         String fullyQualifiedFluxusName,
         List<Field> fields,
         List<FluxusMetod> constructors,

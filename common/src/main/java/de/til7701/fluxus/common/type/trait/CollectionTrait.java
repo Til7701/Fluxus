@@ -8,21 +8,10 @@ import de.til7701.fluxus.common.fons.Array;
 import de.til7701.fluxus.common.type.Metod;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.type.klass.Klass;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import java.util.Optional;
 
-@Getter
-@ToString
-@EqualsAndHashCode
-@RequiredArgsConstructor
-public final class CollectionTrait implements Trait {
-
-    private final TypeDescriptor elementType;
-    private final TypeDescriptor indexType;
+public record CollectionTrait(TypeDescriptor elementType, TypeDescriptor indexType) implements Trait {
 
     @Override
     public Optional<Metod> findMethod(String methodName, TypeDescriptor[] argumentTypes, Environment environment) {

@@ -14,7 +14,7 @@ import de.til7701.fluxus.common.util.Natives;
 import lombok.Getter;
 
 @Getter
-public class Environment {
+public final class Environment {
 
     private static final Class<?>[] FONS = new Class<?>[]{
             Void.class,
@@ -63,7 +63,7 @@ public class Environment {
                 case UTrait _ -> toKlass.type().equals(U.TYPE);
                 case FTrait _ -> toKlass.type().equals(F.TYPE);
                 case CollectionTrait fromCollectionTrait ->
-                        toKlass.type().equals(Array.TYPE) && isAssignable(fromCollectionTrait.getIndexType(), I.DESCRIPTOR.get());
+                        toKlass.type().equals(Array.TYPE) && isAssignable(fromCollectionTrait.indexType(), I.DESCRIPTOR.get());
             };
             case Trait toTrait -> toTrait.isSatisfied(from);
         };

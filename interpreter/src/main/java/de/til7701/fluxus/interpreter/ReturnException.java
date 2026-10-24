@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class ReturnException extends RuntimeException {
+public final class ReturnException extends RuntimeException {
 
     @Getter
     private final Variable returnValue;

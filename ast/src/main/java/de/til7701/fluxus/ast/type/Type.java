@@ -5,7 +5,7 @@ import de.til7701.fluxus.ast.type.trait.TraitType;
 
 import java.util.function.Function;
 
-public sealed interface Type extends Node permits SimpleType, GenericType, TraitType {
+public sealed interface Type extends Node permits SimpleType, TraitType {
 
     Type mapNames(Function<String, String> nameMapper);
 

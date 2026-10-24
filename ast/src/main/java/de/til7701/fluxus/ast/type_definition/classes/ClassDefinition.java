@@ -13,8 +13,6 @@ public record ClassDefinition(
         Span span,
         List<Import> imports,
         List<TypeModifier> modifiers,
-        TypeList generics,
-        TypeList superClasses,
         List<ClassFieldDefinition> fields,
         List<ConstructorDefinition> constructors,
         List<MethodDefinition> methods

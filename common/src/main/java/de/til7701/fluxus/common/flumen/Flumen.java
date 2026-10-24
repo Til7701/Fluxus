@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-public class Flumen {
+public final class Flumen {
 
     private static final String[] sdkClassNames = {
             "fluxus.flumen.Str",

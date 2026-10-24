@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 
 @NullMarked
-public class Parser {
+public final class Parser {
 
     public Ast parseFile(File file) throws IOException {
         CharStream charStream = CharStreams.fromFileName(file.getAbsolutePath());

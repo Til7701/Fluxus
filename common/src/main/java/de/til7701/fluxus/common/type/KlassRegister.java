@@ -1,13 +1,11 @@
 package de.til7701.fluxus.common.type;
 
-import de.til7701.fluxus.ast.type.GenericType;
 import de.til7701.fluxus.ast.type.SimpleType;
 import de.til7701.fluxus.ast.type.Type;
 import de.til7701.fluxus.ast.type.trait.CollectionType;
 import de.til7701.fluxus.ast.type.trait.FType;
 import de.til7701.fluxus.ast.type.trait.IType;
 import de.til7701.fluxus.ast.type.trait.UType;
-import de.til7701.fluxus.common.NotImplementedException;
 import de.til7701.fluxus.common.environment.Imports;
 import de.til7701.fluxus.common.type.klass.Klass;
 import de.til7701.fluxus.common.type.trait.CollectionTrait;
@@ -19,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class KlassRegister {
+public final class KlassRegister {
 
     private final Map<String, Klass> klasses = new HashMap<>();
 
@@ -35,7 +33,6 @@ public class KlassRegister {
                     throw new KlassNotFoundException(type.toString());
                 yield Optional.of(klass);
             }
-            case GenericType _ -> throw new NotImplementedException();
             case IType(_, long bitCount) -> Optional.of(new ITrait(bitCount));
             case UType(_, long bitCount) -> Optional.of(new UTrait(bitCount));
             case FType(_, long bitCount) -> Optional.of(new FTrait(bitCount));

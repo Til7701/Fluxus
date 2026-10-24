@@ -1,7 +1,5 @@
 lexer grammar FluxusLexer;
 
-NEXT: 'next';
-PREVIOUS: 'previous';
 DO: 'do';
 WHEN: 'when';
 LET: 'let';
@@ -9,14 +7,7 @@ NEW: 'new';
 STATIC: 'static';
 CLASS: 'class';
 RETURN: 'return';
-BREAK: 'break';
-CONTINUE: 'continue';
-PUB: 'pub';
-GET: 'get';
-SET: 'set';
-ELSE: 'else';
 AS: 'as';
-EXTENDS: 'extends';
 IMPORT: 'import';
 
 LPAREN : '(';
@@ -44,8 +35,6 @@ AND        : '&&';
 OR         : '||';
 IMPL       : '==>';
 HASH       : '#';
-INC        : '++';
-DEC        : '--';
 ADD        : '+';
 SUB        : '-';
 MUL        : '*';
@@ -54,9 +43,6 @@ BITAND     : '&';
 BITOR      : '|';
 CARET      : '^';
 MOD        : '%';
-ARROW      : '->';
-COLONCOLON : '::';
-AT         : '@';
 SHIFT_LEFT : '<<';
 SHIFT_RIGHT: '>>';
 

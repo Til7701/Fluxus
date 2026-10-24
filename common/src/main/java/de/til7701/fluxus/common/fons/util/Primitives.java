@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class Primitives {
+public final class Primitives {
 
     private static final Map<Class<?>, Type> typeMappingCache = Map.of(
             Class.forPrimitiveName("void"), de.til7701.fluxus.common.fons.Void.TYPE,
@@ -39,7 +39,7 @@ public class Primitives {
         List<Metod> methods = loadJavaMethods(javaClass);
         Map<String, List<Metod>> methodsGroupedByName = methods.stream()
                 .collect(Collectors.groupingBy(Metod::name));
-        JavaKlass klass = new JavaKlass(true, javaClass, fullyQualifiedFluxusName, methods, methodsGroupedByName, type);
+        JavaKlass klass = new JavaKlass(javaClass, fullyQualifiedFluxusName, methods, methodsGroupedByName, type);
         log.debug("Loaded Klass: {}", klass);
         return klass;
     }

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public record JavaKlass(
-        boolean isPub,
         Class<?> javaClass,
         String fullyQualifiedFluxusName,
         List<Metod> methods,

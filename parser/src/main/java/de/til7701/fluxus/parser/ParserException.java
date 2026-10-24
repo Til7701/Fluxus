@@ -4,7 +4,7 @@ import de.til7701.fluxus.ast.Span;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-public class ParserException extends RuntimeException {
+public final class ParserException extends RuntimeException {
 
     private final Span span;
 

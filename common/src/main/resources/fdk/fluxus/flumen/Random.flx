@@ -1,7 +1,7 @@
 import fluxus.flumen.System;
 
 /// PRNG based on https://en.wikipedia.org/wiki/Mersenne_Twister
-pub class;
+class;
 
 static U64 n = 312U64;
 static U64 m = 156U64;
@@ -21,12 +21,12 @@ static U64 f = 6364136223846793005U64;
 U64[U32] stateArray = [ 0U64; Random.n ];
 I32 stateIndex = new 0I32;
 
-pub () {
+() {
     let seed = System.nanoTime(); // TODO switch to UNIX time or something like that
     this.initializeState(seed);
 }
 
-pub (U64 seed) {
+(U64 seed) {
     this.initializeState(seed);
 }
 
@@ -41,7 +41,7 @@ initializeState(U64 seed) {
     }
 }
 
-pub U64 sampleU64() {
+U64 sampleU64() {
     let state = this.stateArray;
     let k = this.stateIndex;
 

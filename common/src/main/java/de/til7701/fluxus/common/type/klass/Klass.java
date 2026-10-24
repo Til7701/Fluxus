@@ -15,8 +15,6 @@ public sealed interface Klass extends TypeDescriptor permits JavaKlass, FluxusKl
 
     List<Import> imports();
 
-    boolean isPub();
-
     String fullyQualifiedFluxusName();
 
     List<Metod> methods();
