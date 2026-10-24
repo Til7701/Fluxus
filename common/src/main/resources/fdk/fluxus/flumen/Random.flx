@@ -18,8 +18,8 @@ static U64 b = 0x71D67FFFEDA60000U64;
 static U64 c = 0xFFF7EEE000000000U64;
 static U64 f = 6364136223846793005U64;
 
-U64[U32] stateArray = [ 0U64; Random.n ];
-I32 stateIndex = new 0I32;
+U64[U31] stateArray = [ 0U64; Random.n ];
+I31 stateIndex = new 0I32;
 
 () {
     let seed = System.nanoTime(); // TODO switch to UNIX time or something like that
@@ -32,12 +32,12 @@ I32 stateIndex = new 0I32;
 
 initializeState(U64 seed) {
     let state = this.stateArray;
-    state[0U64] = new seed;
-    let i = new 1U32;
+    state[0U31] = new seed;
+    let i = new 1U31;
     do when i < Random.n {
         seed = Random.f * (seed ^ (seed >> (Random.w - 2U64))) + i;
         state[i] = new seed;
-        i = i + 1U32;
+        i = i + 1U31;
     }
 }
 
@@ -45,13 +45,13 @@ U64 sampleU64() {
     let state = this.stateArray;
     let k = this.stateIndex;
 
-    let j = k - (Random.n as I32 - 1I32);
+    let j = k - (Random.n as I31 - 1I31);
     let tmpJ = new j;
-    do when tmpJ < 0I32 {
-        j = j + (Random.n as I32);
+    do when tmpJ < 0I31 {
+        j = j + (Random.n as I31);
     }
 
-    let x = (state[k as U32] & Random.umask) | (state[j as U32] & Random.lmask);
+    let x = (state[k as U31] & Random.umask) | (state[j as U31] & Random.lmask);
 
     let xA = x >> 1U64;
     let tmpX = new x;
@@ -59,18 +59,18 @@ U64 sampleU64() {
         xA = xA ^ Random.a;
     }
 
-    j = k - ((Random.n - Random.m) as I32);
+    j = k - ((Random.n - Random.m) as I31);
     let tmpJ = new j;
-    do when tmpJ < 0I32 {
-        j = j + (Random.n as I32);
+    do when tmpJ < 0I31 {
+        j = j + (Random.n as I31);
     }
 
-    x = state[j as U32] ^ xA;
-    state[k as U32] = new x;
-    k = k + 1I32;
+    x = state[j as U31] ^ xA;
+    state[k as U31] = new x;
+    k = k + 1I31;
 
-    do when k >= (Random.n as I32) {
-        k = new 0I32;
+    do when k >= (Random.n as I31) {
+        k = new 0I31;
     }
     this.stateIndex = k;
 

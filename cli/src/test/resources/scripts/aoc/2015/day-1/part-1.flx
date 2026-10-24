@@ -3,7 +3,7 @@ import fluxus.flumen.Str;
 
 let content = ")())())";
 
-let i = new 0U32;
+let i = new 0U31;
 let floor = new 0I32;
 do when i < content.length() {
     let char = content[i];
@@ -13,7 +13,7 @@ do when i < content.length() {
     do when char == ')' {
         floor = floor - 1I32;
     }
-    i = i + 1U32;
+    i = i + 1U31;
 }
 
 System.println(floor as Str);

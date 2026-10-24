@@ -29,7 +29,7 @@ public final class Array implements Primitive {
     @Ignore
     private Array(Object[] value, TypeDescriptor elementType) {
         this.value = value;
-        this.descriptor = new CollectionTrait(new UTrait(32), elementType);
+        this.descriptor = new CollectionTrait(new UTrait(31), elementType);
     }
 
     @Ignore
@@ -38,7 +38,7 @@ public final class Array implements Primitive {
     }
 
     public U length() {
-        return U.of(UN.of(value.length, 32));
+        return U.of(UN.of(value.length, 31));
     }
 
     public static Object index(Array array, U index) {

@@ -3,11 +3,11 @@ import fluxus.flumen.Str;
 
 let content = "()())))))";
 
-let i = new 0U32;
+let i = new 0U31;
 let floor = new 0I32;
 
 when floor < 0I32 {
-    System.println((i + 1U32) as Str);
+    System.println((i + 1U31) as Str);
     i = content.length();
 }
 
@@ -19,5 +19,5 @@ do when i < content.length() {
     do when char == ')' {
         floor = floor - 1I32;
     }
-    i = i + 1U32;
+    i = i + 1U31;
 }

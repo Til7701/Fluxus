@@ -168,7 +168,7 @@ public class Checker {
                         checkAssignability(span, other, first);
                     }
                 }
-                yield new CollectionTrait(types[0], new UTrait(32));
+                yield new CollectionTrait(types[0], new UTrait(31));
             }
             case InstanceFieldAccess(Span span, Expression instance, String fieldName) -> {
                 TypeDescriptor instanceType = evaluateExpressionType(instance, stack, imports);
