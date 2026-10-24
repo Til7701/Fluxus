@@ -9,7 +9,7 @@ import de.til7701.fluxus.common.fons.util.Primitives;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
 import de.til7701.fluxus.common.util.Natives;
-import de.til7701.fluxus.common.util.ints.UN;
+import de.til7701.fluxus.common.util.n.UN;
 
 @FluxusType(
         fullyQualifiedFluxusName = Native.FLUXUS_TYPE_NAME

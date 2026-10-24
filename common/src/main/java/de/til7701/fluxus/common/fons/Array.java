@@ -9,7 +9,7 @@ import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.type.trait.CollectionTrait;
 import de.til7701.fluxus.common.type.trait.UTrait;
 import de.til7701.fluxus.common.util.Ignore;
-import de.til7701.fluxus.common.util.ints.UN;
+import de.til7701.fluxus.common.util.n.UN;
 
 import java.util.Arrays;
 

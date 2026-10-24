@@ -9,10 +9,7 @@ import de.til7701.fluxus.common.type.KlassLoader;
 import de.til7701.fluxus.common.type.KlassRegister;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.type.klass.Klass;
-import de.til7701.fluxus.common.type.trait.CollectionTrait;
-import de.til7701.fluxus.common.type.trait.ITrait;
-import de.til7701.fluxus.common.type.trait.Trait;
-import de.til7701.fluxus.common.type.trait.UTrait;
+import de.til7701.fluxus.common.type.trait.*;
 import de.til7701.fluxus.common.util.Natives;
 import lombok.Getter;
 
@@ -24,6 +21,7 @@ public class Environment {
             Bool.class,
             I.class,
             U.class,
+            F.class,
             Char.class,
             Array.class,
             Native.class,
@@ -63,6 +61,7 @@ public class Environment {
                 case Klass fromKlass -> toKlass.fullyQualifiedFluxusName().equals(fromKlass.fullyQualifiedFluxusName());
                 case ITrait _ -> toKlass.type().equals(I.TYPE);
                 case UTrait _ -> toKlass.type().equals(U.TYPE);
+                case FTrait _ -> toKlass.type().equals(F.TYPE);
                 case CollectionTrait fromCollectionTrait ->
                         toKlass.type().equals(Array.TYPE) && isAssignable(fromCollectionTrait.getIndexType(), I.DESCRIPTOR.get());
             };

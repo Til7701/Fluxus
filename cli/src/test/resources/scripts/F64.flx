@@ -1,0 +1,21 @@
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+
+let a = new 1.5F64;
+let b = 2.2F64;
+
+System.println(a as Str);
+System.println(b as Str);
+
+let sum = a + b;
+System.println(sum as Str);
+
+let difference = b - a;
+System.println(difference as Str);
+
+a = 5.0F64;
+System.println(a as Str);
+
+5.0F64 = new 42.0F64;
+System.println(5.0F64 as Str);
+System.println(a as Str);

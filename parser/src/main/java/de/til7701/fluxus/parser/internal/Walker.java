@@ -182,6 +182,21 @@ public class Walker extends FluxusParserBaseVisitor<Node> {
     }
 
     @Override
+    public Node visitFloatLiteralExpression(FluxusParser.FloatLiteralExpressionContext ctx) {
+        String literal = ctx.FloatLiteral().getText();
+        String[] split = literal.split("F", 2);
+        double value = switch (split[0]) {
+            case "MAX" -> Double.MAX_VALUE;
+            default -> Double.parseDouble(split[0].toLowerCase(Locale.ROOT));
+        };
+        return new FloatLiteralExpression(
+                createSpan(ctx),
+                value,
+                Long.parseLong(split[1])
+        );
+    }
+
+    @Override
     public Node visitCharLiteralExpression(FluxusParser.CharLiteralExpressionContext ctx) {
         String text = ctx.CharLiteral().getText();
         return new CharLiteralExpression(

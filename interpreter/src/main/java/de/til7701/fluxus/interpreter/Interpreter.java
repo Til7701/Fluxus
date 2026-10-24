@@ -78,9 +78,11 @@ public final class Interpreter {
             case NewExpression(_, Expression e) -> evaluateExpression(e, stack).createNew();
             case BooleanLiteralExpression(_, boolean value) -> variableFactory.fromBoolLiteral(value);
             case SignedIntegerLiteralExpression(_, long value, long bitCount) ->
-                    variableFactory.fromILiteral(value, (int) bitCount);
+                    variableFactory.fromILiteral(value,  bitCount);
             case UnsignedIntegerLiteralExpression(_, long value, long bitCount) ->
-                    variableFactory.fromULiteral(value, (int) bitCount);
+                    variableFactory.fromULiteral(value,  bitCount);
+            case FloatLiteralExpression(_, double value, long bitCount) ->
+                    variableFactory.fromFLiteral(value, bitCount);
             case CharLiteralExpression(_, String c) -> variableFactory.fromCharLiteral(c);
             case StringLiteralExpression(Span span, String value) -> createString(stack, span, value);
             case SymbolExpression(_, String identifier) ->
@@ -212,7 +214,7 @@ public final class Interpreter {
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
-            case LeftUnaryExpression _, RightUnaryExpression _, FloatLiteralExpression _ ->
+            case LeftUnaryExpression _, RightUnaryExpression _ ->
                     throw new NotImplementedException(expression.toString());
         };
     }

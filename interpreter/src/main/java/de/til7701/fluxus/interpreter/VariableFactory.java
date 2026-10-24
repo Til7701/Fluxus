@@ -29,12 +29,16 @@ final class VariableFactory {
         return new PrimitiveVariable(Char.of(character));
     }
 
-    Variable fromILiteral(long value, int bitCount) {
+    Variable fromILiteral(long value, long bitCount) {
         return literalStore.forI(value, bitCount);
     }
 
-    Variable fromULiteral(long value, int bitCount) {
+    Variable fromULiteral(long value, long bitCount) {
         return literalStore.forU(value, bitCount);
+    }
+
+    Variable fromFLiteral(double value, long bitCount) {
+        return literalStore.forF(value, bitCount);
     }
 
     Variable asArray(Variable[] variables, TypeDescriptor elementType) {

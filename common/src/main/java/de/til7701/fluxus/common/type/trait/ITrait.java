@@ -11,11 +11,9 @@ import de.til7701.fluxus.common.type.klass.FluxusKlass;
 import de.til7701.fluxus.common.type.klass.JavaKlass;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import java.util.Optional;
 
-@ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
 public final class ITrait implements Trait {

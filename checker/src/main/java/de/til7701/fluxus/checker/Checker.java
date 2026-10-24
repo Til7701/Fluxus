@@ -15,10 +15,7 @@ import de.til7701.fluxus.common.type.klass.Field;
 import de.til7701.fluxus.common.type.klass.FluxusKlass;
 import de.til7701.fluxus.common.type.klass.FluxusMetod;
 import de.til7701.fluxus.common.type.klass.JavaKlass;
-import de.til7701.fluxus.common.type.trait.CollectionTrait;
-import de.til7701.fluxus.common.type.trait.ITrait;
-import de.til7701.fluxus.common.type.trait.Trait;
-import de.til7701.fluxus.common.type.trait.UTrait;
+import de.til7701.fluxus.common.type.trait.*;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
@@ -99,6 +96,7 @@ public class Checker {
             case BooleanLiteralExpression _ -> Bool.DESCRIPTOR.get();
             case SignedIntegerLiteralExpression(_, _, long bitCount) -> new ITrait(bitCount);
             case UnsignedIntegerLiteralExpression(_, _, long bitCount) -> new UTrait(bitCount);
+            case FloatLiteralExpression(_, _, long bitCount) -> new FTrait(bitCount);
             case CharLiteralExpression _ -> Char.DESCRIPTOR.get();
             case StringLiteralExpression _ -> environment.getKlassRegister()
                     .find(new SimpleType(Span.undefined(), "fluxus.flumen.Str"), imports)
@@ -213,7 +211,7 @@ public class Checker {
                 Metod metod = switch (valueType) {
                     case CollectionTrait _, FluxusKlass _ ->
                             findMetod(span, valueType, methodName, new TypeDescriptor[]{valueType});
-                    case ITrait _, UTrait _, JavaKlass _ ->
+                    case ITrait _, UTrait _, FTrait _, JavaKlass _ ->
                             findMetod(span, valueType, methodName, new TypeDescriptor[]{valueType, PType.DESCRIPTOR.get()});
                 };
                 if (metod == null) yield null;

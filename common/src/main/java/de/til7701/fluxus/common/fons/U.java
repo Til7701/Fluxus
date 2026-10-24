@@ -2,6 +2,7 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.type.SimpleType;
+import de.til7701.fluxus.ast.type.trait.FType;
 import de.til7701.fluxus.ast.type.trait.IType;
 import de.til7701.fluxus.ast.type.trait.UType;
 import de.til7701.fluxus.common.fons.util.FluxusType;
@@ -9,8 +10,9 @@ import de.til7701.fluxus.common.fons.util.Primitive;
 import de.til7701.fluxus.common.fons.util.Primitives;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
-import de.til7701.fluxus.common.util.ints.IN;
-import de.til7701.fluxus.common.util.ints.UN;
+import de.til7701.fluxus.common.util.n.FN;
+import de.til7701.fluxus.common.util.n.IN;
+import de.til7701.fluxus.common.util.n.UN;
 import lombok.Getter;
 
 @FluxusType(
@@ -110,6 +112,13 @@ public final class U implements Primitive {
     public static U as__fluxus_fons_U(U value, PType target) {
         if (target.getValue() instanceof UType uType)
             return U.of(UN.of(value.getValue().getValue(), uType.bitCount()));
+        else
+            throw new RuntimeException();
+    }
+
+    public static F as__fluxus_fons_F(U value, PType target) {
+        if (target.getValue() instanceof FType fType)
+            return F.of(FN.of(value.getValue().getValue(), fType.bitCount()));
         else
             throw new RuntimeException();
     }

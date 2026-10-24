@@ -26,6 +26,7 @@ public class Primitives {
             Bool.class, Bool.TYPE,
             I.class, I.TYPE,
             U.class, U.TYPE,
+            F.class, F.TYPE,
             Array.class, Array.TYPE,
             Object.class, Void.TYPE,
             PType.class, PType.TYPE,

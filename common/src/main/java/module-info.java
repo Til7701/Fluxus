@@ -16,7 +16,7 @@ module de.til7701.fluxus.common {
     exports de.til7701.fluxus.common;
     exports de.til7701.fluxus.common.fons;
     exports de.til7701.fluxus.common.util;
-    exports de.til7701.fluxus.common.util.ints;
+    exports de.til7701.fluxus.common.util.n;
     exports de.til7701.fluxus.common.type;
     exports de.til7701.fluxus.common.type.klass;
     exports de.til7701.fluxus.common.type.trait;

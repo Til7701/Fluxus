@@ -1,4 +1,4 @@
-package de.til7701.fluxus.common.util.ints;
+package de.til7701.fluxus.common.util.n;
 
 import de.til7701.fluxus.common.NotImplementedException;
 import lombok.AccessLevel;
