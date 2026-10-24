@@ -19,3 +19,10 @@ System.println(a as Str);
 5U32 = new 42U32;
 System.println(5U32 as Str);
 System.println(a as Str);
+
+let x = 14U32;
+System.println(x as Str);
+
+x = new 38U32;
+System.println(14U32 as Str);
+System.println(x as Str);
