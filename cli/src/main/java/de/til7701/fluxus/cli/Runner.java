@@ -2,9 +2,9 @@ package de.til7701.fluxus.cli;
 
 import de.til7701.fluxus.ast.Ast;
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.checker.Checker;
-import de.til7701.fluxus.checker.Error;
 import de.til7701.fluxus.cli.pretty.AstPrettyPrinter;
+import de.til7701.fluxus.common.checker.Checker;
+import de.til7701.fluxus.common.checker.Error;
 import de.til7701.fluxus.common.environment.Environment;
 import de.til7701.fluxus.common.flumen.Flumen;
 import de.til7701.fluxus.common.type.klass.Klass;
@@ -57,7 +57,7 @@ public class Runner {
             env.getKlassRegister().registerKlass(klass);
         }
         Checker checker = new Checker(env);
-        checker.check(ast);
+        checker.check(ast, null);
         List<Error> errors = checker.getErrors();
         if (!errors.isEmpty()) {
             String code = Files.readString(entry.toPath());

@@ -6,7 +6,6 @@ module de.til7701.fluxus.cli {
     requires de.til7701.fluxus.ast;
     requires de.til7701.fluxus.common;
     requires de.til7701.fluxus.parser;
-    requires de.til7701.fluxus.checker;
     requires de.til7701.fluxus.interpreter;
 
     requires info.picocli;

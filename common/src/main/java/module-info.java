@@ -21,4 +21,5 @@ module de.til7701.fluxus.common {
     exports de.til7701.fluxus.common.type.klass;
     exports de.til7701.fluxus.common.type.trait;
     exports de.til7701.fluxus.common.fons.util;
+    exports de.til7701.fluxus.common.checker;
 }

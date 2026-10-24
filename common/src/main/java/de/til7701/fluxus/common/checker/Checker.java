@@ -1,9 +1,9 @@
-package de.til7701.fluxus.checker;
+package de.til7701.fluxus.common.checker;
 
 import module de.til7701.fluxus.ast;
-import de.til7701.fluxus.checker.internal.Scope;
-import de.til7701.fluxus.checker.internal.ScopeStack;
 import de.til7701.fluxus.common.NotImplementedException;
+import de.til7701.fluxus.common.checker.internal.Scope;
+import de.til7701.fluxus.common.checker.internal.ScopeStack;
 import de.til7701.fluxus.common.environment.Environment;
 import de.til7701.fluxus.common.environment.Imports;
 import de.til7701.fluxus.common.fons.Bool;
@@ -19,10 +19,7 @@ import de.til7701.fluxus.common.type.trait.*;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 public class Checker {
 
@@ -39,18 +36,79 @@ public class Checker {
         errors.clear();
     }
 
-    public void check(Ast ast) {
+    public void check(Ast ast, @Nullable String fullyQualifiedFluxusName) {
         reset();
 
-        ScopeStack stack = new ScopeStack();
-        stack.push(new Scope());
         Imports imports = environment.getPrimitiveImports();
         switch (ast) {
-            case Script script -> script.statements().forEach(s -> check(s, stack, imports));
-            case TypeDefinition typeDefinition -> {
-                // TODO
+            case Script script -> {
+                ScopeStack stack = new ScopeStack();
+                stack.push(new Scope());
+                for (Statement s : script.statements()) {
+                    check(s, stack, imports);
+                }
+            }
+            case ClassDefinition classDefinition -> {
+                Objects.requireNonNull(fullyQualifiedFluxusName);
+                imports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, null));
+                imports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, "This"));
+                for (Import i : classDefinition.imports())
+                    imports.addImport(i);
+
+                ScopeStack staticFieldsStack = new ScopeStack();
+                staticFieldsStack.push(new Scope());
+                for (ClassFieldDefinition field : classDefinition.fields()) {
+                    if (field.modifiers().stream().anyMatch(m -> m.value() != FieldModifierValue.STATIC))
+                        continue;
+                    TypeDescriptor fieldType = findTypeDescriptor(field.span(), field.type(), imports);
+                    if (fieldType == null) continue;
+                    TypeDescriptor valueType = evaluateExpressionType(field.value(), staticFieldsStack, imports);
+                    if (valueType == null) continue;
+                    checkAssignability(field.span(), valueType, fieldType);
+                    staticFieldsStack.initializeVariable(field.name(), fieldType);
+                }
+
+                for (ClassFieldDefinition field : classDefinition.fields()) {
+                    if (field.modifiers().stream().anyMatch(m -> m.value() == FieldModifierValue.STATIC))
+                        continue;
+                    TypeDescriptor fieldType = findTypeDescriptor(field.span(), field.type(), imports);
+                    if (fieldType == null) continue;
+                    ScopeStack stack = new ScopeStack();
+                    stack.push(new Scope());
+                    TypeDescriptor valueType = evaluateExpressionType(field.value(), stack, imports);
+                    if (valueType == null) continue;
+                    checkAssignability(field.span(), valueType, fieldType);
+                }
+
+                for (ConstructorDefinition constructorDefinition : classDefinition.constructors()) {
+                    checkMethod(false, constructorDefinition.parameters().parameters(), constructorDefinition.body(), imports);
+                }
+
+                for (MethodDefinition methodDefinition : classDefinition.methods()) {
+                    checkMethod(
+                            methodDefinition.modifiers().stream().anyMatch(m -> m.value() == MethodModifierValue.STATIC),
+                            methodDefinition.parameters().parameters(), methodDefinition.body(), imports
+                    );
+                }
             }
         }
+    }
+
+    private void checkMethod(boolean isStatic, List<MethodParameter> parameters, Statement body, Imports imports) {
+        ScopeStack stack = new ScopeStack();
+        stack.push(new Scope());
+        if (!isStatic) {
+            TypeDescriptor thisType = findTypeDescriptor(Span.undefined(), new SimpleType(Span.undefined(), "This"), imports);
+            if (thisType == null) return;
+            stack.initializeVariable("this", thisType);
+        }
+        for (MethodParameter parameter : parameters) {
+            TypeDescriptor t = findTypeDescriptor(parameter.span(), parameter.type(), imports);
+            if (t == null)
+                return;
+            stack.initializeVariable(parameter.name(), t);
+        }
+        check(body, stack, imports);
     }
 
     private void check(Statement statement, ScopeStack stack, Imports imports) {
@@ -72,7 +130,9 @@ public class Checker {
             }
             case StatementList statementList -> {
                 stack.push(new Scope());
-                statementList.statements().forEach(s -> check(s, stack, imports));
+                for (Statement s : statementList.statements()) {
+                    check(s, stack, imports);
+                }
                 stack.pop();
             }
             case WhenStatement whenStatement -> {
@@ -169,6 +229,15 @@ public class Checker {
                     }
                 }
                 yield new CollectionTrait(types[0], new UTrait(31));
+            }
+            case ArrayCreation(_, Expression defaultValue, Expression length) -> {
+                TypeDescriptor defaultType = evaluateExpressionType(defaultValue, stack, imports);
+                if (defaultType == null)
+                    yield null;
+                TypeDescriptor lengthType = evaluateExpressionType(length, stack, imports);
+                if (lengthType != null)
+                    checkAssignability(length.span(), lengthType, new UTrait(31));
+                yield new CollectionTrait(defaultType, new UTrait(31));
             }
             case InstanceFieldAccess(Span span, Expression instance, String fieldName) -> {
                 TypeDescriptor instanceType = evaluateExpressionType(instance, stack, imports);

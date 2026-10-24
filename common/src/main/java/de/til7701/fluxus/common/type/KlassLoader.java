@@ -31,7 +31,13 @@ public final class KlassLoader {
     }
 
     private Klass loadKlassFromClassDefinition(String klassName, ClassDefinition classDefinition) {
-        List<Import> imports = Stream.concat(Stream.of(new Import(Span.undefined(), klassName, null)), classDefinition.imports().stream())
+        List<Import> imports = Stream.concat(
+                        Stream.of(
+                                new Import(Span.undefined(), klassName, null),
+                                new Import(Span.undefined(), klassName, "This")
+                        ),
+                        classDefinition.imports().stream()
+                )
                 .toList();
         Imports importsMapper = new Imports(imports);
         Type klassType = new SimpleType(classDefinition.span(), klassName);

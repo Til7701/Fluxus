@@ -1,4 +1,4 @@
-package de.til7701.fluxus.checker.internal;
+package de.til7701.fluxus.common.checker.internal;
 
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import org.jspecify.annotations.Nullable;

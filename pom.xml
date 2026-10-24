@@ -13,7 +13,6 @@
         <module>ast</module>
         <module>common</module>
         <module>parser</module>
-        <module>checker</module>
         <module>interpreter</module>
         <module>cli</module>
     </modules>

@@ -18,11 +18,11 @@ static U64 b = 0x71D67FFFEDA60000U64;
 static U64 c = 0xFFF7EEE000000000U64;
 static U64 f = 6364136223846793005U64;
 
-U64[U31] stateArray = [ 0U64; Random.n ];
-I31 stateIndex = new 0I32;
+U64[U31] stateArray = [ 0U64; Random.n as U31 ];
+I31 stateIndex = new 0I31;
 
 () {
-    let seed = System.nanoTime(); // TODO switch to UNIX time or something like that
+    let seed = System.nanoTime() as U64; // TODO switch to UNIX time or something like that
     this.initializeState(seed);
 }
 

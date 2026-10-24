@@ -1,4 +1,4 @@
-package de.til7701.fluxus.checker;
+package de.til7701.fluxus.common.checker;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.type.Type;
