@@ -1,4 +1,6 @@
+import fluxus.flumen.System;
 import fluxus.flumen.UUID;
+import fluxus.flumen.Str;
 
 let id = UUID(42U64, 14U64);
 System.println(id as Str);

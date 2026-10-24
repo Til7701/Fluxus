@@ -1,4 +1,4 @@
-package de.til7701.fluxus.common.fons;
+package de.til7701.fluxus.common.fons.util;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

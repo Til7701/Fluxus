@@ -7,8 +7,8 @@ import de.til7701.fluxus.common.NotImplementedException;
 import de.til7701.fluxus.common.environment.Environment;
 import de.til7701.fluxus.common.environment.Imports;
 import de.til7701.fluxus.common.fons.Bool;
+import de.til7701.fluxus.common.fons.Char;
 import de.til7701.fluxus.common.fons.PType;
-import de.til7701.fluxus.common.fons.Str;
 import de.til7701.fluxus.common.type.Metod;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.type.klass.Field;
@@ -99,7 +99,10 @@ public class Checker {
             case BooleanLiteralExpression _ -> Bool.DESCRIPTOR.get();
             case SignedIntegerLiteralExpression(_, _, long bitCount) -> new ITrait(bitCount);
             case UnsignedIntegerLiteralExpression(_, _, long bitCount) -> new UTrait(bitCount);
-            case StringLiteralExpression _ -> Str.DESCRIPTOR.get();
+            case CharLiteralExpression _ -> Char.DESCRIPTOR.get();
+            case StringLiteralExpression _ -> environment.getKlassRegister()
+                    .find(new SimpleType(Span.undefined(), "fluxus.flumen.Str"), imports)
+                    .orElse(null);
             case SymbolExpression(Span span, String identifier) -> {
                 TypeDescriptor type = stack.getVariable(identifier);
                 if (type == null)
@@ -219,7 +222,7 @@ public class Checker {
                 checkAssignability(span, returnDescriptor, targetDescriptor);
                 yield targetDescriptor;
             }
-            default -> throw new NotImplementedException();
+            default -> throw new NotImplementedException(expression.toString());
         };
     }
 

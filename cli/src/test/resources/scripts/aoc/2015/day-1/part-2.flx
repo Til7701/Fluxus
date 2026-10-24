@@ -1,3 +1,6 @@
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+
 let content = "()())))))";
 
 let i = new 0U32;
@@ -10,10 +13,10 @@ when floor < 0I32 {
 
 do when i < content.length() {
     let char = content[i];
-    do when char == "(" {
+    do when char == '(' {
         floor = floor + 1I32;
     }
-    do when char == ")" {
+    do when char == ')' {
         floor = floor - 1I32;
     }
     i = i + 1U32;

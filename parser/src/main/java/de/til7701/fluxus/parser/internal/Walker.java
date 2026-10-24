@@ -17,6 +17,7 @@ import de.til7701.fluxus.ast.type_definition.TypeModifier;
 import de.til7701.fluxus.ast.type_definition.TypeModifierValue;
 import de.til7701.fluxus.ast.type_definition.classes.*;
 import de.til7701.fluxus.parser.ParserException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -28,10 +29,14 @@ import java.util.stream.Stream;
 
 @Slf4j
 @NullMarked
+@RequiredArgsConstructor
 public class Walker extends FluxusParserBaseVisitor<Node> {
 
-    private static Span createSpan(ParserRuleContext ctx) {
+    private final String sourceName;
+
+    private Span createSpan(ParserRuleContext ctx) {
         return new Span(
+                sourceName,
                 ctx.getStart().getLine(),
                 ctx.getStart().getCharPositionInLine(),
                 ctx.getStop().getLine(),
@@ -39,8 +44,9 @@ public class Walker extends FluxusParserBaseVisitor<Node> {
         );
     }
 
-    private static Span createSpan(ParserRuleContext ctx1, ParserRuleContext ctx2) {
+    private Span createSpan(ParserRuleContext ctx1, ParserRuleContext ctx2) {
         return new Span(
+                sourceName,
                 ctx1.getStart().getLine(),
                 ctx1.getStart().getCharPositionInLine(),
                 ctx2.getStop().getLine(),
@@ -48,8 +54,9 @@ public class Walker extends FluxusParserBaseVisitor<Node> {
         );
     }
 
-    private static Span createSpan(Token token) {
+    private Span createSpan(Token token) {
         return new Span(
+                sourceName,
                 token.getLine(),
                 token.getCharPositionInLine(),
                 token.getLine(),
@@ -171,6 +178,15 @@ public class Walker extends FluxusParserBaseVisitor<Node> {
                 createSpan(ctx),
                 value,
                 Long.parseLong(split[1])
+        );
+    }
+
+    @Override
+    public Node visitCharLiteralExpression(FluxusParser.CharLiteralExpressionContext ctx) {
+        String text = ctx.CharLiteral().getText();
+        return new CharLiteralExpression(
+                createSpan(ctx),
+                text.substring(1, text.length() - 1)
         );
     }
 
@@ -461,12 +477,12 @@ public class Walker extends FluxusParserBaseVisitor<Node> {
                 typeModifiers,
                 new TypeList(
                         ctx.genericTypeList() == null ?
-                                new Span(-1, -1, -1, -1) :
+                                Span.undefined() :
                                 createSpan(ctx.genericTypeList()),
                         constructGenericTypeList(ctx.genericTypeList())
                 ),
                 new TypeList(
-                        new Span(-1, -1, -1, -1),
+                        Span.undefined(),
                         List.of()
                 ),
                 fields,

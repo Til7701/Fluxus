@@ -1,3 +1,5 @@
+import fluxus.flumen.System;
+
 let x = new true;
 when x == false {
     System.println("triggered outer");

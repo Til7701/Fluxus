@@ -1,6 +1,10 @@
-package de.til7701.fluxus.common.fons;
+package de.til7701.fluxus.common.fons.util;
 
+import de.til7701.fluxus.ast.Span;
+import de.til7701.fluxus.ast.type.SimpleType;
 import de.til7701.fluxus.ast.type.Type;
+import de.til7701.fluxus.common.fons.*;
+import de.til7701.fluxus.common.fons.Void;
 import de.til7701.fluxus.common.type.Metod;
 import de.til7701.fluxus.common.type.klass.JavaKlass;
 import de.til7701.fluxus.common.type.klass.JavaMetod;
@@ -17,14 +21,15 @@ import java.util.stream.Collectors;
 public class Primitives {
 
     private static final Map<Class<?>, Type> typeMappingCache = Map.of(
-            Class.forPrimitiveName("void"), Void.TYPE,
-            Str.class, Str.TYPE,
+            Class.forPrimitiveName("void"), de.til7701.fluxus.common.fons.Void.TYPE,
+            Char.class, Char.TYPE,
             Bool.class, Bool.TYPE,
             I.class, I.TYPE,
             U.class, U.TYPE,
             Array.class, Array.TYPE,
             Object.class, Void.TYPE,
-            PType.class, PType.TYPE
+            PType.class, PType.TYPE,
+            String.class, new SimpleType(Span.undefined(), "fluxus.flumen.Str")
     );
 
     public static JavaKlass loadJavaClass(Class<?> javaClass, Type type) {

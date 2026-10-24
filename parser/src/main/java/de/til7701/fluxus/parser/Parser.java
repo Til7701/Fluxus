@@ -35,7 +35,7 @@ public class Parser {
         parser.addErrorListener(new ErrorListener(sourceName));
 
         ParseTree cst = parser.compilationUnit();
-        FluxusParserBaseVisitor<Node> listener = new Walker();
+        FluxusParserBaseVisitor<Node> listener = new Walker(sourceName);
         return (Ast) listener.visit(cst);
     }
 

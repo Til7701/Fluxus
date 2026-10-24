@@ -1,3 +1,5 @@
+import fluxus.flumen.System;
+
 let x = new false;
 
 when x {

@@ -1,4 +1,7 @@
-let a = 1U32;
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+
+let a = new 1U32;
 let b = 2U32;
 
 System.println(a as Str);
@@ -15,3 +18,4 @@ System.println(a as Str);
 
 5U32 = new 42U32;
 System.println(5U32 as Str);
+System.println(a as Str);

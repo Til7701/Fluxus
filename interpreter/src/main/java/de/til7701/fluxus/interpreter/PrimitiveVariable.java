@@ -1,6 +1,6 @@
 package de.til7701.fluxus.interpreter;
 
-import de.til7701.fluxus.common.fons.Primitive;
+import de.til7701.fluxus.common.fons.util.Primitive;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 
 final class PrimitiveVariable extends AbstractVariable {

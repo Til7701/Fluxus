@@ -5,6 +5,7 @@ import de.til7701.fluxus.ast.statement.Statement;
 import de.til7701.fluxus.common.NotImplementedException;
 import de.til7701.fluxus.common.environment.Imports;
 import de.til7701.fluxus.common.fons.Bool;
+import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -18,6 +19,7 @@ class When implements VariableObserver {
     private final Statement body;
     private final Imports imports;
     private final Collection<Variable> topVariables;
+    @Getter
     private final StackFrame creationFrame;
 
     When(Interpreter interpreter, long interruptMutexID, boolean evalInstantly, Stack stack, Expression condition, Statement body, Imports imports) {
@@ -39,6 +41,7 @@ class When implements VariableObserver {
             case SymbolExpression(_, String name) -> Set.of(Objects.requireNonNull(stack.getVariable(name)));
             case BooleanLiteralExpression _,
                  StringLiteralExpression _,
+                 CharLiteralExpression _,
                  SignedIntegerLiteralExpression _,
                  UnsignedIntegerLiteralExpression _,
                  StaticFieldAccess _ -> Set.of(interpreter.evaluateExpression(expression, stack));

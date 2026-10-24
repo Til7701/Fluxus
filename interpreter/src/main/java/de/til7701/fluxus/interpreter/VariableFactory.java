@@ -2,9 +2,9 @@ package de.til7701.fluxus.interpreter;
 
 import de.til7701.fluxus.common.NotImplementedException;
 import de.til7701.fluxus.common.fons.Array;
-import de.til7701.fluxus.common.fons.Primitive;
-import de.til7701.fluxus.common.fons.Str;
+import de.til7701.fluxus.common.fons.Char;
 import de.til7701.fluxus.common.fons.Void;
+import de.til7701.fluxus.common.fons.util.Primitive;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
@@ -19,8 +19,14 @@ final class VariableFactory {
         return literalStore.forBool(value);
     }
 
-    Variable fromStrLiteral(String value) {
-        return new PrimitiveVariable(Str.of(value));
+    Variable fromCharLiteral(String c) {
+        char character = switch (c) {
+            case "\\0" -> '\0';
+            case "\\n" -> '\n';
+            case "\\t" -> '\t';
+            default -> c.charAt(0);
+        };
+        return new PrimitiveVariable(Char.of(character));
     }
 
     Variable fromILiteral(long value, int bitCount) {

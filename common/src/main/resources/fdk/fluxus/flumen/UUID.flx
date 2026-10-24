@@ -16,6 +16,6 @@ pub static Bool eq(UUID left, UUID right) {
     return left.mostSigBits == right.mostSigBits && left.leastSigBits == right.leastSigBits;
 }
 
-pub static Str as__fluxus_fons_Str(UUID id) {
+pub static Str as__fluxus_flumen_Str(UUID id) {
     return (id.mostSigBits as Str) + ", " + (id.leastSigBits as Str);
 }

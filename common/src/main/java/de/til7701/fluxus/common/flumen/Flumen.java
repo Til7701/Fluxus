@@ -21,6 +21,8 @@ import java.util.List;
 public class Flumen {
 
     private static final String[] sdkClassNames = {
+            "fluxus.flumen.Str",
+            "fluxus.flumen.System",
             "fluxus.flumen.UUID",
             "fluxus.flumen.Random",
     };

@@ -3,8 +3,8 @@ package de.til7701.fluxus.common.environment;
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.statement.Import;
 import de.til7701.fluxus.common.fons.*;
-import de.til7701.fluxus.common.fons.System;
 import de.til7701.fluxus.common.fons.Void;
+import de.til7701.fluxus.common.fons.util.FluxusType;
 import de.til7701.fluxus.common.type.KlassLoader;
 import de.til7701.fluxus.common.type.KlassRegister;
 import de.til7701.fluxus.common.type.TypeDescriptor;
@@ -19,14 +19,14 @@ import lombok.Getter;
 @Getter
 public class Environment {
 
-    private static final Class<?>[] SHAFT = new Class<?>[]{
+    private static final Class<?>[] FONS = new Class<?>[]{
             Void.class,
             Bool.class,
             I.class,
             U.class,
-            Str.class,
+            Char.class,
             Array.class,
-            System.class,
+            Native.class,
             PType.class,
     };
 
@@ -38,7 +38,7 @@ public class Environment {
 
     public Environment(Natives natives) {
         this.natives = natives;
-        for (Class<?> javaClass : SHAFT) {
+        for (Class<?> javaClass : FONS) {
             this.addJavaClass(javaClass);
             primitiveImports.addImport(new Import(Span.undefined(), getFullyQualifiedFluxusName(javaClass), null));
         }

@@ -20,6 +20,7 @@ expression
     : SignedIntegerLiteral #signedIntegerLiteralExpression
     | UnsignedIntegerLiteral #unsignedIntegerLiteralExpression
     | FloatLiteral #floatLiteralExpression
+    | CharLiteral #charLiteralExpression
     | StringLiteral #stringLiteralExpression
     | BooleanLiteral #booleanLiteralExpression
     | SymbolIdentifier #symbolIdentifierExpression

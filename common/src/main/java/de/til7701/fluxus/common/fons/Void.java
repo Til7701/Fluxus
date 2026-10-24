@@ -2,6 +2,9 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.type.SimpleType;
+import de.til7701.fluxus.common.fons.util.FluxusType;
+import de.til7701.fluxus.common.fons.util.Primitive;
+import de.til7701.fluxus.common.fons.util.Primitives;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
 

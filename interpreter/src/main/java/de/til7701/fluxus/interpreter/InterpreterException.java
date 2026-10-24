@@ -17,6 +17,12 @@ public sealed abstract class InterpreterException extends RuntimeException {
         super(message);
     }
 
+    public static final class Panic extends InterpreterException {
+        public Panic(Span span, Stack stack, LiteralStore literalStore, String message) {
+            super(span, stack, literalStore, message);
+        }
+    }
+
     public static final class CollectionAccessOutOfBounds extends InterpreterException {
         public CollectionAccessOutOfBounds(Span span, Stack stack, LiteralStore literalStore, String message) {
             super(span, stack, literalStore, message);

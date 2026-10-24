@@ -31,7 +31,7 @@ public final class Interpreter {
 
     public void interpret(Ast ast) {
         Stack stack = new Stack();
-        stack.push(new StackFrame());
+        stack.push(new StackFrame(new Span("init", -1, -1, -1, -1)));
         switch (ast) {
             case Script script -> {
                 List<Statement> statements = script.statements();
@@ -56,8 +56,7 @@ public final class Interpreter {
             case ReturnStatement(_, Expression value) -> {
                 if (value != null) {
                     Variable result = evaluateExpression(value, stack);
-                    StackFrame frame = stack.peek();
-                    if (frame != null) frame.setReturnValue(result);
+                    throw new ReturnException(result);
                 }
             }
             case StatementList(_, List<Statement> statements) -> {
@@ -82,7 +81,8 @@ public final class Interpreter {
                     variableFactory.fromILiteral(value, (int) bitCount);
             case UnsignedIntegerLiteralExpression(_, long value, long bitCount) ->
                     variableFactory.fromULiteral(value, (int) bitCount);
-            case StringLiteralExpression(_, String value) -> variableFactory.fromStrLiteral(value);
+            case CharLiteralExpression(_, String c) -> variableFactory.fromCharLiteral(c);
+            case StringLiteralExpression(Span span, String value) -> createString(stack, span, value);
             case SymbolExpression(_, String identifier) ->
                     Objects.requireNonNull(stack.getVariable(identifier), expression + "\n" + stack);
             case InstanceMethodCall(Span span, Expression instance, String name, List<Expression> arguments) -> {
@@ -153,7 +153,7 @@ public final class Interpreter {
                 }
                 yield variableFactory.asArray(array, d.descriptor());
             }
-            case ConstructorCall(_, Type type, List<Expression> arguments) -> {
+            case ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
                         .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
                 List<Variable> argumentValues = arguments.stream()
@@ -167,12 +167,11 @@ public final class Interpreter {
                     case FluxusKlass fluxusKlass -> {
                         FluxusMetod method = fluxusKlass.getConstructor(argumentTypes, environment)
                                 .orElseThrow(() -> new RuntimeException("Constructor: with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + typeDescriptor));
-                        Variable struct = initStruct(fluxusKlass);
-                        Stack s = new Stack();
-                        s.push(new StackFrame());
-                        s.initializeVariable("this", struct);
-                        executeFluxusMethod(method, argumentValues, null, s);
-                        s.popDestroy();
+                        Variable struct = initStruct(span, fluxusKlass);
+                        stack.push(new StackFrame(span));
+                        stack.initializeVariable("this", struct);
+                        executeFluxusMethod(method, argumentValues, null, stack);
+                        stack.popDestroy();
                         yield struct;
                     }
                     default -> throw new UnsupportedOperationException();
@@ -186,10 +185,11 @@ public final class Interpreter {
                     throw new RuntimeException("Instance is not a struct");
                 }
             }
-            case StaticFieldAccess(_, Type type, String fieldName) -> {
+            case StaticFieldAccess(Span span, Type type, String fieldName) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
                         .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
-                if (!staticStore.has(typeDescriptor)) staticStore.init(typeDescriptor, populateStatics(typeDescriptor));
+                if (!staticStore.has(typeDescriptor))
+                    staticStore.init(typeDescriptor, populateStatics(span, typeDescriptor));
                 Variable value = staticStore.get(typeDescriptor, fieldName);
                 yield Objects.requireNonNull(value);
             }
@@ -217,10 +217,10 @@ public final class Interpreter {
         };
     }
 
-    private Variable initStruct(FluxusKlass fluxusKlass) {
+    private Variable initStruct(Span span, FluxusKlass fluxusKlass) {
         Map<String, Variable> fields = new HashMap<>();
         Stack instanceInitStack = new Stack();
-        instanceInitStack.push(new StackFrame());
+        instanceInitStack.push(new StackFrame(span));
         for (Field field : fluxusKlass.fields()) {
             if (field.isStatic()) continue;
             String name = field.name();
@@ -231,10 +231,10 @@ public final class Interpreter {
         return new StructVariable(fluxusKlass, fields);
     }
 
-    private Map<String, Variable> populateStatics(TypeDescriptor typeDescriptor) {
+    private Map<String, Variable> populateStatics(Span span, TypeDescriptor typeDescriptor) {
         Map<String, Variable> variables = new HashMap<>();
         Stack staticInitStack = new Stack();
-        staticInitStack.push(new StackFrame());
+        staticInitStack.push(new StackFrame(span));
         if (typeDescriptor instanceof FluxusKlass klass) {
             klass.fields().stream()
                     .filter(Field::isStatic)
@@ -264,6 +264,8 @@ public final class Interpreter {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             switch (e.getCause()) {
+                case PanicException pe ->
+                        throw new InterpreterException.Panic(span, stack, variableFactory.getLiteralStore(), pe.getMessage());
                 case ArrayIndexOutOfBoundsException ae when !argumentValues.isEmpty() && argumentValues.getFirst() instanceof PrimitiveVariable primitiveVariable && primitiveVariable.javaValue() instanceof Array ->
                         throw new InterpreterException.CollectionAccessOutOfBounds(span, stack, variableFactory.getLiteralStore(), ae.getMessage());
                 case CastNegativeToUnsignedException ce ->
@@ -273,18 +275,35 @@ public final class Interpreter {
                 case null, default -> throw new RuntimeException(span.toString(), e);
             }
         }
-        return variableFactory.fromJavaValue(result);
+
+        if (result instanceof String s)
+            return createString(stack, span, s);
+        else
+            return variableFactory.fromJavaValue(result);
+    }
+
+    private Variable createString(Stack stack, Span span, String value) {
+        Expression charArrayLiteral = new ArrayLiteralCreation(span, value.chars()
+                .mapToObj(c -> (Expression) new CharLiteralExpression(span, String.valueOf((char) c)))
+                .toList());
+        ConstructorCall constructorCall = new ConstructorCall(span, new SimpleType(span, "fluxus.flumen.Str"), List.of(charArrayLiteral));
+        return evaluateExpression(constructorCall, stack);
     }
 
     private Variable executeFluxusMethod(FluxusMetod fluxusMetod, List<Variable> argumentValues, @Nullable Variable instance, Stack stack) {
-        stack.push(new StackFrame());
+        stack.push(new StackFrame(fluxusMetod.body().span()));
         if (instance != null) stack.initializeVariable("this", instance);
         for (int i = 0; i < fluxusMetod.parameterNames().length; i++) {
             stack.initializeVariable(fluxusMetod.parameterNames()[i], argumentValues.get(i));
         }
-        executeStatement(fluxusMetod.body(), stack);
-        StackFrame frame = stack.popDestroy();
-        return frame.getReturnValue();
+        try {
+            executeStatement(fluxusMetod.body(), stack);
+        } catch (ReturnException returnException) {
+            StackFrame _ = stack.popDestroy();
+            return returnException.getReturnValue();
+        }
+        StackFrame _ = stack.popDestroy();
+        return variableFactory.fromJavaValue(null);
     }
 
     private void handleInterrupts(Stack stack) {
@@ -311,8 +330,18 @@ public final class Interpreter {
         runningInterrupts.add(interrupt.mutexID());
 
         Stack interruptStack = interrupt.stack();
-        interruptStack.push(new StackFrame());
-        executeStatement(interrupt.unterbrechungsbehandlungsprozedur(), interruptStack);
+        interruptStack.push(new StackFrame(interrupt.unterbrechungsbehandlungsprozedur().span()));
+        try {
+            executeStatement(interrupt.unterbrechungsbehandlungsprozedur(), interruptStack);
+        } catch (ReturnException re) {
+            interruptStack.popDestroy();
+
+            runningInterrupts.remove(interrupt.mutexID());
+
+            currentImports = oldImports;
+            throw re;
+        }
+
         interruptStack.popDestroy();
 
         runningInterrupts.remove(interrupt.mutexID());

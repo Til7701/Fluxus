@@ -1,0 +1,21 @@
+import fluxus.flumen.Str;
+
+class;
+
+static println(Str line) {
+    let i = new 0U32;
+    let l = new line.length();
+    do when i < l {
+        Native.printChar(line[i]);
+        i = i + 1U32;
+    }
+    Native.printChar('\n');
+}
+
+static println(Bool bool) {
+    System.println(bool as Str);
+}
+
+static I64 nanoTime() {
+    return Native.nanoTime();
+}

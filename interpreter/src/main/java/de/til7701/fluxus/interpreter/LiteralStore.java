@@ -46,7 +46,7 @@ public final class LiteralStore {
             sb.append(entry.getValue());
             sb.append(", ");
         }
-        sb.append("\n");
+        sb.append("]\n");
 
         sb.append("U: [");
         for (Map.Entry<UN, Variable> entry : unsignedIntegers.entrySet()) {
@@ -55,6 +55,7 @@ public final class LiteralStore {
             sb.append(entry.getValue());
             sb.append(", ");
         }
+        sb.append("]");
 
         return sb.toString();
     }

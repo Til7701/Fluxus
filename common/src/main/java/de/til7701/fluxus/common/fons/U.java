@@ -4,6 +4,9 @@ import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.type.SimpleType;
 import de.til7701.fluxus.ast.type.trait.IType;
 import de.til7701.fluxus.ast.type.trait.UType;
+import de.til7701.fluxus.common.fons.util.FluxusType;
+import de.til7701.fluxus.common.fons.util.Primitive;
+import de.til7701.fluxus.common.fons.util.Primitives;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
 import de.til7701.fluxus.common.util.ints.IN;
@@ -93,8 +96,8 @@ public final class U implements Primitive {
         return of(UN.shiftRight(left.value, right.value));
     }
 
-    public static Str as__fluxus_fons_Str(U value, PType ignored) {
-        return Str.of(value.value.toString());
+    public static String as__fluxus_flumen_Str(U value, PType ignored) {
+        return value.value.toString();
     }
 
     public static I as__fluxus_fons_I(U value, PType target) {

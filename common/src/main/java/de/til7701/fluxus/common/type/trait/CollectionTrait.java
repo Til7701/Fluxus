@@ -4,6 +4,7 @@ import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.type.Type;
 import de.til7701.fluxus.ast.type.trait.CollectionType;
 import de.til7701.fluxus.common.environment.Environment;
+import de.til7701.fluxus.common.fons.Array;
 import de.til7701.fluxus.common.type.Metod;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.type.klass.Klass;
@@ -36,7 +37,7 @@ public final class CollectionTrait implements Trait {
     @Override
     public boolean isSatisfied(TypeDescriptor typeDescriptor) {
         return switch (typeDescriptor) {
-            case Klass klass -> klass.methods().stream().anyMatch(m ->
+            case Klass klass -> klass == Array.DESCRIPTOR.get() || klass.methods().stream().anyMatch(m ->
                     m.returnType().equals(elementType.type())
                             && m.parameterTypes().length == 2
                             && m.parameterTypes()[1].equals(indexType.type()));

@@ -1,0 +1,52 @@
+class;
+
+Char[U32] chars = ['0'];
+
+(Char[U32] chars) {
+    this.chars = chars;
+}
+
+U32 length() {
+    return this.chars.length();
+}
+
+static Char index(Str str, U32 i) {
+    return str.chars[i];
+}
+
+static Str add(Str left, Str right) {
+    let length = left.length() + (right.length());
+    let chars = ['0'; length];
+    let resultI = new 0U32;
+
+    let leftI = new 0U32;
+    do when leftI < left.length() {
+        chars[resultI] = left[leftI];
+        resultI = resultI + 1U32;
+        leftI = leftI + 1U32;
+    }
+
+    let rightI = new 0U32;
+    do when rightI < right.length() {
+        chars[resultI] = right[rightI];
+        resultI = resultI + 1U32;
+        rightI = rightI + 1U32;
+    }
+
+    return Str(chars);
+}
+
+static Str eq(Str left, Str right) {
+    do when left.length() != right.length() {
+        return false;
+    }
+    let i = new 0U32;
+    do when i < left.length() {
+        let tmpI = new i;
+        do when left[tmpI] != (right[tmpI]) {
+            return false;
+        }
+        i = i + 1U32;
+    }
+    return true;
+}

@@ -5,10 +5,7 @@ import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.io.PrintStream;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -46,11 +43,7 @@ public final class Stack implements Iterable<StackFrame> {
     }
 
     void initializeVariable(String name, Variable variable) {
-        StackFrame stackFrame = stack.peek();
-        if (stackFrame == null) {
-            stackFrame = new StackFrame();
-            push(stackFrame);
-        }
+        StackFrame stackFrame = Objects.requireNonNull(stack.peek());
         stackFrame.initializeVariable(name, variable);
     }
 
@@ -76,7 +69,7 @@ public final class Stack implements Iterable<StackFrame> {
 
                     @Override
                     public BiConsumer<ArrayDeque<StackFrame>, StackFrame> accumulator() {
-                        return ArrayDeque::push;
+                        return ArrayDeque::addLast;
                     }
 
                     @Override
@@ -94,7 +87,7 @@ public final class Stack implements Iterable<StackFrame> {
 
                     @Override
                     public Set<Characteristics> characteristics() {
-                        return Set.of();
+                        return Set.of(Characteristics.IDENTITY_FINISH);
                     }
                 });
         return new Stack(snapshot);
@@ -110,4 +103,5 @@ public final class Stack implements Iterable<StackFrame> {
     public Iterator<StackFrame> iterator() {
         return stack.iterator();
     }
+
 }

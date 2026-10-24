@@ -1,3 +1,6 @@
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+
 let i = new 0I32;
 do when i < 10I32 {
     System.println(i as Str);

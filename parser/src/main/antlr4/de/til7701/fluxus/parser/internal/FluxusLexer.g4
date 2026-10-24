@@ -78,13 +78,17 @@ INTEGER_VALUE
     ;
 I : 'I';
 U : 'U';
+F : 'F';
 
 UnsignedIntegerTypeIdentifier : U INTEGER;
 SignedIntegerTypeIdentifier : I INTEGER;
 SignedIntegerLiteral : SUB? INTEGER_VALUE I INTEGER;
 UnsignedIntegerLiteral : INTEGER_VALUE U INTEGER;
 
+FloatLiteral : INTEGER DOT INTEGER F INTEGER;
+
 StringLiteral : '"' ( ~["\\] | '\\' . )* '"';
+CharLiteral : '\'' ( ~['\\] | '\\' . ) '\'';
 BooleanLiteral : 'true' | 'false';
 
 TypeIdentifier : [A-Z][a-zA-Z0-9]*;

@@ -1,6 +1,9 @@
 package de.til7701.fluxus.ast;
 
+import org.jspecify.annotations.Nullable;
+
 public record Span(
+        @Nullable String filename,
         int startLine,
         int startCol,
         int endLine,
@@ -8,15 +11,16 @@ public record Span(
 ) {
 
     public static Span undefined() {
-        return new Span(-1, -1, -1, -1);
+        return new Span(null, -1, -1, -1, -1);
     }
 
     @Override
     public String toString() {
-        if (startLine == -1 && startCol == -1 && endLine == -1 && endCol == -1)
+        if (filename == null && startLine == -1 && startCol == -1 && endLine == -1 && endCol == -1)
             return "Span.undefined";
         return "Span{" +
-                startLine +
+                filename +
+                ", " + startLine +
                 ", " + startCol +
                 ", " + endLine +
                 ", " + endCol +

@@ -1,3 +1,6 @@
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+
 let a = [ 0I32, 5I32 ];
 System.println(a[0U32] as Str);
 

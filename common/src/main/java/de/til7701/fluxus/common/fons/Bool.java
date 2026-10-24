@@ -2,6 +2,9 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.type.SimpleType;
+import de.til7701.fluxus.common.fons.util.FluxusType;
+import de.til7701.fluxus.common.fons.util.Primitive;
+import de.til7701.fluxus.common.fons.util.Primitives;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
 import lombok.Getter;
@@ -37,14 +40,19 @@ public final class Bool implements Primitive {
         return of(left.value == right.value);
     }
 
-    public static Str as__fluxus_fons_Str(Bool value, PType ignored) {
-        return Str.of(Boolean.toString(value.value));
+    public static String as__fluxus_flumen_Str(Bool value, PType ignored) {
+        return Boolean.toString(value.value);
     }
 
     @Ignore
     @Override
     public TypeDescriptor descriptor() {
         return DESCRIPTOR.get();
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
     }
 
 }

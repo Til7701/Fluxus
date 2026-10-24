@@ -1,0 +1,13 @@
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+
+let a = "a";
+let b = "b";
+
+System.println(a);
+System.println(b);
+System.println(a + b);
+
+System.println(a == a);
+System.println(a == b);
+System.println("ab" == "a");

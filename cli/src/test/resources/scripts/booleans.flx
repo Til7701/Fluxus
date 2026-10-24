@@ -1,3 +1,6 @@
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+
 let a = new true;
 let b = new false;
 
