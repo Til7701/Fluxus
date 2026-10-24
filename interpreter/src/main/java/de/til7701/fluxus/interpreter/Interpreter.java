@@ -8,7 +8,6 @@ import org.jspecify.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Slf4j
 public final class Interpreter {
@@ -85,17 +84,25 @@ public final class Interpreter {
                     variableFactory.fromFLiteral(value, bitCount);
             case CharLiteralExpression(_, String c) -> variableFactory.fromCharLiteral(c);
             case StringLiteralExpression(Span span, String value) -> createString(stack, span, value);
-            case SymbolExpression(_, String identifier) ->
-                    Objects.requireNonNull(stack.getVariable(identifier), expression + "\n" + stack);
+            case SymbolExpression(_, String identifier) -> {
+                Variable v = stack.getVariable(identifier);
+                if (v == null)
+                    throw new NullPointerException(expression + "\n" + stack);
+                yield v;
+            }
             case InstanceMethodCall(Span span, Expression instance, String name, List<Expression> arguments) -> {
                 Variable instanceVariable = evaluateExpression(instance, stack);
                 TypeDescriptor typeDescriptor = instanceVariable.descriptor();
-                List<Variable> argumentValues = arguments.stream()
-                        .map((Expression e) -> evaluateExpression(e, stack))
-                        .toList();
-                TypeDescriptor[] argumentTypes = argumentValues.stream()
-                        .map(Variable::descriptor)
-                        .toArray(TypeDescriptor[]::new);
+                Variable[] argumentValues = new Variable[arguments.size()];
+                for (int i = 0; i < argumentValues.length; i++) {
+                    Expression e = arguments.get(i);
+                    Variable variable = evaluateExpression(e, stack);
+                    argumentValues[i] = variable;
+                }
+                TypeDescriptor[] argumentTypes = new TypeDescriptor[argumentValues.length];
+                for (int i = 0; i < argumentTypes.length; i++) {
+                    argumentTypes[i] = argumentValues[i].descriptor();
+                }
                 Metod method = typeDescriptor.findMethod(name, argumentTypes, environment)
                         .orElseThrow(() -> new RuntimeException("Method: " + name + " with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + typeDescriptor));
                 yield switch (method) {
@@ -109,12 +116,16 @@ public final class Interpreter {
             case StaticMethodCall(Span span, Type type, String methodName, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
                         .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
-                List<Variable> argumentValues = arguments.stream()
-                        .map((Expression e) -> evaluateExpression(e, stack))
-                        .toList();
-                TypeDescriptor[] argumentTypes = argumentValues.stream()
-                        .map(Variable::descriptor)
-                        .toArray(TypeDescriptor[]::new);
+                Variable[] argumentValues = new Variable[arguments.size()];
+                for (int i = 0; i < argumentValues.length; i++) {
+                    Expression e = arguments.get(i);
+                    Variable variable = evaluateExpression(e, stack);
+                    argumentValues[i] = variable;
+                }
+                TypeDescriptor[] argumentTypes = new TypeDescriptor[argumentValues.length];
+                for (int i = 0; i < argumentTypes.length; i++) {
+                    argumentTypes[i] = argumentValues[i].descriptor();
+                }
                 Metod method = typeDescriptor.findMethod(methodName, argumentTypes, environment)
                         .orElseThrow(() -> new RuntimeException("Method: " + methodName + " with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + typeDescriptor));
                 yield switch (method) {
@@ -132,9 +143,10 @@ public final class Interpreter {
                 Metod method = type.findMethod(methodName, argumentTypes, environment)
                         .orElseThrow(() -> new RuntimeException(span + " Method: " + methodName + " with args: " + Arrays.deepToString(argumentTypes) + " not found for class: " + type));
                 yield switch (method) {
-                    case JavaMetod javaMetod -> executeJavaMethod(span, javaMetod, List.of(leftV, rightV), null, stack);
+                    case JavaMetod javaMetod ->
+                            executeJavaMethod(span, javaMetod, new Variable[]{leftV, rightV}, null, stack);
                     case FluxusMetod fluxusMetod ->
-                            executeFluxusMethod(fluxusMetod, List.of(leftV, rightV), null, stack);
+                            executeFluxusMethod(fluxusMetod, new Variable[]{leftV, rightV}, null, stack);
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
@@ -158,12 +170,16 @@ public final class Interpreter {
             case ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
                         .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
-                List<Variable> argumentValues = arguments.stream()
-                        .map((Expression e) -> evaluateExpression(e, stack))
-                        .toList();
-                TypeDescriptor[] argumentTypes = argumentValues.stream()
-                        .map(Variable::descriptor)
-                        .toArray(TypeDescriptor[]::new);
+                Variable[] argumentValues = new Variable[arguments.size()];
+                for (int i = 0; i < argumentValues.length; i++) {
+                    Expression e = arguments.get(i);
+                    Variable variable = evaluateExpression(e, stack);
+                    argumentValues[i] = variable;
+                }
+                TypeDescriptor[] argumentTypes = new TypeDescriptor[argumentValues.length];
+                for (int i = 0; i < argumentTypes.length; i++) {
+                    argumentTypes[i] = argumentValues[i].descriptor();
+                }
                 yield switch (typeDescriptor) {
                     case JavaKlass _ -> throw new NotImplementedException();
                     case FluxusKlass fluxusKlass -> {
@@ -209,8 +225,9 @@ public final class Interpreter {
                 }).orElseThrow(() -> new RuntimeException("Method: " + methodName + " with args: " + valueType.type().name() + ", " + PType.TYPE.name() + " not found for class: " + valueType));
                 yield switch (method) {
                     case JavaMetod javaMetod ->
-                            executeJavaMethod(span, javaMetod, List.of(value, new PrimitiveVariable(PType.of(targetType))), null, stack);
-                    case FluxusMetod fluxusMetod -> executeFluxusMethod(fluxusMetod, List.of(value), null, stack);
+                            executeJavaMethod(span, javaMetod, new Variable[]{value, new PrimitiveVariable(PType.of(targetType))}, null, stack);
+                    case FluxusMetod fluxusMetod ->
+                            executeFluxusMethod(fluxusMetod, new Variable[]{value}, null, stack);
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
@@ -248,7 +265,7 @@ public final class Interpreter {
         return variables;
     }
 
-    private Variable executeJavaMethod(Span span, JavaMetod javaMetod, List<Variable> argumentValues, @Nullable Variable instance, Stack stack) {
+    private Variable executeJavaMethod(Span span, JavaMetod javaMetod, Variable[] argumentValues, @Nullable Variable instance, Stack stack) {
         Object result;
         try {
             Method method = javaMetod.javaMethod();
@@ -256,18 +273,24 @@ public final class Interpreter {
             if (!javaMetod.isStatic() && instance != null) {
                 javaInstance = instance.javaValue();
             }
-            log.debug(javaMetod.toString());
-            if (javaMetod.needsNatives())
-                result = method.invoke(javaInstance, Stream.concat(Stream.of(environment.getNatives()), argumentValues.stream().map(Variable::javaValue)).toArray());
-            else
-                result = method.invoke(javaInstance, argumentValues.stream().map(Variable::javaValue).toArray());
+            Object[] javaArgs = new Object[argumentValues.length];
+            for (int i = 0; i < javaArgs.length; i++) {
+                javaArgs[i] = argumentValues[i].javaValue();
+            }
+            if (javaMetod.needsNatives()) {
+                Object[] args = new Object[javaArgs.length + 1];
+                args[0] = environment.getNatives();
+                System.arraycopy(javaArgs, 0, args, 1, javaArgs.length);
+                result = method.invoke(javaInstance, args);
+            } else
+                result = method.invoke(javaInstance, javaArgs);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             switch (e.getCause()) {
                 case PanicException pe ->
                         throw new InterpreterException.Panic(span, stack, variableFactory.getLiteralStore(), pe.getMessage());
-                case ArrayIndexOutOfBoundsException ae when !argumentValues.isEmpty() && argumentValues.getFirst() instanceof PrimitiveVariable primitiveVariable && primitiveVariable.javaValue() instanceof Array ->
+                case ArrayIndexOutOfBoundsException ae when argumentValues.length != 0 && argumentValues[0] instanceof PrimitiveVariable primitiveVariable && primitiveVariable.javaValue() instanceof Array ->
                         throw new InterpreterException.CollectionAccessOutOfBounds(span, stack, variableFactory.getLiteralStore(), ae.getMessage());
                 case CastNegativeToUnsignedException ce ->
                         throw new InterpreterException.CastNegativeToUnsigned(span, stack, variableFactory.getLiteralStore(), ce.getMessage());
@@ -291,11 +314,12 @@ public final class Interpreter {
         return evaluateExpression(constructorCall, stack);
     }
 
-    private Variable executeFluxusMethod(FluxusMetod fluxusMetod, List<Variable> argumentValues, @Nullable Variable instance, Stack stack) {
+    private Variable executeFluxusMethod(FluxusMetod fluxusMetod, Variable[] argumentValues, @Nullable Variable instance, Stack stack) {
         stack.push(new StackFrame(fluxusMetod.body().span()));
         if (instance != null) stack.initializeVariable("this", instance);
-        for (int i = 0; i < fluxusMetod.parameterNames().length; i++) {
-            stack.initializeVariable(fluxusMetod.parameterNames()[i], argumentValues.get(i));
+        String[] parameterNames = fluxusMetod.parameterNames();
+        for (int i = 0; i < parameterNames.length; i++) {
+            stack.initializeVariable(parameterNames[i], argumentValues[i]);
         }
         try {
             executeStatement(fluxusMetod.body(), stack);
