@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ScriptTest {
+class SingleFileTest {
 
     @ParameterizedTest(name = "Script {0}")
     @MethodSource("findScriptFiles")
@@ -21,6 +21,7 @@ class ScriptTest {
         InputStream in = new BufferedInputStream(new ByteArrayInputStream(new byte[0]));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Runner runner = new Runner(
+                new File(SingleFileTest.class.getResource("/singleFiles").getPath()),
                 file,
                 in,
                 new PrintStream(out)
@@ -33,7 +34,7 @@ class ScriptTest {
     }
 
     private static Stream<File> findScriptFiles() throws URISyntaxException, IOException {
-        URL folderUrl = ScriptTest.class.getResource("/scripts");
+        URL folderUrl = SingleFileTest.class.getResource("/singleFiles");
         assertNotNull(folderUrl);
         return Files.find(Path.of(folderUrl.toURI()), 10,
                         ((path, _) -> path.toString().endsWith(".flx")))

@@ -1,0 +1,29 @@
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+
+class;
+
+static I64[U31] longs = [10I64, 9I64, 8I64, 7I64, 6I64, 5I64, 4I64, 3I64, 2I64];
+U31 index = new 0U31;
+
+(U31 index) {
+    this.index = index;
+}
+
+static main() {
+    let i = new 0I32;
+    when i < 4I32 {
+        let instance = Showcase(i as U31);
+        instance.run(i as U31 * 2U31);
+        i = i + 1I32;
+    }
+    i = new 1I32;
+}
+
+run(U31 upTo) {
+    do when (this.index < Showcase.longs.length()) && (this.index <= upTo) {
+        let long = This.longs[this.index];
+        System.println(long as Str);
+        this.index = this.index + 1U31;
+    }
+}

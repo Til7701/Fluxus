@@ -19,7 +19,10 @@ import de.til7701.fluxus.common.type.trait.*;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 public class Checker {
 
@@ -36,7 +39,7 @@ public class Checker {
         errors.clear();
     }
 
-    public void check(Ast ast, @Nullable String fullyQualifiedFluxusName) {
+    public void check(Ast ast, String fullyQualifiedFluxusName) {
         reset();
 
         Imports imports = environment.getPrimitiveImports();
@@ -49,7 +52,6 @@ public class Checker {
                 }
             }
             case ClassDefinition classDefinition -> {
-                Objects.requireNonNull(fullyQualifiedFluxusName);
                 imports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, null));
                 imports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, "This"));
                 for (Import i : classDefinition.imports())

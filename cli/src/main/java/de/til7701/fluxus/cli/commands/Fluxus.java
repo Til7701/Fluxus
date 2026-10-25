@@ -31,6 +31,7 @@ public class Fluxus implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         Runner runner = new Runner(
+                new File("."),
                 source,
                 System.in,
                 System.out

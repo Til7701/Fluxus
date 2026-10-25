@@ -2,7 +2,7 @@ package de.til7701.fluxus.cli;
 
 import de.til7701.fluxus.ast.Ast;
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.cli.pretty.AstPrettyPrinter;
+import de.til7701.fluxus.ast.type_definition.TypeDefinition;
 import de.til7701.fluxus.common.checker.Checker;
 import de.til7701.fluxus.common.checker.Error;
 import de.til7701.fluxus.common.environment.Environment;
@@ -26,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Runner {
 
+    private final File baseDir;
     private final File entry;
 
     private final InputStream stdIn;
@@ -35,29 +36,26 @@ public class Runner {
         Parser fileParser = new Parser();
         Ast ast = fileParser.parseFile(entry);
 
-        if (log.isDebugEnabled()) {
-            StringBuilder builder = new StringBuilder();
-            AstPrettyPrinter prettyPrinter = new AstPrettyPrinter(builder::append);
-            prettyPrinter.print(ast, 0);
-            log.debug("Parsed AST:\n{}", builder);
-        }
-
         final Environment env = new Environment(new Natives(stdIn, stdOut));
         Flumen flumen = new Flumen();
-        if (log.isDebugEnabled()) {
-            List<Ast> asts = flumen.getAsts();
-            for (int i = 0; i < asts.size(); i++) {
-                StringBuilder builder = new StringBuilder();
-                AstPrettyPrinter prettyPrinter = new AstPrettyPrinter(builder::append);
-                prettyPrinter.print(asts.get(i), 0);
-                log.debug("Parsed Grip class '{}':\n{}", flumen.getKlasses().get(i).fullyQualifiedFluxusName(), builder);
-            }
-        }
         for (Klass klass : flumen.getKlasses()) {
             env.getKlassRegister().registerKlass(klass);
         }
+
+        String fullyQualifiedFluxusName = entry.getAbsolutePath()
+                .replace(
+                        baseDir.getAbsolutePath() + File.separator,
+                        ""
+                )
+                .replace(File.separator, ".")
+                .replace(".flx", "");
+        if (ast instanceof TypeDefinition typeDefinition) {
+            Klass klass = env.getKlassLoader().loadKlassFromAst(fullyQualifiedFluxusName, typeDefinition);
+            env.getKlassRegister().registerKlass(klass);
+        }
+
         Checker checker = new Checker(env);
-        checker.check(ast, null);
+        checker.check(ast, fullyQualifiedFluxusName);
         List<Error> errors = checker.getErrors();
         if (!errors.isEmpty()) {
             String code = Files.readString(entry.toPath());
@@ -66,7 +64,7 @@ public class Runner {
         }
         Interpreter interpreter = new Interpreter(env);
         try {
-            interpreter.interpret(ast);
+            interpreter.interpret(ast, fullyQualifiedFluxusName);
         } catch (InterpreterException e) {
             printInterpreterException(e);
         }

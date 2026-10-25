@@ -1,0 +1,7 @@
+import fluxus.flumen.System;
+
+class;
+
+static main() {
+    System.println("Hello World");
+}

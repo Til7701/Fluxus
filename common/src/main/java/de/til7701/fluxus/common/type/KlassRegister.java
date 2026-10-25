@@ -29,9 +29,7 @@ public final class KlassRegister {
         return switch (type) {
             case SimpleType(_, String name) -> {
                 Klass klass = klasses.get(imports.map(name));
-                if (klass == null)
-                    throw new KlassNotFoundException(type.toString());
-                yield Optional.of(klass);
+                yield Optional.ofNullable(klass);
             }
             case IType(_, long bitCount) -> Optional.of(new ITrait(bitCount));
             case UType(_, long bitCount) -> Optional.of(new UTrait(bitCount));

@@ -28,17 +28,39 @@ public final class Interpreter {
         currentImports = environment.getPrimitiveImports();
     }
 
-    public void interpret(Ast ast) {
+    public void interpret(Ast ast, @Nullable String fullyQualifiedFluxusName) {
         Stack stack = new Stack();
-        stack.push(new StackFrame(new Span("init", -1, -1, -1, -1)));
         switch (ast) {
             case Script script -> {
+                stack.push(new StackFrame(script.span()));
                 List<Statement> statements = script.statements();
                 for (Statement statement : statements) {
                     executeStatement(statement, stack);
                 }
             }
-            case TypeDefinition _ -> throw new NotImplementedException();
+            case TypeDefinition typeDefinition -> {
+                switch (typeDefinition) {
+                    case ClassDefinition classDefinition -> {
+                        MethodDefinition main = classDefinition.methods().stream()
+                                .filter(m -> m.name().equals("main"))
+                                .filter(m -> m.modifiers().stream().anyMatch(mod -> mod.value() == MethodModifierValue.STATIC))
+                                .filter(m -> m.parameters().parameters().isEmpty())
+                                .findAny().orElseThrow(() -> {
+                                    stack.push(new StackFrame(classDefinition.span()));
+                                    return new InterpreterException.MethodNotFound(
+                                            typeDefinition.span(),
+                                            stack, variableFactory.getLiteralStore(), "Main method not found"
+                                    );
+                                });
+                        stack.push(new StackFrame(main.span()));
+                        classDefinition.imports().forEach(c -> currentImports.addImport(c));
+                        Objects.requireNonNull(fullyQualifiedFluxusName);
+                        currentImports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, null));
+                        currentImports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, "This"));
+                        executeStatement(main.body(), stack);
+                    }
+                }
+            }
         }
     }
 
