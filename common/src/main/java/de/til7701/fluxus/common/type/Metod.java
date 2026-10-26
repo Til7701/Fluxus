@@ -1,6 +1,6 @@
 package de.til7701.fluxus.common.type;
 
-import de.til7701.fluxus.ast.type.Type;
+import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.type.klass.FluxusMetod;
 import de.til7701.fluxus.common.type.klass.JavaMetod;
 import de.til7701.fluxus.common.type.trait.TraitMetod;

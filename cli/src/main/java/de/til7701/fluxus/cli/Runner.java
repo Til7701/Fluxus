@@ -2,7 +2,7 @@ package de.til7701.fluxus.cli;
 
 import de.til7701.fluxus.ast.Ast;
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.ast.type_definition.TypeDefinition;
+import de.til7701.fluxus.ast.TypeDefinition;
 import de.til7701.fluxus.common.checker.Checker;
 import de.til7701.fluxus.common.checker.Error;
 import de.til7701.fluxus.common.environment.Environment;

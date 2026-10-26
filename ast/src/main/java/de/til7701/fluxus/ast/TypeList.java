@@ -1,7 +1,4 @@
-package de.til7701.fluxus.ast.type;
-
-import de.til7701.fluxus.ast.Node;
-import de.til7701.fluxus.ast.Span;
+package de.til7701.fluxus.ast;
 
 import java.util.List;
 import java.util.function.Function;

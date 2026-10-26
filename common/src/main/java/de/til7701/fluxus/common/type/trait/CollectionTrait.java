@@ -1,9 +1,7 @@
 package de.til7701.fluxus.common.type.trait;
 
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.ast.type.SimpleType;
-import de.til7701.fluxus.ast.type.Type;
-import de.til7701.fluxus.ast.type.trait.CollectionType;
+import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.environment.Environment;
 import de.til7701.fluxus.common.fons.Array;
 import de.til7701.fluxus.common.fons.U;
@@ -33,7 +31,7 @@ public record CollectionTrait(TypeDescriptor elementType, TypeDescriptor indexTy
             case "as__fluxus_flumen_Str" -> Optional.of(new TraitMetod(
                     false,
                     "length",
-                    new SimpleType(Span.undefined(), "fluxus.flumen.Str"),
+                    new Type.Simple(Span.undefined(), "fluxus.flumen.Str"),
                     new Type[]{this.type()}
             ));
             default -> Optional.empty();
@@ -53,7 +51,7 @@ public record CollectionTrait(TypeDescriptor elementType, TypeDescriptor indexTy
 
     @Override
     public Type type() {
-        return new CollectionType(Span.undefined(), indexType.type(), elementType.type());
+        return new Type.Trait.Collection(Span.undefined(), indexType.type(), elementType.type());
     }
 
     @Override

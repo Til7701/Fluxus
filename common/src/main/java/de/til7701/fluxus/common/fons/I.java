@@ -1,10 +1,7 @@
 package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.ast.type.SimpleType;
-import de.til7701.fluxus.ast.type.trait.FType;
-import de.til7701.fluxus.ast.type.trait.IType;
-import de.til7701.fluxus.ast.type.trait.UType;
+import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.fons.util.CastNegativeToUnsignedException;
 import de.til7701.fluxus.common.fons.util.FluxusType;
 import de.til7701.fluxus.common.fons.util.Primitive;
@@ -17,12 +14,12 @@ import de.til7701.fluxus.common.util.n.UN;
 import lombok.Getter;
 
 @FluxusType(
-        fullyQualifiedFluxusName = I.FLUXUS_TYPE_NAME
+        fullyQualifiedFluxusName = de.til7701.fluxus.common.fons.I.FLUXUS_TYPE_NAME
 )
 public final class I implements Primitive {
 
     static final String FLUXUS_TYPE_NAME = "fluxus.fons.I";
-    public static final SimpleType TYPE = new SimpleType(Span.undefined(), FLUXUS_TYPE_NAME);
+    public static final Type.Simple TYPE = new Type.Simple(Span.undefined(), FLUXUS_TYPE_NAME);
 
     public static final LazyConstant<TypeDescriptor> DESCRIPTOR = LazyConstant.of(() -> Primitives.loadJavaClass(I.class, TYPE));
 
@@ -106,22 +103,22 @@ public final class I implements Primitive {
     public static U as__fluxus_fons_U(I value, PType target) {
         if (IN.lt(value.getValue(), IN.of(0, value.value.getBitCount())))
             throw new CastNegativeToUnsignedException(value.getValue().toString());
-        if (target.getValue() instanceof UType uType)
-            return U.of(UN.of(value.getValue().getValue(), uType.bitCount()));
+        if (target.getValue() instanceof Type.Trait.U uType)
+            return de.til7701.fluxus.common.fons.U.of(UN.of(value.getValue().getValue(), uType.bitCount()));
         else
             throw new RuntimeException();
     }
 
     public static I as__fluxus_fons_I(I value, PType target) {
-        if (target.getValue() instanceof IType itype)
-            return I.of(IN.of(value.getValue().getValue(), itype.bitCount()));
+        if (target.getValue() instanceof Type.Trait.I itype)
+            return de.til7701.fluxus.common.fons.I.of(IN.of(value.getValue().getValue(), itype.bitCount()));
         else
             throw new RuntimeException();
     }
 
     public static F as__fluxus_fons_F(I value, PType target) {
-        if (target.getValue() instanceof FType fType)
-            return F.of(FN.of(value.getValue().getValue(), fType.bitCount()));
+        if (target.getValue() instanceof Type.Trait.F fType)
+            return de.til7701.fluxus.common.fons.F.of(FN.of(value.getValue().getValue(), fType.bitCount()));
         else
             throw new RuntimeException();
     }

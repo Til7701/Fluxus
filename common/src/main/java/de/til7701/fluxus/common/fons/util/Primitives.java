@@ -1,8 +1,7 @@
 package de.til7701.fluxus.common.fons.util;
 
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.ast.type.SimpleType;
-import de.til7701.fluxus.ast.type.Type;
+import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.fons.*;
 import de.til7701.fluxus.common.fons.Void;
 import de.til7701.fluxus.common.type.Metod;
@@ -30,7 +29,7 @@ public final class Primitives {
             Array.class, Array.TYPE,
             Object.class, Void.TYPE,
             PType.class, PType.TYPE,
-            String.class, new SimpleType(Span.undefined(), "fluxus.flumen.Str")
+            String.class, new Type.Simple(Span.undefined(), "fluxus.flumen.Str")
     );
 
     public static JavaKlass loadJavaClass(Class<?> javaClass, Type type) {

@@ -1,7 +1,7 @@
 package de.til7701.fluxus.common.environment;
 
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.ast.statement.Import;
+import de.til7701.fluxus.ast.Statement;
 import de.til7701.fluxus.common.fons.*;
 import de.til7701.fluxus.common.fons.Void;
 import de.til7701.fluxus.common.fons.util.FluxusType;
@@ -38,7 +38,7 @@ public final class Environment {
         this.natives = natives;
         for (Class<?> javaClass : FONS) {
             this.addJavaClass(javaClass);
-            primitiveImports.addImport(new Import(Span.undefined(), getFullyQualifiedFluxusName(javaClass), null));
+            primitiveImports.addImport(new Statement.Import(Span.undefined(), getFullyQualifiedFluxusName(javaClass), null));
         }
     }
 

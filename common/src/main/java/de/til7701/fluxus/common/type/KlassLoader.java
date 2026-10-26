@@ -1,14 +1,9 @@
 package de.til7701.fluxus.common.type;
 
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.ast.methods.MethodModifierValue;
-import de.til7701.fluxus.ast.methods.MethodParameter;
-import de.til7701.fluxus.ast.statement.Import;
-import de.til7701.fluxus.ast.type.SimpleType;
-import de.til7701.fluxus.ast.type.Type;
-import de.til7701.fluxus.ast.type_definition.TypeDefinition;
-import de.til7701.fluxus.ast.type_definition.classes.ClassDefinition;
-import de.til7701.fluxus.ast.type_definition.classes.FieldModifierValue;
+import de.til7701.fluxus.ast.Statement;
+import de.til7701.fluxus.ast.Type;
+import de.til7701.fluxus.ast.TypeDefinition;
 import de.til7701.fluxus.common.environment.Imports;
 import de.til7701.fluxus.common.fons.Void;
 import de.til7701.fluxus.common.type.klass.Field;
@@ -26,25 +21,26 @@ public final class KlassLoader {
 
     public Klass loadKlassFromAst(String klassName, TypeDefinition typeDefinition) {
         return switch (typeDefinition) {
-            case ClassDefinition classDefinition -> loadKlassFromClassDefinition(klassName, classDefinition);
+            case TypeDefinition.ClassDefinition classDefinition ->
+                    loadKlassFromClassDefinition(klassName, classDefinition);
         };
     }
 
-    private Klass loadKlassFromClassDefinition(String klassName, ClassDefinition classDefinition) {
-        List<Import> imports = Stream.concat(
+    private Klass loadKlassFromClassDefinition(String klassName, TypeDefinition.ClassDefinition classDefinition) {
+        List<Statement.Import> imports = Stream.concat(
                         Stream.of(
-                                new Import(Span.undefined(), klassName, null),
-                                new Import(Span.undefined(), klassName, "This")
+                                new Statement.Import(Span.undefined(), klassName, null),
+                                new Statement.Import(Span.undefined(), klassName, "This")
                         ),
                         classDefinition.imports().stream()
                 )
                 .toList();
         Imports importsMapper = new Imports(imports);
-        Type klassType = new SimpleType(classDefinition.span(), klassName);
+        Type klassType = new Type.Simple(classDefinition.span(), klassName);
         final Type finalKlassType = klassType;
         List<Field> fields = classDefinition.fields().stream()
                 .map(fieldDefinition -> new Field(
-                        fieldDefinition.modifiers().stream().anyMatch(f -> f.value() == FieldModifierValue.STATIC),
+                        fieldDefinition.modifiers().stream().anyMatch(f -> f.value() == TypeDefinition.FieldModifierValue.STATIC),
                         fieldDefinition.name(),
                         fieldDefinition.type().mapNames(importsMapper::map),
                         fieldDefinition.value()
@@ -59,21 +55,21 @@ public final class KlassLoader {
                                 .map(methodParameter -> methodParameter.type().mapNames(importsMapper::map))
                                 .toArray(Type[]::new),
                         constructorDefinition.parameters().parameters().stream()
-                                .map(MethodParameter::name)
+                                .map(TypeDefinition.MethodParameter::name)
                                 .toArray(String[]::new),
                         constructorDefinition.body()
                 ))
                 .toList();
         List<Metod> methods = classDefinition.methods().stream()
                 .map(methodDefinition -> (Metod) new FluxusMetod(
-                        methodDefinition.modifiers().stream().anyMatch(m -> m.value() == MethodModifierValue.STATIC),
+                        methodDefinition.modifiers().stream().anyMatch(m -> m.value() == TypeDefinition.MethodModifierValue.STATIC),
                         methodDefinition.name(),
                         methodDefinition.returnType().orElse(Void.TYPE).mapNames(importsMapper::map),
                         methodDefinition.parameters().parameters().stream()
                                 .map(methodParameter -> methodParameter.type().mapNames(importsMapper::map))
                                 .toArray(Type[]::new),
                         methodDefinition.parameters().parameters().stream()
-                                .map(MethodParameter::name)
+                                .map(TypeDefinition.MethodParameter::name)
                                 .toArray(String[]::new),
                         methodDefinition.body()
                 ))

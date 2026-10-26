@@ -1,7 +1,7 @@
 package de.til7701.fluxus.common.checker;
 
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.ast.type.Type;
+import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 
 import java.util.Arrays;

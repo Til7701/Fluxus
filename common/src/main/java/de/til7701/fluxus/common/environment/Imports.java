@@ -1,6 +1,6 @@
 package de.til7701.fluxus.common.environment;
 
-import de.til7701.fluxus.ast.statement.Import;
+import de.til7701.fluxus.ast.Statement;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
@@ -13,11 +13,11 @@ public final class Imports {
     /// Maps from the local names to the real type names.
     private final Map<String, String> nameMapping = new HashMap<>();
 
-    public Imports(List<Import> imports) {
+    public Imports(List<Statement.Import> imports) {
         imports.forEach(this::addImport);
     }
 
-    public void addImport(Import imp) {
+    public void addImport(Statement.Import imp) {
         String localName = imp.asName();
         if (localName == null)
             localName = imp.typeToImport().substring(imp.typeToImport().lastIndexOf('.') + 1);

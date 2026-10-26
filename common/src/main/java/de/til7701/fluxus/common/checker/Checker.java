@@ -51,16 +51,16 @@ public class Checker {
                     check(s, stack, imports);
                 }
             }
-            case ClassDefinition classDefinition -> {
-                imports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, null));
-                imports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, "This"));
-                for (Import i : classDefinition.imports())
+            case TypeDefinition.ClassDefinition classDefinition -> {
+                imports.addImport(new Statement.Import(Span.undefined(), fullyQualifiedFluxusName, null));
+                imports.addImport(new Statement.Import(Span.undefined(), fullyQualifiedFluxusName, "This"));
+                for (Statement.Import i : classDefinition.imports())
                     imports.addImport(i);
 
                 ScopeStack staticFieldsStack = new ScopeStack();
                 staticFieldsStack.push(new Scope());
-                for (ClassFieldDefinition field : classDefinition.fields()) {
-                    if (field.modifiers().stream().anyMatch(m -> m.value() != FieldModifierValue.STATIC))
+                for (TypeDefinition.ClassFieldDefinition field : classDefinition.fields()) {
+                    if (field.modifiers().stream().anyMatch(m -> m.value() != TypeDefinition.FieldModifierValue.STATIC))
                         continue;
                     TypeDescriptor fieldType = findTypeDescriptor(field.span(), field.type(), imports);
                     if (fieldType == null) continue;
@@ -70,8 +70,8 @@ public class Checker {
                     staticFieldsStack.initializeVariable(field.name(), fieldType);
                 }
 
-                for (ClassFieldDefinition field : classDefinition.fields()) {
-                    if (field.modifiers().stream().anyMatch(m -> m.value() == FieldModifierValue.STATIC))
+                for (TypeDefinition.ClassFieldDefinition field : classDefinition.fields()) {
+                    if (field.modifiers().stream().anyMatch(m -> m.value() == TypeDefinition.FieldModifierValue.STATIC))
                         continue;
                     TypeDescriptor fieldType = findTypeDescriptor(field.span(), field.type(), imports);
                     if (fieldType == null) continue;
@@ -82,13 +82,13 @@ public class Checker {
                     checkAssignability(field.span(), valueType, fieldType);
                 }
 
-                for (ConstructorDefinition constructorDefinition : classDefinition.constructors()) {
+                for (TypeDefinition.ConstructorDefinition constructorDefinition : classDefinition.constructors()) {
                     checkMethod(false, constructorDefinition.parameters().parameters(), constructorDefinition.body(), imports);
                 }
 
-                for (MethodDefinition methodDefinition : classDefinition.methods()) {
+                for (TypeDefinition.MethodDefinition methodDefinition : classDefinition.methods()) {
                     checkMethod(
-                            methodDefinition.modifiers().stream().anyMatch(m -> m.value() == MethodModifierValue.STATIC),
+                            methodDefinition.modifiers().stream().anyMatch(m -> m.value() == TypeDefinition.MethodModifierValue.STATIC),
                             methodDefinition.parameters().parameters(), methodDefinition.body(), imports
                     );
                 }
@@ -96,15 +96,15 @@ public class Checker {
         }
     }
 
-    private void checkMethod(boolean isStatic, List<MethodParameter> parameters, Statement body, Imports imports) {
+    private void checkMethod(boolean isStatic, List<TypeDefinition.MethodParameter> parameters, Statement body, Imports imports) {
         ScopeStack stack = new ScopeStack();
         stack.push(new Scope());
         if (!isStatic) {
-            TypeDescriptor thisType = findTypeDescriptor(Span.undefined(), new SimpleType(Span.undefined(), "This"), imports);
+            TypeDescriptor thisType = findTypeDescriptor(Span.undefined(), new Type.Simple(Span.undefined(), "This"), imports);
             if (thisType == null) return;
             stack.initializeVariable("this", thisType);
         }
-        for (MethodParameter parameter : parameters) {
+        for (TypeDefinition.MethodParameter parameter : parameters) {
             TypeDescriptor t = findTypeDescriptor(parameter.span(), parameter.type(), imports);
             if (t == null)
                 return;
@@ -115,29 +115,29 @@ public class Checker {
 
     private void check(Statement statement, ScopeStack stack, Imports imports) {
         switch (statement) {
-            case Import i -> imports.addImport(i);
-            case VariableInitialization(_, String name, Expression value) -> {
+            case Statement.Import i -> imports.addImport(i);
+            case Statement.VariableInitialization(_, String name, Expression value) -> {
                 TypeDescriptor expressionType = evaluateExpressionType(value, stack, imports);
                 if (expressionType != null)
                     stack.initializeVariable(name, expressionType);
             }
-            case Assignment(Span span, Expression target, Expression value) -> {
+            case Statement.Assignment(Span span, Expression target, Expression value) -> {
                 TypeDescriptor expressionType = evaluateExpressionType(value, stack, imports);
                 TypeDescriptor targetType = evaluateExpressionType(target, stack, imports);
                 if (expressionType != null && targetType != null)
                     checkAssignability(span, expressionType, targetType);
             }
-            case ReturnStatement(Span span, Expression value) -> {
+            case Statement.Return(Span span, Expression value) -> {
                 // TODO
             }
-            case StatementList statementList -> {
+            case Statement.StatementList statementList -> {
                 stack.push(new Scope());
                 for (Statement s : statementList.statements()) {
                     check(s, stack, imports);
                 }
                 stack.pop();
             }
-            case WhenStatement whenStatement -> {
+            case Statement.When whenStatement -> {
                 Expression condition = whenStatement.condition();
                 TypeDescriptor conditionType = evaluateExpressionType(condition, stack, imports);
                 if (conditionType != null)
@@ -154,33 +154,35 @@ public class Checker {
 
     private @Nullable TypeDescriptor evaluateExpressionType(Expression expression, ScopeStack stack, Imports imports) {
         return switch (expression) {
-            case NewExpression(_, Expression e) -> evaluateExpressionType(e, stack, imports);
-            case BooleanLiteralExpression _ -> Bool.DESCRIPTOR.get();
-            case SignedIntegerLiteralExpression(_, _, long bitCount) -> new ITrait(bitCount);
-            case UnsignedIntegerLiteralExpression(_, _, long bitCount) -> new UTrait(bitCount);
-            case FloatLiteralExpression(_, _, long bitCount) -> new FTrait(bitCount);
-            case CharLiteralExpression _ -> Char.DESCRIPTOR.get();
-            case StringLiteralExpression _ -> environment.getKlassRegister()
-                    .find(new SimpleType(Span.undefined(), "fluxus.flumen.Str"), imports)
+            case Expression.New(_, Expression e) -> evaluateExpressionType(e, stack, imports);
+            case Expression.BooleanLiteral _ -> Bool.DESCRIPTOR.get();
+            case Expression.SignedIntegerLiteral(_, _, long bitCount) -> new ITrait(bitCount);
+            case Expression.UnsignedIntegerLiteral(_, _, long bitCount) -> new UTrait(bitCount);
+            case Expression.FloatLiteral(_, _, long bitCount) -> new FTrait(bitCount);
+            case Expression.CharLiteral _ -> Char.DESCRIPTOR.get();
+            case Expression.StringLiteral _ -> environment.getKlassRegister()
+                    .find(new Type.Simple(Span.undefined(), "fluxus.flumen.Str"), imports)
                     .orElse(null);
-            case SymbolExpression(Span span, String identifier) -> {
+            case Expression.Symbol(Span span, String identifier) -> {
                 TypeDescriptor type = stack.getVariable(identifier);
                 if (type == null)
                     errors.add(new Error.SymbolNotFound(span, identifier));
                 yield type;
             }
-            case InstanceMethodCall(Span span, Expression instance, String methodName, List<Expression> arguments) -> {
+            case Expression.InstanceMethodCall(
+                    Span span, Expression instance, String methodName, List<Expression> arguments
+            ) -> {
                 TypeDescriptor instanceType = evaluateExpressionType(instance, stack, imports);
                 if (instanceType != null)
                     yield evaluateMethodCall(span, instanceType, methodName, arguments, stack, imports);
                 yield null;
             }
-            case StaticMethodCall(Span span, Type type, String methodName, List<Expression> arguments) -> {
+            case Expression.StaticMethodCall(Span span, Type type, String methodName, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = findTypeDescriptor(span, type.mapNames(imports::map), imports);
                 if (typeDescriptor == null) yield null;
                 yield evaluateMethodCall(span, typeDescriptor, methodName, arguments, stack, imports);
             }
-            case ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
+            case Expression.ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
                 type = type.mapNames(imports::map);
                 TypeDescriptor typeDescriptor = findTypeDescriptor(span, type, imports);
                 if (typeDescriptor == null) yield null;
@@ -208,13 +210,15 @@ public class Checker {
                     }
                 }
             }
-            case LeftUnaryExpression(Span span, LeftUnaryOperator operator, Expression value) -> {
+            case Expression.LeftUnary(Span span, Expression.LeftUnaryOperator operator, Expression value) -> {
                 TypeDescriptor valueT = evaluateExpressionType(value, stack, imports);
                 if (valueT == null) yield null;
                 String methodName = operator.name().toLowerCase(Locale.ROOT);
                 yield evaluateMethodCall(span, valueT, methodName, List.of(value), stack, imports);
             }
-            case BinaryExpression(Span span, Expression left, BinaryOperator operator, Expression right) -> {
+            case Expression.Binary(
+                    Span span, Expression left, Expression.BinaryOperator operator, Expression right
+            ) -> {
                 TypeDescriptor leftT = evaluateExpressionType(left, stack, imports);
                 if (leftT == null) yield null;
                 TypeDescriptor rightT = evaluateExpressionType(right, stack, imports);
@@ -222,7 +226,7 @@ public class Checker {
                 String methodName = operator.name().toLowerCase(Locale.ROOT);
                 yield evaluateMethodCall(span, leftT, methodName, List.of(left, right), stack, imports);
             }
-            case ArrayLiteralCreation(Span span, List<Expression> values) -> {
+            case Expression.ArrayLiteralCreation(Span span, List<Expression> values) -> {
                 TypeDescriptor[] types = new TypeDescriptor[values.size()];
                 for (int i = 0; i < types.length; i++) {
                     TypeDescriptor t = evaluateExpressionType(values.get(i), stack, imports);
@@ -238,7 +242,7 @@ public class Checker {
                 }
                 yield new CollectionTrait(types[0], new UTrait(31));
             }
-            case ArrayCreation(_, Expression defaultValue, Expression length) -> {
+            case Expression.ArrayCreation(_, Expression defaultValue, Expression length) -> {
                 TypeDescriptor defaultType = evaluateExpressionType(defaultValue, stack, imports);
                 if (defaultType == null)
                     yield null;
@@ -247,7 +251,7 @@ public class Checker {
                     checkAssignability(length.span(), lengthType, new UTrait(31));
                 yield new CollectionTrait(defaultType, new UTrait(31));
             }
-            case InstanceFieldAccess(Span span, Expression instance, String fieldName) -> {
+            case Expression.InstanceFieldAccess(Span span, Expression instance, String fieldName) -> {
                 TypeDescriptor instanceType = evaluateExpressionType(instance, stack, imports);
                 if (instanceType == null) yield null;
                 yield switch (instanceType) {
@@ -265,7 +269,7 @@ public class Checker {
                     }
                 };
             }
-            case StaticFieldAccess(Span span, Type type, String fieldName) -> {
+            case Expression.StaticFieldAccess(Span span, Type type, String fieldName) -> {
                 TypeDescriptor typeDescriptor = findTypeDescriptor(span, type, imports);
                 if (typeDescriptor == null) yield null;
                 Field field = switch (typeDescriptor) {
@@ -278,7 +282,7 @@ public class Checker {
                 if (field == null) yield null;
                 yield findTypeDescriptor(span, field.type(), imports);
             }
-            case TypeCastExpression(Span span, Type targetType, Expression valueExpression) -> {
+            case Expression.TypeCast(Span span, Type targetType, Expression valueExpression) -> {
                 targetType = targetType.mapNames(imports::map);
                 TypeDescriptor targetDescriptor = findTypeDescriptor(span, targetType, imports);
                 if (targetDescriptor == null) yield null;

@@ -40,10 +40,10 @@ public final class Interpreter {
             }
             case TypeDefinition typeDefinition -> {
                 switch (typeDefinition) {
-                    case ClassDefinition classDefinition -> {
-                        MethodDefinition main = classDefinition.methods().stream()
+                    case TypeDefinition.ClassDefinition classDefinition -> {
+                        TypeDefinition.MethodDefinition main = classDefinition.methods().stream()
                                 .filter(m -> m.name().equals("main"))
-                                .filter(m -> m.modifiers().stream().anyMatch(mod -> mod.value() == MethodModifierValue.STATIC))
+                                .filter(m -> m.modifiers().stream().anyMatch(mod -> mod.value() == TypeDefinition.MethodModifierValue.STATIC))
                                 .filter(m -> m.parameters().parameters().isEmpty())
                                 .findAny().orElseThrow(() -> {
                                     stack.push(new StackFrame(classDefinition.span()));
@@ -55,8 +55,8 @@ public final class Interpreter {
                         stack.push(new StackFrame(main.span()));
                         classDefinition.imports().forEach(c -> currentImports.addImport(c));
                         Objects.requireNonNull(fullyQualifiedFluxusName);
-                        currentImports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, null));
-                        currentImports.addImport(new Import(Span.undefined(), fullyQualifiedFluxusName, "This"));
+                        currentImports.addImport(new Statement.Import(Span.undefined(), fullyQualifiedFluxusName, null));
+                        currentImports.addImport(new Statement.Import(Span.undefined(), fullyQualifiedFluxusName, "This"));
                         executeStatement(main.body(), stack);
                     }
                 }
@@ -67,25 +67,25 @@ public final class Interpreter {
     private void executeStatement(Statement statement, Stack stack) {
         handleInterrupts(stack);
         switch (statement) {
-            case Import imp -> currentImports.addImport(imp);
-            case VariableInitialization(_, String name, Expression value) ->
+            case Statement.Import imp -> currentImports.addImport(imp);
+            case Statement.VariableInitialization(_, String name, Expression value) ->
                     stack.initializeVariable(name, evaluateExpression(value, stack));
-            case Assignment(_, Expression target, Expression value) -> {
+            case Statement.Assignment(_, Expression target, Expression value) -> {
                 Variable t = evaluateExpression(target, stack);
                 t.set(evaluateExpression(value, stack));
             }
-            case ReturnStatement(_, Expression value) -> {
+            case Statement.Return(_, Expression value) -> {
                 if (value != null) {
                     Variable result = evaluateExpression(value, stack);
                     throw new ReturnException(result);
                 }
             }
-            case StatementList(_, List<Statement> statements) -> {
+            case Statement.StatementList(_, List<Statement> statements) -> {
                 for (Statement s : statements) {
                     executeStatement(s, stack);
                 }
             }
-            case WhenStatement(long id, _, boolean evalInstantly, Expression condition, Statement body) -> {
+            case Statement.When(long id, _, boolean evalInstantly, Expression condition, Statement body) -> {
                 When when = new When(this, id, evalInstantly, stack.snapshot(), condition, body, currentImports.snapshot());
                 stack.peek().getWhens().add(when);
             }
@@ -96,23 +96,25 @@ public final class Interpreter {
 
     Variable evaluateExpression(Expression expression, Stack stack) {
         return switch (expression) {
-            case NewExpression(_, Expression e) -> evaluateExpression(e, stack).createNew();
-            case BooleanLiteralExpression(_, boolean value) -> variableFactory.fromBoolLiteral(value);
-            case SignedIntegerLiteralExpression(_, long value, long bitCount) ->
+            case Expression.New(_, Expression e) -> evaluateExpression(e, stack).createNew();
+            case Expression.BooleanLiteral(_, boolean value) -> variableFactory.fromBoolLiteral(value);
+            case Expression.SignedIntegerLiteral(_, long value, long bitCount) ->
                     variableFactory.fromILiteral(value, bitCount);
-            case UnsignedIntegerLiteralExpression(_, long value, long bitCount) ->
+            case Expression.UnsignedIntegerLiteral(_, long value, long bitCount) ->
                     variableFactory.fromULiteral(value, bitCount);
-            case FloatLiteralExpression(_, double value, long bitCount) ->
+            case Expression.FloatLiteral(_, double value, long bitCount) ->
                     variableFactory.fromFLiteral(value, bitCount);
-            case CharLiteralExpression(_, String c) -> variableFactory.fromCharLiteral(c);
-            case StringLiteralExpression(Span span, String value) -> createString(stack, span, value);
-            case SymbolExpression(_, String identifier) -> {
+            case Expression.CharLiteral(_, String c) -> variableFactory.fromCharLiteral(c);
+            case Expression.StringLiteral(Span span, String value) -> createString(stack, span, value);
+            case Expression.Symbol(_, String identifier) -> {
                 Variable v = stack.getVariable(identifier);
                 if (v == null)
                     throw new NullPointerException(expression + "\n" + stack);
                 yield v;
             }
-            case InstanceMethodCall(Span span, Expression instance, String name, List<Expression> arguments) -> {
+            case Expression.InstanceMethodCall(
+                    Span span, Expression instance, String name, List<Expression> arguments
+            ) -> {
                 Variable instanceVariable = evaluateExpression(instance, stack);
                 TypeDescriptor typeDescriptor = instanceVariable.descriptor();
                 Variable[] argumentValues = new Variable[arguments.size()];
@@ -135,7 +137,7 @@ public final class Interpreter {
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
-            case StaticMethodCall(Span span, Type type, String methodName, List<Expression> arguments) -> {
+            case Expression.StaticMethodCall(Span span, Type type, String methodName, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
                         .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
                 Variable[] argumentValues = new Variable[arguments.size()];
@@ -156,7 +158,7 @@ public final class Interpreter {
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
-            case LeftUnaryExpression(Span span, LeftUnaryOperator operator, Expression value) -> {
+            case Expression.LeftUnary(Span span, Expression.LeftUnaryOperator operator, Expression value) -> {
                 Variable valueV = evaluateExpression(value, stack);
                 String methodName = operator.name().toLowerCase(Locale.ROOT);
                 TypeDescriptor type = valueV.descriptor();
@@ -170,7 +172,9 @@ public final class Interpreter {
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
-            case BinaryExpression(Span span, Expression left, BinaryOperator binaryOperator, Expression right) -> {
+            case Expression.Binary(
+                    Span span, Expression left, Expression.BinaryOperator binaryOperator, Expression right
+            ) -> {
                 Variable leftV = evaluateExpression(left, stack);
                 Variable rightV = evaluateExpression(right, stack);
                 String methodName = binaryOperator.name().toLowerCase(Locale.ROOT);
@@ -186,14 +190,14 @@ public final class Interpreter {
                     case TraitMetod _ -> throw new UnsupportedOperationException();
                 };
             }
-            case ArrayLiteralCreation(_, List<Expression> values) -> {
+            case Expression.ArrayLiteralCreation(_, List<Expression> values) -> {
                 Variable[] variables = values.stream()
                         .map((Expression e) -> evaluateExpression(e, stack))
                         .toArray(Variable[]::new);
                 TypeDescriptor elementType = variables[0].descriptor();
                 yield variableFactory.asArray(variables, elementType);
             }
-            case ArrayCreation(_, Expression defaultValue, Expression length) -> {
+            case Expression.ArrayCreation(_, Expression defaultValue, Expression length) -> {
                 Variable lengthVar = evaluateExpression(length, stack);
                 int l = (int) ((U) lengthVar.javaValue()).getValue().getValue();
                 Variable d = evaluateExpression(defaultValue, stack);
@@ -203,7 +207,7 @@ public final class Interpreter {
                 }
                 yield variableFactory.asArray(array, d.descriptor());
             }
-            case ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
+            case Expression.ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
                         .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
                 Variable[] argumentValues = new Variable[arguments.size()];
@@ -214,7 +218,7 @@ public final class Interpreter {
                 }
                 yield callConstructor(span, typeDescriptor, argumentValues, stack);
             }
-            case InstanceFieldAccess(_, Expression instance, String fieldName) -> {
+            case Expression.InstanceFieldAccess(_, Expression instance, String fieldName) -> {
                 Variable inst = evaluateExpression(instance, stack);
                 if (inst instanceof StructVariable struct) {
                     yield struct.getField(fieldName);
@@ -222,7 +226,7 @@ public final class Interpreter {
                     throw new RuntimeException("Instance is not a struct");
                 }
             }
-            case StaticFieldAccess(Span span, Type type, String fieldName) -> {
+            case Expression.StaticFieldAccess(Span span, Type type, String fieldName) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
                         .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
                 if (!staticStore.has(typeDescriptor))
@@ -230,7 +234,7 @@ public final class Interpreter {
                 Variable value = staticStore.get(typeDescriptor, fieldName);
                 yield Objects.requireNonNull(value);
             }
-            case TypeCastExpression(Span span, Type targetType, Expression valueExpression) -> {
+            case Expression.TypeCast(Span span, Type targetType, Expression valueExpression) -> {
                 Variable value = evaluateExpression(valueExpression, stack);
                 TypeDescriptor valueType = value.descriptor();
                 targetType = targetType.mapNames(currentImports::map);
@@ -349,7 +353,7 @@ public final class Interpreter {
         Variable array = variableFactory.asArray(value.chars()
                 .mapToObj(c -> variableFactory.fromCharLiteral(String.valueOf((char) c)))
                 .toArray(Variable[]::new), Char.DESCRIPTOR.get());
-        TypeDescriptor typeDescriptor = environment.getKlassRegister().find(new SimpleType(span, "fluxus.flumen.Str"), currentImports)
+        TypeDescriptor typeDescriptor = environment.getKlassRegister().find(new Type.Simple(span, "fluxus.flumen.Str"), currentImports)
                 .orElseThrow(() -> new RuntimeException("Str class not found"));
         return callConstructor(span, typeDescriptor, new Variable[]{array}, stack);
     }

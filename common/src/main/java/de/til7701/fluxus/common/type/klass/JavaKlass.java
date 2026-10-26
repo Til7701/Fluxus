@@ -1,7 +1,7 @@
 package de.til7701.fluxus.common.type.klass;
 
-import de.til7701.fluxus.ast.statement.Import;
-import de.til7701.fluxus.ast.type.Type;
+import de.til7701.fluxus.ast.Statement;
+import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.type.Metod;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public record JavaKlass(
         Type type
 ) implements Klass {
 
-    public List<Import> imports() {
+    public List<Statement.Import> imports() {
         return List.of();
     }
 

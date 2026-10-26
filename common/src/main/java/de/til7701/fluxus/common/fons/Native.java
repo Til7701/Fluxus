@@ -1,8 +1,7 @@
 package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.ast.type.SimpleType;
-import de.til7701.fluxus.ast.type.Type;
+import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.fons.util.FluxusType;
 import de.til7701.fluxus.common.fons.util.PanicException;
 import de.til7701.fluxus.common.fons.util.Primitives;
@@ -17,7 +16,7 @@ import de.til7701.fluxus.common.util.n.UN;
 public final class Native {
 
     static final String FLUXUS_TYPE_NAME = "fluxus.fons.Native";
-    public static final Type TYPE = new SimpleType(Span.undefined(), FLUXUS_TYPE_NAME);
+    public static final Type TYPE = new Type.Simple(Span.undefined(), FLUXUS_TYPE_NAME);
 
     public static final LazyConstant<TypeDescriptor> DESCRIPTOR = LazyConstant.of(() -> Primitives.loadJavaClass(Native.class, TYPE));
 

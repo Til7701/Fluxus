@@ -1,6 +1,6 @@
 package de.til7701.fluxus.common.type.klass;
 
-import de.til7701.fluxus.ast.statement.Import;
+import de.til7701.fluxus.ast.Statement;
 import de.til7701.fluxus.common.environment.Environment;
 import de.til7701.fluxus.common.environment.Imports;
 import de.til7701.fluxus.common.type.Metod;
@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public sealed interface Klass extends TypeDescriptor permits JavaKlass, FluxusKlass {
 
-    List<Import> imports();
+    List<Statement.Import> imports();
 
     String fullyQualifiedFluxusName();
 

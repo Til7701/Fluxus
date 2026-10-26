@@ -1,17 +1,6 @@
 package de.til7701.fluxus.parser.internal;
 
-import de.til7701.fluxus.ast.Node;
-import de.til7701.fluxus.ast.Script;
-import de.til7701.fluxus.ast.Span;
-import de.til7701.fluxus.ast.expression.*;
-import de.til7701.fluxus.ast.methods.*;
-import de.til7701.fluxus.ast.statement.*;
-import de.til7701.fluxus.ast.type.SimpleType;
-import de.til7701.fluxus.ast.type.Type;
-import de.til7701.fluxus.ast.type.trait.CollectionType;
-import de.til7701.fluxus.ast.type.trait.IType;
-import de.til7701.fluxus.ast.type.trait.UType;
-import de.til7701.fluxus.ast.type_definition.classes.*;
+import de.til7701.fluxus.ast.*;
 import de.til7701.fluxus.parser.ParserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +56,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
         } else {
             List<Statement> statements = Stream.concat(
                             ctx.importStatement().stream()
-                                    .map(importContext -> (Import) visit(importContext)),
+                                    .map(importContext -> (Statement.Import) visit(importContext)),
                             ctx.statement().stream()
                                     .map(statementContext -> (Statement) visit(statementContext))
                     )
@@ -82,7 +71,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitStatementList(FluxusParser.StatementListContext ctx) {
-        return new StatementList(
+        return new Statement.StatementList(
                 createSpan(ctx),
                 ctx.statement().stream()
                         .map(tree -> (Statement) visit(tree))
@@ -92,7 +81,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitVariableInitialization(FluxusParser.VariableInitializationContext ctx) {
-        return new VariableInitialization(
+        return new Statement.VariableInitialization(
                 createSpan(ctx),
                 ctx.SymbolIdentifier().getText(),
                 (Expression) visit(ctx.expression())
@@ -101,7 +90,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitAssignment(FluxusParser.AssignmentContext ctx) {
-        return new Assignment(
+        return new Statement.Assignment(
                 createSpan(ctx),
                 (Expression) visit(ctx.expression(0)),
                 (Expression) visit(ctx.expression(1))
@@ -120,7 +109,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
             body = (Statement) visit(ctx.statement());
         else
             body = (Statement) visit(ctx.statementList());
-        return new WhenStatement(
+        return new Statement.When(
                 createSpan(ctx),
                 ctx.DO() != null,
                 (Expression) visit(ctx.expression()),
@@ -130,7 +119,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitReturnStatement(FluxusParser.ReturnStatementContext ctx) {
-        return new ReturnStatement(
+        return new Statement.Return(
                 createSpan(ctx),
                 (Expression) visit(ctx.expression())
         );
@@ -155,7 +144,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
                 yield Long.parseUnsignedLong(number, radix);
             }
         };
-        return new UnsignedIntegerLiteralExpression(
+        return new Expression.UnsignedIntegerLiteral(
                 createSpan(ctx),
                 value,
                 Long.parseLong(split[1])
@@ -170,7 +159,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
             case "MAX" -> Long.MAX_VALUE;
             default -> Long.parseLong(split[0].toLowerCase(Locale.ROOT));
         };
-        return new SignedIntegerLiteralExpression(
+        return new Expression.SignedIntegerLiteral(
                 createSpan(ctx),
                 value,
                 Long.parseLong(split[1])
@@ -185,7 +174,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
             case "MAX" -> Double.MAX_VALUE;
             default -> Double.parseDouble(split[0].toLowerCase(Locale.ROOT));
         };
-        return new FloatLiteralExpression(
+        return new Expression.FloatLiteral(
                 createSpan(ctx),
                 value,
                 Long.parseLong(split[1])
@@ -195,7 +184,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
     @Override
     public Node visitCharLiteralExpression(FluxusParser.CharLiteralExpressionContext ctx) {
         String text = ctx.CharLiteral().getText();
-        return new CharLiteralExpression(
+        return new Expression.CharLiteral(
                 createSpan(ctx),
                 text.substring(1, text.length() - 1)
         );
@@ -204,7 +193,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
     @Override
     public Node visitStringLiteralExpression(FluxusParser.StringLiteralExpressionContext ctx) {
         String text = ctx.StringLiteral().getText();
-        return new StringLiteralExpression(
+        return new Expression.StringLiteral(
                 createSpan(ctx),
                 text.substring(1, text.length() - 1)
         );
@@ -218,7 +207,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
             case "false" -> false;
             default -> throw new ParserException(span, "Invalid boolean literal: " + ctx.BooleanLiteral().getText());
         };
-        return new BooleanLiteralExpression(
+        return new Expression.BooleanLiteral(
                 span,
                 value
         );
@@ -226,7 +215,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitSymbolIdentifierExpression(FluxusParser.SymbolIdentifierExpressionContext ctx) {
-        return new SymbolExpression(
+        return new Expression.Symbol(
                 createSpan(ctx),
                 ctx.SymbolIdentifier().getText()
         );
@@ -238,7 +227,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
                 .map(c -> (Expression) visit(c))
                 .toList();
         Type type = (Type) visit(ctx.typeIdentifier());
-        return new StaticMethodCall(
+        return new Expression.StaticMethodCall(
                 createSpan(ctx),
                 type,
                 ctx.SymbolIdentifier().getText(),
@@ -251,7 +240,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
         List<Expression> args = ctx.expression().subList(1, ctx.expression().size()).stream()
                 .map(c -> (Expression) visit(c))
                 .toList();
-        return new InstanceMethodCall(
+        return new Expression.InstanceMethodCall(
                 createSpan(ctx),
                 (Expression) visit(ctx.expression(0)),
                 ctx.SymbolIdentifier().getText(),
@@ -264,7 +253,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
         List<Expression> args = ctx.expression().stream()
                 .map(c -> (Expression) visit(c))
                 .toList();
-        return new ConstructorCall(
+        return new Expression.ConstructorCall(
                 createSpan(ctx),
                 (Type) visit(ctx.typeIdentifier()),
                 args
@@ -274,14 +263,14 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
     @Override
     public Node visitLeftUnaryOperationExpression(FluxusParser.LeftUnaryOperationExpressionContext ctx) {
         Span span = createSpan(ctx);
-        LeftUnaryOperator operator = switch (ctx.leftUnaryOperator().getText()) {
-            case "-" -> LeftUnaryOperator.SUB;
-            case "!" -> LeftUnaryOperator.NOT;
-            case "#" -> LeftUnaryOperator.HASH;
+        Expression.LeftUnaryOperator operator = switch (ctx.leftUnaryOperator().getText()) {
+            case "-" -> Expression.LeftUnaryOperator.SUB;
+            case "!" -> Expression.LeftUnaryOperator.NOT;
+            case "#" -> Expression.LeftUnaryOperator.HASH;
             default -> throw new ParserException(span, "Unexpected value: " + ctx.leftUnaryOperator().getText());
         };
         Expression expression = (Expression) visit(ctx.expression());
-        return new LeftUnaryExpression(
+        return new Expression.LeftUnary(
                 span,
                 operator,
                 expression
@@ -291,29 +280,29 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
     @Override
     public Node visitBinaryOperationExpression(FluxusParser.BinaryOperationExpressionContext ctx) {
         Span span = createSpan(ctx);
-        BinaryOperator operator = switch (ctx.binaryOperator().getText()) {
-            case "+" -> BinaryOperator.ADD;
-            case "-" -> BinaryOperator.SUB;
-            case "*" -> BinaryOperator.MUL;
-            case "/" -> BinaryOperator.DIVIDE;
-            case "==" -> BinaryOperator.EQ;
-            case "!=" -> BinaryOperator.NEQ;
-            case "<" -> BinaryOperator.LT;
-            case "<=" -> BinaryOperator.LTE;
-            case ">" -> BinaryOperator.GT;
-            case ">=" -> BinaryOperator.GTE;
-            case "&&" -> BinaryOperator.AND;
-            case "||" -> BinaryOperator.OR;
-            case "&" -> BinaryOperator.BIT_AND;
-            case "|" -> BinaryOperator.BIT_OR;
-            case "^" -> BinaryOperator.BIT_XOR;
-            case "<<" -> BinaryOperator.SHIFT_LEFT;
-            case ">>" -> BinaryOperator.SHIFT_RIGHT;
+        Expression.BinaryOperator operator = switch (ctx.binaryOperator().getText()) {
+            case "+" -> Expression.BinaryOperator.ADD;
+            case "-" -> Expression.BinaryOperator.SUB;
+            case "*" -> Expression.BinaryOperator.MUL;
+            case "/" -> Expression.BinaryOperator.DIVIDE;
+            case "==" -> Expression.BinaryOperator.EQ;
+            case "!=" -> Expression.BinaryOperator.NEQ;
+            case "<" -> Expression.BinaryOperator.LT;
+            case "<=" -> Expression.BinaryOperator.LTE;
+            case ">" -> Expression.BinaryOperator.GT;
+            case ">=" -> Expression.BinaryOperator.GTE;
+            case "&&" -> Expression.BinaryOperator.AND;
+            case "||" -> Expression.BinaryOperator.OR;
+            case "&" -> Expression.BinaryOperator.BIT_AND;
+            case "|" -> Expression.BinaryOperator.BIT_OR;
+            case "^" -> Expression.BinaryOperator.BIT_XOR;
+            case "<<" -> Expression.BinaryOperator.SHIFT_LEFT;
+            case ">>" -> Expression.BinaryOperator.SHIFT_RIGHT;
             default -> throw new ParserException(span, "Unexpected value: " + ctx.binaryOperator().getText());
         };
         Expression left = (Expression) visit(ctx.expression(0));
         Expression right = (Expression) visit(ctx.expression(1));
-        return new BinaryExpression(
+        return new Expression.Binary(
                 span,
                 left,
                 operator,
@@ -328,7 +317,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitArrayCreation(FluxusParser.ArrayCreationContext ctx) {
-        return new ArrayCreation(
+        return new Expression.ArrayCreation(
                 createSpan(ctx),
                 (Expression) visit(ctx.expression(0)),
                 (Expression) visit(ctx.expression(1))
@@ -340,7 +329,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
         List<Expression> expressions = ctx.expression().stream()
                 .map(tree -> (Expression) visit(tree))
                 .toList();
-        return new ArrayLiteralCreation(
+        return new Expression.ArrayLiteralCreation(
                 createSpan(ctx),
                 expressions
         );
@@ -348,7 +337,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitNewExpression(FluxusParser.NewExpressionContext ctx) {
-        return new NewExpression(
+        return new Expression.New(
                 createSpan(ctx),
                 (Expression) visit(ctx.expression())
         );
@@ -356,17 +345,17 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitCollectionAccess(FluxusParser.CollectionAccessContext ctx) {
-        return new BinaryExpression(
+        return new Expression.Binary(
                 createSpan(ctx),
                 (Expression) visit(ctx.expression(0)),
-                BinaryOperator.INDEX,
+                Expression.BinaryOperator.INDEX,
                 (Expression) visit(ctx.expression(1))
         );
     }
 
     @Override
     public Node visitTypeCastExpression(FluxusParser.TypeCastExpressionContext ctx) {
-        return new TypeCastExpression(
+        return new Expression.TypeCast(
                 createSpan(ctx),
                 (Type) visit(ctx.typeIdentifier()),
                 (Expression) visit(ctx.expression())
@@ -375,7 +364,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitITypeIdentifier(FluxusParser.ITypeIdentifierContext ctx) {
-        return new IType(
+        return new Type.Trait.I(
                 createSpan(ctx),
                 Long.parseLong(ctx.SignedIntegerTypeIdentifier().getText().substring(1))
         );
@@ -383,7 +372,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitUTypeIdentifier(FluxusParser.UTypeIdentifierContext ctx) {
-        return new UType(
+        return new Type.Trait.U(
                 createSpan(ctx),
                 Long.parseLong(ctx.UnsignedIntegerTypeIdentifier().getText().substring(1))
         );
@@ -391,7 +380,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitSimpleTypeIdentifier(FluxusParser.SimpleTypeIdentifierContext ctx) {
-        return new SimpleType(
+        return new Type.Simple(
                 createSpan(ctx),
                 ctx.getText()
         );
@@ -399,7 +388,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitCollectionTypeIdentifier(FluxusParser.CollectionTypeIdentifierContext ctx) {
-        return new CollectionType(
+        return new Type.Trait.Collection(
                 createSpan(ctx),
                 (Type) visit(ctx.typeIdentifier(1)),
                 (Type) visit(ctx.typeIdentifier(0))
@@ -415,19 +404,19 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitClassTypeDefinition(FluxusParser.ClassTypeDefinitionContext ctx) {
-        List<Import> imports = ctx.importStatement().stream()
-                .map(tmCtx -> (Import) visit(tmCtx))
+        List<Statement.Import> imports = ctx.importStatement().stream()
+                .map(tmCtx -> (Statement.Import) visit(tmCtx))
                 .toList();
-        List<ClassFieldDefinition> fields = ctx.fieldDefinition().stream()
-                .map(cfdCtx -> (ClassFieldDefinition) visit(cfdCtx))
+        List<TypeDefinition.ClassFieldDefinition> fields = ctx.fieldDefinition().stream()
+                .map(cfdCtx -> (TypeDefinition.ClassFieldDefinition) visit(cfdCtx))
                 .toList();
-        List<ConstructorDefinition> constructors = ctx.constructorDefinition().stream()
-                .map(cdCtx -> (ConstructorDefinition) visit(cdCtx))
+        List<TypeDefinition.ConstructorDefinition> constructors = ctx.constructorDefinition().stream()
+                .map(cdCtx -> (TypeDefinition.ConstructorDefinition) visit(cdCtx))
                 .toList();
-        List<MethodDefinition> methods = ctx.methodDefinition().stream()
-                .map(mdCtx -> (MethodDefinition) visit(mdCtx))
+        List<TypeDefinition.MethodDefinition> methods = ctx.methodDefinition().stream()
+                .map(mdCtx -> (TypeDefinition.MethodDefinition) visit(mdCtx))
                 .toList();
-        return new ClassDefinition(
+        return new TypeDefinition.ClassDefinition(
                 createSpan(ctx),
                 imports,
                 List.of(),
@@ -439,10 +428,10 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitInitializedFieldDefinition(FluxusParser.InitializedFieldDefinitionContext ctx) {
-        List<FieldModifier> fieldModifiers = ctx.fieldModifier().stream()
-                .map(fmCtx -> (FieldModifier) visit(fmCtx))
+        List<TypeDefinition.FieldModifier> fieldModifiers = ctx.fieldModifier().stream()
+                .map(fmCtx -> (TypeDefinition.FieldModifier) visit(fmCtx))
                 .toList();
-        return new ClassFieldDefinition(
+        return new TypeDefinition.ClassFieldDefinition(
                 createSpan(ctx),
                 fieldModifiers,
                 (Type) visit(ctx.typeIdentifier()),
@@ -454,33 +443,33 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
     @Override
     public Node visitFieldModifier(FluxusParser.FieldModifierContext ctx) {
         if (ctx.STATIC() != null)
-            return new FieldModifier(createSpan(ctx), FieldModifierValue.STATIC);
+            return new TypeDefinition.FieldModifier(createSpan(ctx), TypeDefinition.FieldModifierValue.STATIC);
         throw new ParserException(createSpan(ctx), "Unknown field modifier: " + ctx.getText());
     }
 
     @Override
     public Node visitConstructorDefinition(FluxusParser.ConstructorDefinitionContext ctx) {
-        List<MethodModifier> modifiers = ctx.methodModifier().stream()
-                .map(mpCtx -> (MethodModifier) visit(mpCtx))
+        List<TypeDefinition.MethodModifier> modifiers = ctx.methodModifier().stream()
+                .map(mpCtx -> (TypeDefinition.MethodModifier) visit(mpCtx))
                 .toList();
         Statement body;
         if (ctx.statement() != null)
             body = (Statement) visit(ctx.statement());
         else
             body = (Statement) visit(ctx.statementList());
-        return new ConstructorDefinition(
+        return new TypeDefinition.ConstructorDefinition(
                 createSpan(ctx),
                 modifiers,
                 ctx.parametherList() == null
-                        ? new MethodParameters(createSpan(ctx), Collections.emptyList())
-                        : (MethodParameters) visit(ctx.parametherList()),
+                        ? new TypeDefinition.MethodParameters(createSpan(ctx), Collections.emptyList())
+                        : (TypeDefinition.MethodParameters) visit(ctx.parametherList()),
                 body
         );
     }
 
     @Override
     public Node visitInstanceFieldAccess(FluxusParser.InstanceFieldAccessContext ctx) {
-        return new InstanceFieldAccess(
+        return new Expression.InstanceFieldAccess(
                 createSpan(ctx),
                 (Expression) visit(ctx.expression()),
                 ctx.SymbolIdentifier().getText()
@@ -489,7 +478,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitStaticFieldAccess(FluxusParser.StaticFieldAccessContext ctx) {
-        return new StaticFieldAccess(
+        return new Expression.StaticFieldAccess(
                 createSpan(ctx),
                 (Type) visit(ctx.typeIdentifier()),
                 ctx.SymbolIdentifier().getText()
@@ -498,7 +487,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitImportStatement(FluxusParser.ImportStatementContext ctx) {
-        return new Import(
+        return new Statement.Import(
                 createSpan(ctx),
                 ctx.FullyQualifiedTypeIdentifier().getText(),
                 ctx.TypeIdentifier() == null ? null : ctx.TypeIdentifier().getText()
@@ -507,8 +496,8 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitMethodDefinition(FluxusParser.MethodDefinitionContext ctx) {
-        List<MethodModifier> modifiers = ctx.methodModifier().stream()
-                .map(mpCtx -> (MethodModifier) visit(mpCtx))
+        List<TypeDefinition.MethodModifier> modifiers = ctx.methodModifier().stream()
+                .map(mpCtx -> (TypeDefinition.MethodModifier) visit(mpCtx))
                 .toList();
         Optional<Type> returnType = ctx.typeIdentifier() != null
                 ? Optional.of((Type) visit(ctx.typeIdentifier()))
@@ -518,14 +507,14 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
             body = (Statement) visit(ctx.statement());
         else
             body = (Statement) visit(ctx.statementList());
-        return new MethodDefinition(
+        return new TypeDefinition.MethodDefinition(
                 createSpan(ctx),
                 modifiers,
                 returnType,
                 ctx.SymbolIdentifier().getText(),
                 ctx.parametherList() == null
-                        ? new MethodParameters(createSpan(ctx), Collections.emptyList())
-                        : (MethodParameters) visit(ctx.parametherList()),
+                        ? new TypeDefinition.MethodParameters(createSpan(ctx), Collections.emptyList())
+                        : (TypeDefinition.MethodParameters) visit(ctx.parametherList()),
                 body
         );
     }
@@ -533,13 +522,13 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
     @Override
     public Node visitMethodModifier(FluxusParser.MethodModifierContext ctx) {
         if (ctx.STATIC() != null)
-            return new MethodModifier(createSpan(ctx), MethodModifierValue.STATIC);
+            return new TypeDefinition.MethodModifier(createSpan(ctx), TypeDefinition.MethodModifierValue.STATIC);
         throw new ParserException(createSpan(ctx), "Unknown method modifier: " + ctx.getText());
     }
 
     @Override
     public Node visitParameter(FluxusParser.ParameterContext ctx) {
-        return new MethodParameter(
+        return new TypeDefinition.MethodParameter(
                 createSpan(ctx),
                 (Type) visit(ctx.typeIdentifier()),
                 ctx.SymbolIdentifier().getText()
@@ -548,10 +537,10 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
 
     @Override
     public Node visitParametherList(FluxusParser.ParametherListContext ctx) {
-        List<MethodParameter> parameters = ctx.parameter().stream()
-                .map(pCtx -> (MethodParameter) visit(pCtx))
+        List<TypeDefinition.MethodParameter> parameters = ctx.parameter().stream()
+                .map(pCtx -> (TypeDefinition.MethodParameter) visit(pCtx))
                 .toList();
-        return new MethodParameters(
+        return new TypeDefinition.MethodParameters(
                 createSpan(ctx),
                 parameters
         );

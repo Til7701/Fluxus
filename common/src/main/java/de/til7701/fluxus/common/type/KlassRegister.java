@@ -1,11 +1,6 @@
 package de.til7701.fluxus.common.type;
 
-import de.til7701.fluxus.ast.type.SimpleType;
-import de.til7701.fluxus.ast.type.Type;
-import de.til7701.fluxus.ast.type.trait.CollectionType;
-import de.til7701.fluxus.ast.type.trait.FType;
-import de.til7701.fluxus.ast.type.trait.IType;
-import de.til7701.fluxus.ast.type.trait.UType;
+import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.environment.Imports;
 import de.til7701.fluxus.common.type.klass.Klass;
 import de.til7701.fluxus.common.type.trait.CollectionTrait;
@@ -27,14 +22,14 @@ public final class KlassRegister {
 
     public Optional<TypeDescriptor> find(Type type, Imports imports) {
         return switch (type) {
-            case SimpleType(_, String name) -> {
+            case Type.Simple(_, String name) -> {
                 Klass klass = klasses.get(imports.map(name));
                 yield Optional.ofNullable(klass);
             }
-            case IType(_, long bitCount) -> Optional.of(new ITrait(bitCount));
-            case UType(_, long bitCount) -> Optional.of(new UTrait(bitCount));
-            case FType(_, long bitCount) -> Optional.of(new FTrait(bitCount));
-            case CollectionType(_, Type indexType, Type elementType) -> find(elementType, imports).flatMap(e ->
+            case Type.Trait.I(_, long bitCount) -> Optional.of(new ITrait(bitCount));
+            case Type.Trait.U(_, long bitCount) -> Optional.of(new UTrait(bitCount));
+            case Type.Trait.F(_, long bitCount) -> Optional.of(new FTrait(bitCount));
+            case Type.Trait.Collection(_, Type indexType, Type elementType) -> find(elementType, imports).flatMap(e ->
                     find(indexType, imports).map(i ->
                             new CollectionTrait(e, i)
                     )

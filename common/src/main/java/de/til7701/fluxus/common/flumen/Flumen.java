@@ -2,7 +2,7 @@ package de.til7701.fluxus.common.flumen;
 
 import de.til7701.fluxus.ast.Ast;
 import de.til7701.fluxus.ast.Script;
-import de.til7701.fluxus.ast.type_definition.TypeDefinition;
+import de.til7701.fluxus.ast.TypeDefinition;
 import de.til7701.fluxus.common.type.KlassLoader;
 import de.til7701.fluxus.common.type.klass.Klass;
 import de.til7701.fluxus.parser.Parser;
