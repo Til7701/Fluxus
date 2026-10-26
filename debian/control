@@ -1,0 +1,13 @@
+Source: fluxus
+Section: misc
+Maintainer: Til7701 <tilman@holube.de>
+Priority: optional
+Build-Depends: debhelper-compat (= 13), gzip, bash-completion
+Standards-Version: 4.7.2
+Homepage: https://github.com/Til7701/Fluxus
+
+Package: fluxus
+Architecture: amd64
+Description: The Fluxus programming language
+ Fluxus is a low performance, interpreted programming language implemented in Java.
+Depends: ${shlibs:Depends}, ${misc:Depends}

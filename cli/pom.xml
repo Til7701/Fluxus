@@ -62,6 +62,24 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <outputDirectory>${project.build.directory}/jar</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.panteleyev</groupId>
+                <artifactId>jpackage-maven-plugin</artifactId>
+                <version>1.8.0</version>
+                <configuration>
+                    <type>APP_IMAGE</type>
+                    <vendor>Til7701</vendor>
+                    <name>fluxus</name>
+                    <destination>${project.build.directory}/jpackage-image</destination>
+                    <input>${project.build.directory}/jar</input>
+                    <mainJar>cli-${project.version}-jar-with-dependencies.jar</mainJar>
+                    <javaOptions>
+                        <option>-Dfile.encoding=UTF-8</option>
+                        <option>-Dfluxus.version=${project.version}</option>
+                    </javaOptions>
                 </configuration>
             </plugin>
         </plugins>

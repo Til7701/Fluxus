@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
 
 @Slf4j
 @CommandLine.Command(
-        name = "flx",
+        name = "fluxus",
         mixinStandardHelpOptions = true,
         versionProvider = VersionProvider.class,
         description = "The Fluxus programming language."
