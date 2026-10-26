@@ -87,4 +87,11 @@ Then you can run the CLI using:
 java -jar cli/target/cli-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
-A more convenient packaging has not been set up yet, but is planned.
+### DEB
+
+You can build and install a deb package by running:
+
+```bash
+./build-deb.sh
+sudo apt install ./cli/target/fluxus_0.0.1_amd64.deb
+```

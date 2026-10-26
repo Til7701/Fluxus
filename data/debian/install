@@ -1,0 +1,4 @@
+../jpackage-image/fluxus/bin/* usr/bin/
+../jpackage-image/fluxus/lib/* usr/lib/fluxus/lib/
+../../../data/vim/syntax/fluxus.vim /usr/share/vim/vimfiles/syntax/
+../../../data/vim/ftdetect/fluxus.vim /usr/share/vim/vimfiles/ftdetect/
