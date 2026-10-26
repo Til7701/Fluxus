@@ -1,0 +1,3 @@
+patch-module de.til7701.fluxus.common {
+    add-modules TEST-MODULE-PATH;
+}

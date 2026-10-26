@@ -19,7 +19,4 @@ module de.til7701.fluxus.cli {
     provides org.slf4j.spi.SLF4JServiceProvider with LoggerServiceProvider;
 
     exports de.til7701.fluxus.cli;
-
-    // For tests. Find a way to avoid it in the future.
-    exports de.til7701.fluxus.cli.commands to de.til7701.fluxus.test;
 }

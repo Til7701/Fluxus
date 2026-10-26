@@ -1,0 +1,5 @@
+patch-module de.til7701.fluxus.cli {
+    add-modules TEST-MODULE-PATH;
+
+    add-exports de.til7701.fluxus.cli.commands
+}
