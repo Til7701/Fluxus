@@ -4,8 +4,7 @@ Fluxus is an absolutely serious, low performance, interpreted programming langua
 
 ## Language Overview
 
-This gives a very small overview. A full description can be found on [my website](https://til7701.de/projects/fluxus)
-in a few days (hopefully).
+This gives a very small overview. A full description can be found on [my website](https://til7701.de/projects/fluxus).
 
 ### Primitives
 
@@ -52,7 +51,7 @@ System.println(0U32 as Str); // prints 0
 
 ### Conditionals
 
-There are not `if`-statements or loops. Both are very inferior and therefore replaced with `when` statements.
+There are no if-statements or loops. Both are very inferior and therefore replaced with when-statements.
 Whenever a variable in the condition changes, it is reevaluated and the body is executed if the condition is `true`.
 
 ```rust
@@ -61,7 +60,7 @@ when x < 10I32 {
 }
 ```
 
-To evaluate the condition without another reassignment, you can prefix the `when`-statement with `do`.
+To evaluate the condition without another reassignment, you can prefix the when-statement with `do`.
 The following prints the numbers from 0 to 9.
 
 ```rust
