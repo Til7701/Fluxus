@@ -1,7 +1,8 @@
 package de.til7701.fluxus.ast;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
-import java.util.Optional;
 
 public sealed interface TypeDefinition extends Ast {
 
@@ -43,7 +44,7 @@ public sealed interface TypeDefinition extends Ast {
 
     record MethodDefinition(Span span,
                             List<MethodModifier> modifiers,
-                            Optional<Type> returnType,
+                            @Nullable Type returnType,
                             String name,
                             MethodParameters parameters,
                             Statement body

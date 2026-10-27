@@ -1,5 +1,6 @@
 package de.til7701.fluxus.common.type.klass;
 
+import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.type.Metod;
 
@@ -13,4 +14,10 @@ public record JavaMetod(
         Type[] parameterTypes,
         boolean needsNatives
 ) implements Metod {
+
+    @Override
+    public Span span() {
+        return Span.undefined();
+    }
+
 }

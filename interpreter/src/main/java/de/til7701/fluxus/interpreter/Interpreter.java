@@ -18,6 +18,7 @@ public final class Interpreter {
     private final StaticStore staticStore = new StaticStore();
 
     private Imports currentImports;
+    private Span currentMethodSpan;
 
     public Interpreter(Environment environment) {
         this.environment = environment;
@@ -77,7 +78,7 @@ public final class Interpreter {
             case Statement.Return(_, Expression value) -> {
                 if (value != null) {
                     Variable result = evaluateExpression(value, stack);
-                    throw new ReturnException(result);
+                    throw new ReturnException(null, result);
                 }
             }
             case Statement.StatementList(_, List<Statement> statements) -> {
@@ -86,7 +87,7 @@ public final class Interpreter {
                 }
             }
             case Statement.When(long id, _, boolean evalInstantly, Expression condition, Statement body) -> {
-                When when = new When(this, id, evalInstantly, stack.snapshot(), condition, body, currentImports.snapshot());
+                When when = new When(this, id, evalInstantly, stack.snapshot(), condition, body, currentImports.snapshot(), this.currentMethodSpan);
                 stack.peek().getWhens().add(when);
             }
             case Expression e -> evaluateExpression(e, stack);
@@ -365,12 +366,20 @@ public final class Interpreter {
         for (int i = 0; i < parameterNames.length; i++) {
             stack.initializeVariable(parameterNames[i], argumentValues[i]);
         }
+        Span oldMethodSpan = this.currentMethodSpan;
+        this.currentMethodSpan = fluxusMetod.span();
         try {
             executeStatement(fluxusMetod.body(), stack);
         } catch (ReturnException returnException) {
             StackFrame _ = stack.popDestroy();
-            return returnException.getReturnValue();
+            if (returnException.getReturnSpan() == null || fluxusMetod.span().equals(returnException.getReturnSpan())) {
+                this.currentMethodSpan = oldMethodSpan;
+                return returnException.getReturnValue();
+            } else {
+                throw returnException;
+            }
         }
+        this.currentMethodSpan = oldMethodSpan;
         StackFrame _ = stack.popDestroy();
         return variableFactory.fromJavaValue(null);
     }
@@ -395,6 +404,8 @@ public final class Interpreter {
     private void executeInterrupt(Interrupt interrupt) {
         Imports oldImports = currentImports;
         currentImports = interrupt.imports();
+        Span oldMethodSpan = currentMethodSpan;
+        currentMethodSpan = interrupt.methodSpan();
 
         runningInterrupts.add(interrupt.mutexID());
 
@@ -403,10 +414,14 @@ public final class Interpreter {
         try {
             executeStatement(interrupt.unterbrechungsbehandlungsprozedur(), interruptStack);
         } catch (ReturnException re) {
+            if (re.getReturnSpan() == null)
+                re.setReturnSpan(interrupt.methodSpan());
+
             interruptStack.popDestroy();
 
             runningInterrupts.remove(interrupt.mutexID());
 
+            currentMethodSpan = oldMethodSpan;
             currentImports = oldImports;
             throw re;
         }
@@ -415,6 +430,7 @@ public final class Interpreter {
 
         runningInterrupts.remove(interrupt.mutexID());
 
+        currentMethodSpan = oldMethodSpan;
         currentImports = oldImports;
     }
 

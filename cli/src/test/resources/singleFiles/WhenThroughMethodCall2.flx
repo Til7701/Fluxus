@@ -1,0 +1,28 @@
+import fluxus.flumen.System;
+import fluxus.flumen.Str;
+
+class;
+
+static main() {
+    let value = This.run();
+    System.println(value as Str);
+}
+
+static I32 run() {
+    let b = new false;
+    when b {
+        do when b {
+            return 0I32;
+        }
+    }
+    let r = This.mod(b);
+    System.println(r as Str);
+    return 1I32;
+}
+
+static Bool mod(Bool b) {
+    do when !b {
+        b = true;
+    }
+    return b;
+}

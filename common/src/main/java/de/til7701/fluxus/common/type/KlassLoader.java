@@ -48,6 +48,7 @@ public final class KlassLoader {
                 .toList();
         List<FluxusMetod> constructors = classDefinition.constructors().stream()
                 .map(constructorDefinition -> new FluxusMetod(
+                        constructorDefinition.span(),
                         true,
                         klassName,
                         finalKlassType,
@@ -62,9 +63,12 @@ public final class KlassLoader {
                 .toList();
         List<Metod> methods = classDefinition.methods().stream()
                 .map(methodDefinition -> (Metod) new FluxusMetod(
+                        methodDefinition.span(),
                         methodDefinition.modifiers().stream().anyMatch(m -> m.value() == TypeDefinition.MethodModifierValue.STATIC),
                         methodDefinition.name(),
-                        methodDefinition.returnType().orElse(Void.TYPE).mapNames(importsMapper::map),
+                        methodDefinition.returnType() == null
+                                ? Void.TYPE
+                                : methodDefinition.returnType().mapNames(importsMapper::map),
                         methodDefinition.parameters().parameters().stream()
                                 .map(methodParameter -> methodParameter.type().mapNames(importsMapper::map))
                                 .toArray(Type[]::new),

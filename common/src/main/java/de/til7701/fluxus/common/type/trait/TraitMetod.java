@@ -1,5 +1,6 @@
 package de.til7701.fluxus.common.type.trait;
 
+import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.type.Metod;
 
@@ -11,6 +12,11 @@ public record TraitMetod(
         Type returnType,
         Type[] parameterTypes
 ) implements Metod {
+
+    @Override
+    public Span span() {
+        return Span.undefined();
+    }
 
     @Override
     public String toString() {

@@ -1,9 +1,8 @@
-package de.til7701.fluxus.test.common.flumen;
+package de.til7701.fluxus.common.flumen;
 
 import de.til7701.fluxus.ast.Ast;
 import de.til7701.fluxus.common.checker.Checker;
 import de.til7701.fluxus.common.environment.Environment;
-import de.til7701.fluxus.common.flumen.Flumen;
 import de.til7701.fluxus.common.type.klass.Klass;
 import de.til7701.fluxus.common.util.Natives;
 import org.junit.jupiter.api.Test;

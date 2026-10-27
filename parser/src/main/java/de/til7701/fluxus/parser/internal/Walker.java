@@ -510,7 +510,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
         return new TypeDefinition.MethodDefinition(
                 createSpan(ctx),
                 modifiers,
-                returnType,
+                returnType.orElse(null),
                 ctx.SymbolIdentifier().getText(),
                 ctx.parametherList() == null
                         ? new TypeDefinition.MethodParameters(createSpan(ctx), Collections.emptyList())

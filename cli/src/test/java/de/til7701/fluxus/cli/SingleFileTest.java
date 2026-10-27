@@ -1,6 +1,5 @@
-package de.til7701.fluxus.test.cli;
+package de.til7701.fluxus.cli;
 
-import de.til7701.fluxus.cli.Runner;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 

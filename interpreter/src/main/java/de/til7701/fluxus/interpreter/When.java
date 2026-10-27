@@ -1,6 +1,7 @@
 package de.til7701.fluxus.interpreter;
 
 import de.til7701.fluxus.ast.Expression;
+import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Statement;
 import de.til7701.fluxus.common.NotImplementedException;
 import de.til7701.fluxus.common.environment.Imports;
@@ -21,8 +22,10 @@ final class When implements VariableObserver {
     private final Collection<Variable> topVariables;
     @Getter
     private final StackFrame creationFrame;
+    @Getter
+    private final Span creationMethodSpan;
 
-    When(Interpreter interpreter, long interruptMutexID, boolean evalInstantly, Stack stack, Expression condition, Statement body, Imports imports) {
+    When(Interpreter interpreter, long interruptMutexID, boolean evalInstantly, Stack stack, Expression condition, Statement body, Imports imports, Span creationMethodSpan) {
         this.interpreter = interpreter;
         this.interruptMutexID = interruptMutexID;
         this.stack = stack;
@@ -30,6 +33,7 @@ final class When implements VariableObserver {
         this.body = body;
         this.imports = imports;
         this.creationFrame = stack.peek();
+        this.creationMethodSpan = creationMethodSpan;
 
         topVariables = topVariables(condition, stack);
         topVariables.forEach(v -> v.listen(this));
@@ -91,7 +95,7 @@ final class When implements VariableObserver {
         if (result instanceof PrimitiveVariable primitiveVariable
                 && primitiveVariable.javaValue() instanceof Bool bool
                 && bool.isValue()) {
-            creationFrame.getInterruptQueue().add(new Interrupt(interruptMutexID, body, stack, imports));
+            creationFrame.getInterruptQueue().add(new Interrupt(creationMethodSpan, interruptMutexID, body, stack, imports));
         }
     }
 
