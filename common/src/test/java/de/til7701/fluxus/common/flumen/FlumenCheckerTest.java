@@ -16,13 +16,13 @@ public class FlumenCheckerTest {
     @Test
     void runChecker() {
         Environment env = new Environment(new Natives(System.in, System.out));
-        Flumen flumen = new Flumen();
+        Flumen flumen = new Flumen(env.getKlassLoader());
         for (Klass klass : flumen.getKlasses()) {
             env.getKlassRegister().registerKlass(klass);
         }
 
-        List<Ast> asts = new Flumen().getAsts();
-        List<Klass> klasses = new Flumen().getKlasses();
+        List<Ast> asts = flumen.getAsts();
+        List<Klass> klasses = flumen.getKlasses();
         for (int i = 0; i < asts.size(); i++) {
             Ast ast = asts.get(i);
             Klass klass = klasses.get(i);

@@ -9,6 +9,7 @@ CLASS: 'class';
 RETURN: 'return';
 AS: 'as';
 IMPORT: 'import';
+TEMPLATE: 'template';
 
 LPAREN : '(';
 RPAREN : ')';

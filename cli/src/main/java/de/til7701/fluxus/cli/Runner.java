@@ -37,7 +37,7 @@ public class Runner {
         Ast ast = fileParser.parseFile(entry);
 
         final Environment env = new Environment(new Natives(stdIn, stdOut));
-        Flumen flumen = new Flumen();
+        Flumen flumen = new Flumen(env.getKlassLoader());
         for (Klass klass : flumen.getKlasses()) {
             env.getKlassRegister().registerKlass(klass);
         }
@@ -49,8 +49,8 @@ public class Runner {
                 )
                 .replace(File.separator, ".")
                 .replace(".flx", "");
-        if (ast instanceof TypeDefinition typeDefinition) {
-            Klass klass = env.getKlassLoader().loadKlassFromAst(fullyQualifiedFluxusName, typeDefinition);
+        if (ast instanceof TypeDefinition.ClassDefinition typeDefinition) {
+            Klass klass = env.getKlassLoader().loadKlass(fullyQualifiedFluxusName, typeDefinition);
             env.getKlassRegister().registerKlass(klass);
         }
 

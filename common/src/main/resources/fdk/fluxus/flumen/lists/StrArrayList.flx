@@ -1,0 +1,6 @@
+import fluxus.flumen.templates.ArrayList;
+
+as ArrayList {{
+    Str,
+    ""
+}};

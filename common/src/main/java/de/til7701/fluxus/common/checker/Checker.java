@@ -93,6 +93,10 @@ public class Checker {
                     );
                 }
             }
+            case TypeDefinition.TemplateDefinition _ ->
+                    throw new IllegalArgumentException("Templates cannot be checked");
+            case TypeDefinition.TemplateInstance _ ->
+                    throw new IllegalArgumentException("Uninstantiated template instances cannot be checked");
         }
     }
 

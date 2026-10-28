@@ -23,6 +23,24 @@ public sealed interface TypeDefinition extends Ast {
     ) implements TypeDefinition {
     }
 
+    record TemplateDefinition(Span span,
+                              List<Statement.Import> imports,
+                              List<TypeModifier> modifiers,
+                              List<TemplateVariable> templateVariables,
+                              List<ClassFieldDefinition> fields,
+                              List<ConstructorDefinition> constructors,
+                              List<MethodDefinition> methods
+    ) implements TypeDefinition {
+    }
+
+    record TemplateInstance(Span span,
+                            List<Statement.Import> imports,
+                            List<TypeModifier> modifiers,
+                            Type templateType,
+                            List<TemplateVariable> templateVariables
+    ) implements TypeDefinition {
+    }
+
     record ClassFieldDefinition(Span span,
                                 List<FieldModifier> modifiers, Type type, String name, Expression value
     ) implements Node {
@@ -68,6 +86,18 @@ public sealed interface TypeDefinition extends Ast {
     record MethodParameter(Span span,
                            Type type, String name
     ) implements Node {
+    }
+
+    sealed interface TemplateVariable extends Node {
+        record Type(Span span,
+                    de.til7701.fluxus.ast.Type type
+        ) implements TemplateVariable {
+        }
+
+        record Expression(Span span,
+                          de.til7701.fluxus.ast.Expression expression
+        ) implements TemplateVariable {
+        }
     }
 
 }

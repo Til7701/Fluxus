@@ -1,0 +1,35 @@
+template {{
+    T,
+    defaultValue
+}};
+
+T[U31] elements = [defaultValue; 10U31];
+U31 size = new 0U31;
+
+() {
+}
+
+static T index(This list, U31 index) {
+    do when index >= size {
+        Native.panic();
+    }
+    return list.elements[index];
+}
+
+add(T t) {
+    this.ensureCapacity(this.size);
+    this.elements[this.size] = t;
+    this.size = this.size + 1U31;
+}
+
+ensureCapacity(U31 capacity) {
+    do when this.elements.length() < capacity {
+        let newElements = [defaultValue; this.elements.length()];
+        let i = new 0U31;
+        do when i < this.elements.length() {
+            newElements[i] = this.elements[i];
+            i = i + 1U31;
+        }
+        this.elements = newElements;
+    }
+}

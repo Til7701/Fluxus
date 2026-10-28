@@ -77,14 +77,29 @@ importStatement : IMPORT FullyQualifiedTypeIdentifier (AS TypeIdentifier)? SEMI;
 
 typeDefinition
     : classTypeDefinition
+    | templateTypeDefinition
+    | templateInstanceTypeDefinition
     ;
 
 classTypeDefinition
-    : importStatement* CLASS genericTypeList? SEMI fieldDefinition* constructorDefinition* methodDefinition*
+    : importStatement* CLASS SEMI fieldDefinition* constructorDefinition* methodDefinition*
     ;
 
-genericTypeList
-    : LT typeIdentifier (COMMA typeIdentifier)* GT
+templateTypeDefinition
+    : importStatement* TEMPLATE templateVariableList? SEMI fieldDefinition* constructorDefinition* methodDefinition*
+    ;
+
+templateInstanceTypeDefinition
+    : importStatement* AS typeIdentifier templateVariableList? SEMI
+    ;
+
+templateVariableList
+    : LBRACE LBRACE templateVariable (COMMA templateVariable)* RBRACE RBRACE
+    ;
+
+templateVariable
+    : typeIdentifier
+    | expression
     ;
 
 fieldDefinition

@@ -399,7 +399,11 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
     public Node visitTypeDefinition(FluxusParser.TypeDefinitionContext ctx) {
         if (ctx.classTypeDefinition() != null)
             return visit(ctx.classTypeDefinition());
-        throw new ParserException(createSpan(ctx), "Unknown type definition: " + ctx.getText());
+        if (ctx.templateTypeDefinition() != null)
+            return visit(ctx.templateTypeDefinition());
+        if (ctx.templateInstanceTypeDefinition() != null)
+            return visit(ctx.templateInstanceTypeDefinition());
+        throw new ParserException(createSpan(ctx), "Unknown expression definition: " + ctx.getText());
     }
 
     @Override
@@ -424,6 +428,67 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
                 constructors,
                 methods
         );
+    }
+
+    @Override
+    public Node visitTemplateTypeDefinition(FluxusParser.TemplateTypeDefinitionContext ctx) {
+        List<Statement.Import> imports = ctx.importStatement().stream()
+                .map(tmCtx -> (Statement.Import) visit(tmCtx))
+                .toList();
+        List<TypeDefinition.TemplateVariable> templateVariables = ctx.templateVariableList().templateVariable().stream()
+                .map(tvCtx -> (TypeDefinition.TemplateVariable) visit(tvCtx))
+                .toList();
+        List<TypeDefinition.ClassFieldDefinition> fields = ctx.fieldDefinition().stream()
+                .map(cfdCtx -> (TypeDefinition.ClassFieldDefinition) visit(cfdCtx))
+                .toList();
+        List<TypeDefinition.ConstructorDefinition> constructors = ctx.constructorDefinition().stream()
+                .map(cdCtx -> (TypeDefinition.ConstructorDefinition) visit(cdCtx))
+                .toList();
+        List<TypeDefinition.MethodDefinition> methods = ctx.methodDefinition().stream()
+                .map(mdCtx -> (TypeDefinition.MethodDefinition) visit(mdCtx))
+                .toList();
+        return new TypeDefinition.TemplateDefinition(
+                createSpan(ctx),
+                imports,
+                List.of(),
+                templateVariables,
+                fields,
+                constructors,
+                methods
+        );
+    }
+
+    @Override
+    public Node visitTemplateInstanceTypeDefinition(FluxusParser.TemplateInstanceTypeDefinitionContext ctx) {
+        List<Statement.Import> imports = ctx.importStatement().stream()
+                .map(tmCtx -> (Statement.Import) visit(tmCtx))
+                .toList();
+        List<TypeDefinition.TemplateVariable> templateVariables = ctx.templateVariableList().templateVariable().stream()
+                .map(tvCtx -> (TypeDefinition.TemplateVariable) visit(tvCtx))
+                .toList();
+        Type templateType = (Type) visit(ctx.typeIdentifier());
+        return new TypeDefinition.TemplateInstance(
+                createSpan(ctx),
+                imports,
+                List.of(),
+                templateType,
+                templateVariables
+        );
+    }
+
+    @Override
+    public Node visitTemplateVariable(FluxusParser.TemplateVariableContext ctx) {
+        if (ctx.typeIdentifier() != null) {
+            return new TypeDefinition.TemplateVariable.Type(
+                    createSpan(ctx),
+                    (Type) visit(ctx.typeIdentifier())
+            );
+        } else {
+            return new TypeDefinition.TemplateVariable.Expression(
+                    createSpan(ctx),
+                    (Expression) visit(ctx.expression())
+            );
+        }
     }
 
     @Override

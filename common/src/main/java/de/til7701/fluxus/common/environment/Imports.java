@@ -10,7 +10,7 @@ import java.util.Map;
 @NoArgsConstructor
 public final class Imports {
 
-    /// Maps from the local names to the real type names.
+    /// Maps from the local names to the real expression names.
     private final Map<String, String> nameMapping = new HashMap<>();
 
     public Imports(List<Statement.Import> imports) {

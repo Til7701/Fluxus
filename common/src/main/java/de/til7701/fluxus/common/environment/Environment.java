@@ -5,7 +5,7 @@ import de.til7701.fluxus.ast.Statement;
 import de.til7701.fluxus.common.fons.*;
 import de.til7701.fluxus.common.fons.Void;
 import de.til7701.fluxus.common.fons.util.FluxusType;
-import de.til7701.fluxus.common.type.KlassLoader;
+import de.til7701.fluxus.common.loading.KlassLoader;
 import de.til7701.fluxus.common.type.KlassRegister;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.type.klass.Klass;

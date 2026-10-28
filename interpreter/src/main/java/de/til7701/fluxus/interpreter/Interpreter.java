@@ -140,7 +140,7 @@ public final class Interpreter {
             }
             case Expression.StaticMethodCall(Span span, Type type, String methodName, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
-                        .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
+                        .orElseThrow(() -> new RuntimeException("Class not found for expression: " + type));
                 Variable[] argumentValues = new Variable[arguments.size()];
                 for (int i = 0; i < argumentValues.length; i++) {
                     Expression e = arguments.get(i);
@@ -210,7 +210,7 @@ public final class Interpreter {
             }
             case Expression.ConstructorCall(Span span, Type type, List<Expression> arguments) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
-                        .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
+                        .orElseThrow(() -> new RuntimeException("Class not found for expression: " + type));
                 Variable[] argumentValues = new Variable[arguments.size()];
                 for (int i = 0; i < argumentValues.length; i++) {
                     Expression e = arguments.get(i);
@@ -229,7 +229,7 @@ public final class Interpreter {
             }
             case Expression.StaticFieldAccess(Span span, Type type, String fieldName) -> {
                 TypeDescriptor typeDescriptor = environment.getKlassRegister().find(type, currentImports)
-                        .orElseThrow(() -> new RuntimeException("Class not found for type: " + type));
+                        .orElseThrow(() -> new RuntimeException("Class not found for expression: " + type));
                 if (!staticStore.has(typeDescriptor))
                     staticStore.init(typeDescriptor, populateStatics(span, typeDescriptor));
                 Variable value = staticStore.get(typeDescriptor, fieldName);
