@@ -5,14 +5,14 @@ set -e
 ./mvnw clean package
 
 jlink \
-  --module-path "./cli/target/lib:./cli/target/cli-0.0.1.jar" \
+  --module-path "./cli/target/lib:./cli/target/cli-0.0.2.jar" \
   --add-modules "de.til7701.fluxus.cli" \
   --launcher "fluxus=de.til7701.fluxus.cli/de.til7701.fluxus.cli.Main" \
   --no-header-files \
   --no-man-pages \
   --strip-debug \
   --compress zip-6 \
-  --add-options="--enable-preview -Dfluxus.version=0.0.1" \
+  --add-options="--enable-preview -Dfluxus.version=0.0.2" \
   --output "./cli/target/jlink-out" \
   --verbose
 

@@ -1,3 +1,10 @@
+fluxus (0.0.2) unstable; urgency=medium
+
+  * Fix JVM args.
+
+ -- Til7701 <tilman@holube.de>  Mon, 28 Oct 2026 20:42:00 +0100
+
+
 fluxus (0.0.1) unstable; urgency=medium
 
   * This is the first release.
