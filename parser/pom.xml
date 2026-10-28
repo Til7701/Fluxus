@@ -13,7 +13,7 @@
             <artifactId>ast</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.antlr</groupId>
+            <groupId>com.github.Til7701.antlr4</groupId>
             <artifactId>antlr4-runtime</artifactId>
         </dependency>
         <dependency>
