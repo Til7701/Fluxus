@@ -74,23 +74,9 @@ do when i < 10I32 {
 ## Build
 
 To build Fluxus you need Java 27 or newer installed.
-Then you can run:
-
-```shell
-./mvnw clean package
-```
-
-Then you can run the CLI using:
-
-```shell
-java -jar cli/target/cli-1.0-SNAPSHOT-jar-with-dependencies.jar
-```
-
-### DEB
-
-You can build and install a deb package by running:
+Then you can run the `build-deb.sh` script to build the deb package which you can install by running:
 
 ```bash
 ./build-deb.sh
-sudo apt install ./cli/target/fluxus_0.0.1_amd64.deb
+sudo apt install ./cli/target/fluxus_VERSION_amd64.deb
 ```
