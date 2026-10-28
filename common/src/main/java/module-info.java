@@ -2,14 +2,13 @@ import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 module de.til7701.fluxus.common {
-    requires static lombok;
-    requires org.slf4j;
-
     requires de.til7701.fluxus.ast;
     requires de.til7701.fluxus.parser;
-    requires org.antlr.antlr4.runtime;
+
+    requires static lombok;
+
     requires org.jspecify;
-    requires jdk.jshell;
+    requires org.slf4j;
 
     exports de.til7701.fluxus.common.environment;
     exports de.til7701.fluxus.common.flumen;

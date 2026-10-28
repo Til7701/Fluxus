@@ -12,6 +12,7 @@ import org.jspecify.annotations.NullMarked;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 @NullMarked
 public final class Parser {
@@ -21,12 +22,12 @@ public final class Parser {
         return parse(charStream, file.getName());
     }
 
-    public Ast parseString(String content, String sourceName) {
-        CharStream charStream = CharStreams.fromString(content);
+    public Ast parseInputStream(InputStream stream, String sourceName) throws IOException {
+        CharStream charStream = CharStreams.fromStream(stream);
         return parse(charStream, sourceName);
     }
 
-    public Ast parse(CharStream charStream, String sourceName) {
+    private Ast parse(CharStream charStream, String sourceName) {
         FluxusLexer lexer = new FluxusLexer(charStream);
         CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
 

@@ -36,42 +36,24 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
+                        <configuration>
+                            <includeScope>runtime</includeScope>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>de.til7701.fluxus.cli.Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <outputDirectory>${project.build.directory}/jar</outputDirectory>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.panteleyev</groupId>
-                <artifactId>jpackage-maven-plugin</artifactId>
-                <configuration>
-                    <type>APP_IMAGE</type>
-                    <vendor>Til7701</vendor>
-                    <name>fluxus</name>
-                    <destination>${project.build.directory}/jpackage-image</destination>
-                    <input>${project.build.directory}/jar</input>
-                    <mainJar>cli-${project.version}-jar-with-dependencies.jar</mainJar>
-                    <javaOptions>
-                        <option>-Dfile.encoding=UTF-8</option>
-                        <option>-Dfluxus.version=${project.version}</option>
-                    </javaOptions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

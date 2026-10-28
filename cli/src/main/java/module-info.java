@@ -8,10 +8,11 @@ module de.til7701.fluxus.cli {
     requires de.til7701.fluxus.parser;
     requires de.til7701.fluxus.interpreter;
 
-    requires info.picocli;
-    requires org.slf4j;
-    requires org.jspecify;
     requires static lombok;
+
+    requires org.jspecify;
+    requires org.slf4j;
+    requires info.picocli;
 
     opens de.til7701.fluxus.cli.commands to info.picocli;
     opens de.til7701.fluxus.cli.mixins to info.picocli;

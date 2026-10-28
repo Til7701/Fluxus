@@ -8,8 +8,6 @@ import de.til7701.fluxus.common.type.klass.Klass;
 import de.til7701.fluxus.parser.Parser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,9 +49,8 @@ public final class Flumen {
             if (stream == null) {
                 throw new RuntimeException("FDK class not found: " + resourcePath);
             }
-            CharStream charStream = CharStreams.fromStream(stream);
             Parser parser = new Parser();
-            Ast ast = parser.parse(charStream, resourcePath);
+            Ast ast = parser.parseInputStream(stream, resourcePath);
             asts.add(ast);
             return switch (ast) {
                 case TypeDefinition typeDef -> klassLoader.loadKlassFromAst(name, typeDef);

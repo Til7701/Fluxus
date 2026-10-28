@@ -3,9 +3,9 @@ module de.til7701.fluxus.parser {
 
     requires static lombok;
 
+    requires org.jspecify;
     requires org.slf4j;
     requires org.antlr.antlr4.runtime;
-    requires org.jspecify;
 
     exports de.til7701.fluxus.parser;
 }
