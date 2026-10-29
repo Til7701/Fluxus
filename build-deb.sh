@@ -4,18 +4,6 @@ set -e
 
 ./mvnw clean package
 
-jlink \
-  --module-path "./cli/target/lib:./cli/target/cli-0.0.3-SNAPSHOT.jar" \
-  --add-modules "de.til7701.fluxus.cli" \
-  --launcher "fluxus=de.til7701.fluxus.cli/de.til7701.fluxus.cli.Main" \
-  --no-header-files \
-  --no-man-pages \
-  --strip-debug \
-  --compress zip-6 \
-  --add-options="--enable-preview -Dfluxus.version=0.0.3-SNAPSHOT" \
-  --output "./cli/target/jlink-out" \
-  --verbose
-
 mkdir -p cli/target/dpkg-buildpackage-working-dir
 cp -r data/debian cli/target/dpkg-buildpackage-working-dir
 
