@@ -55,6 +55,41 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <executable>jlink</executable>
+                            <arguments>
+                                <!-- @formatter:off -->
+                                <argument>--module-path</argument>
+                                <argument>${project.build.directory}/lib:${project.build.directory}/cli-${project.version}.jar</argument>
+                                <argument>--add-modules</argument>
+                                <argument>de.til7701.fluxus.cli</argument>
+                                <argument>--launcher</argument>
+                                <argument>fluxus=de.til7701.fluxus.cli/de.til7701.fluxus.cli.Main</argument>
+                                <argument>--no-header-files</argument>
+                                <argument>--no-man-pages</argument>
+                                <argument>--strip-debug</argument>
+                                <argument>--compress</argument>
+                                <argument>zip-6</argument>
+                                <argument>--add-options=--enable-preview -Dfluxus.version=${project.version}</argument>
+                                <argument>--output</argument>
+                                <argument>${project.build.directory}/jlink-out</argument>
+                                <argument>--verbose</argument>
+                                <!-- @formatter:on -->
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
