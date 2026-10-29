@@ -40,6 +40,7 @@ public final class KlassLoader {
         final Type finalKlassType = klassType;
         List<Field> fields = classDefinition.fields().stream()
                 .map(fieldDefinition -> new Field(
+                        fieldDefinition.docComment(),
                         fieldDefinition.modifiers().stream().anyMatch(f -> f.value() == TypeDefinition.FieldModifierValue.STATIC),
                         fieldDefinition.name(),
                         fieldDefinition.type().mapNames(importsMapper::map),
@@ -49,6 +50,7 @@ public final class KlassLoader {
         List<FluxusMetod> constructors = classDefinition.constructors().stream()
                 .map(constructorDefinition -> new FluxusMetod(
                         constructorDefinition.span(),
+                        constructorDefinition.docComment(),
                         true,
                         klassName,
                         finalKlassType,
@@ -64,6 +66,7 @@ public final class KlassLoader {
         List<Metod> methods = classDefinition.methods().stream()
                 .map(methodDefinition -> (Metod) new FluxusMetod(
                         methodDefinition.span(),
+                        methodDefinition.docComment(),
                         methodDefinition.modifiers().stream().anyMatch(m -> m.value() == TypeDefinition.MethodModifierValue.STATIC),
                         methodDefinition.name(),
                         methodDefinition.returnType() == null
@@ -80,6 +83,7 @@ public final class KlassLoader {
                 .toList();
         return new FluxusKlass(
                 imports,
+                classDefinition.docComment(),
                 klassName,
                 fields,
                 constructors,

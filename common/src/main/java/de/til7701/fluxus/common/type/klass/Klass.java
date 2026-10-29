@@ -1,10 +1,12 @@
 package de.til7701.fluxus.common.type.klass;
 
+import de.til7701.fluxus.ast.DocComment;
 import de.til7701.fluxus.ast.Statement;
 import de.til7701.fluxus.common.environment.Environment;
 import de.til7701.fluxus.common.environment.Imports;
 import de.til7701.fluxus.common.type.Metod;
 import de.til7701.fluxus.common.type.TypeDescriptor;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.Optional;
 public sealed interface Klass extends TypeDescriptor permits JavaKlass, FluxusKlass {
 
     List<Statement.Import> imports();
+
+    @Nullable DocComment docComment();
 
     String fullyQualifiedFluxusName();
 

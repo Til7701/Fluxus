@@ -1,5 +1,6 @@
 package de.til7701.fluxus.common.fons.util;
 
+import de.til7701.fluxus.ast.DocComment;
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.fons.*;
@@ -38,7 +39,12 @@ public final class Primitives {
         List<Metod> methods = loadJavaMethods(javaClass);
         Map<String, List<Metod>> methodsGroupedByName = methods.stream()
                 .collect(Collectors.groupingBy(Metod::name));
-        JavaKlass klass = new JavaKlass(javaClass, fullyQualifiedFluxusName, methods, methodsGroupedByName, type);
+        DocComment docComment = null;
+        FluxusDoc fluxusDoc = javaClass.getAnnotation(FluxusDoc.class);
+        if (fluxusDoc != null) {
+            docComment = new DocComment(Span.undefined(), fluxusDoc.value());
+        }
+        JavaKlass klass = new JavaKlass(javaClass, docComment, fullyQualifiedFluxusName, methods, methodsGroupedByName, type);
         log.debug("Loaded Klass: {}", klass);
         return klass;
     }
@@ -59,7 +65,13 @@ public final class Primitives {
                     .map(Primitives::mapTypes)
                     .toArray(Type[]::new);
 
+            DocComment docComment = null;
+            FluxusDoc fluxusDoc = javaMethod.getAnnotation(FluxusDoc.class);
+            if (fluxusDoc != null) {
+                docComment = new DocComment(Span.undefined(), fluxusDoc.value());
+            }
             Metod metod = new JavaMetod(
+                    docComment,
                     (javaMethod.getModifiers() & Modifier.STATIC) != 0,
                     javaMethod,
                     methodName,

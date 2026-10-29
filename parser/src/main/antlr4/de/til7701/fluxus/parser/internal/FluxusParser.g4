@@ -66,6 +66,10 @@ binaryOperator
     | SHIFT_RIGHT
     ;
 
+docComment
+    : DOC_COMMENT_LINE+
+    ;
+
 typeIdentifier
     : SignedIntegerTypeIdentifier #iTypeIdentifier
     | UnsignedIntegerTypeIdentifier #uTypeIdentifier
@@ -80,7 +84,7 @@ typeDefinition
     ;
 
 classTypeDefinition
-    : importStatement* CLASS genericTypeList? SEMI fieldDefinition* constructorDefinition* methodDefinition*
+    : importStatement* docComment? CLASS genericTypeList? SEMI fieldDefinition* constructorDefinition* methodDefinition*
     ;
 
 genericTypeList
@@ -88,7 +92,7 @@ genericTypeList
     ;
 
 fieldDefinition
-    : fieldModifier* typeIdentifier SymbolIdentifier ASSIGN expression SEMI #initializedFieldDefinition
+    : docComment? fieldModifier* typeIdentifier SymbolIdentifier ASSIGN expression SEMI #initializedFieldDefinition
     ;
 
 fieldModifier
@@ -96,11 +100,11 @@ fieldModifier
     ;
 
 constructorDefinition
-    : methodModifier* LPAREN parametherList? RPAREN (statement | statementList)
+    : docComment? methodModifier* LPAREN parametherList? RPAREN (statement | statementList)
     ;
 
 methodDefinition
-    : methodModifier* typeIdentifier? SymbolIdentifier LPAREN parametherList? RPAREN (statement | statementList)
+    : docComment? methodModifier* typeIdentifier? SymbolIdentifier LPAREN parametherList? RPAREN (statement | statementList)
     ;
 
 methodModifier

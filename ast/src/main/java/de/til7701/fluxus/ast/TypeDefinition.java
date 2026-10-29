@@ -1,5 +1,6 @@
 package de.til7701.fluxus.ast;
 
+import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public sealed interface TypeDefinition extends Ast {
     }
 
     record ClassDefinition(Span span,
+                           @Nullable DocComment docComment,
                            List<Statement.Import> imports,
                            List<TypeModifier> modifiers,
                            List<ClassFieldDefinition> fields,
@@ -23,7 +25,7 @@ public sealed interface TypeDefinition extends Ast {
     ) implements TypeDefinition {
     }
 
-    record ClassFieldDefinition(Span span,
+    record ClassFieldDefinition(Span span, @Nullable DocComment docComment,
                                 List<FieldModifier> modifiers, Type type, String name, Expression value
     ) implements Node {
     }
@@ -37,12 +39,13 @@ public sealed interface TypeDefinition extends Ast {
         STATIC,
     }
 
-    record ConstructorDefinition(Span span,
+    record ConstructorDefinition(Span span, @Nullable DocComment docComment,
                                  List<MethodModifier> modifiers, MethodParameters parameters, Statement body
     ) implements Node {
     }
 
     record MethodDefinition(Span span,
+                            @Nullable DocComment docComment,
                             List<MethodModifier> modifiers,
                             @Nullable Type returnType,
                             String name,

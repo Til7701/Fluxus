@@ -2,6 +2,7 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
+import de.til7701.fluxus.common.fons.util.FluxusDoc;
 import de.til7701.fluxus.common.fons.util.FluxusType;
 import de.til7701.fluxus.common.fons.util.Primitive;
 import de.til7701.fluxus.common.fons.util.Primitives;
@@ -37,6 +38,9 @@ public final class Array implements Primitive {
         return new Array(value, elementType);
     }
 
+    @FluxusDoc("""
+            Returns the length of the array.
+            """)
     public U length() {
         return U.of(UN.of(value.length, 31));
     }

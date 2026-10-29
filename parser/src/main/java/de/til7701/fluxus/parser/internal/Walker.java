@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.*;
@@ -47,6 +48,14 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
                 token.getLine(),
                 token.getCharPositionInLine() + token.getText().length()
         );
+    }
+
+    private DocComment readDocComment(FluxusParser.DocCommentContext ctx) {
+        StringBuilder comment = new StringBuilder();
+        for (TerminalNode line : ctx.DOC_COMMENT_LINE()) {
+            comment.append(line.getText().substring(3));
+        }
+        return new DocComment(createSpan(ctx), comment.toString().strip());
     }
 
     @Override
@@ -418,6 +427,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
                 .toList();
         return new TypeDefinition.ClassDefinition(
                 createSpan(ctx),
+                readDocComment(ctx.docComment()),
                 imports,
                 List.of(),
                 fields,
@@ -433,6 +443,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
                 .toList();
         return new TypeDefinition.ClassFieldDefinition(
                 createSpan(ctx),
+                readDocComment(ctx.docComment()),
                 fieldModifiers,
                 (Type) visit(ctx.typeIdentifier()),
                 ctx.SymbolIdentifier().getText(),
@@ -459,6 +470,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
             body = (Statement) visit(ctx.statementList());
         return new TypeDefinition.ConstructorDefinition(
                 createSpan(ctx),
+                readDocComment(ctx.docComment()),
                 modifiers,
                 ctx.parametherList() == null
                         ? new TypeDefinition.MethodParameters(createSpan(ctx), Collections.emptyList())
@@ -509,6 +521,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
             body = (Statement) visit(ctx.statementList());
         return new TypeDefinition.MethodDefinition(
                 createSpan(ctx),
+                readDocComment(ctx.docComment()),
                 modifiers,
                 returnType.orElse(null),
                 ctx.SymbolIdentifier().getText(),
