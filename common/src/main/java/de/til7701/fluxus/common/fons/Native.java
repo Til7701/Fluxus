@@ -2,13 +2,14 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
+import de.til7701.fluxus.common.fons.util.FluxusArgName;
 import de.til7701.fluxus.common.fons.util.FluxusType;
 import de.til7701.fluxus.common.fons.util.PanicException;
 import de.til7701.fluxus.common.fons.util.Primitives;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
 import de.til7701.fluxus.common.util.Natives;
-import de.til7701.fluxus.common.util.n.UN;
+import de.til7701.fluxus.n.UN;
 
 @FluxusType(
         fullyQualifiedFluxusName = Native.FLUXUS_TYPE_NAME
@@ -28,7 +29,7 @@ public final class Native {
         throw new PanicException();
     }
 
-    public static void printChar(Natives natives, Char c) {
+    public static void printChar(@FluxusArgName("natives") Natives natives, @FluxusArgName("c") Char c) {
         natives.stdOut().print(c.getValue());
     }
 

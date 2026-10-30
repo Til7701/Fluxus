@@ -64,6 +64,10 @@ public final class Primitives {
                     .filter(c -> !c.equals(Natives.class))
                     .map(Primitives::mapTypes)
                     .toArray(Type[]::new);
+            String[] parameterNames = Arrays.stream(javaMethod.getParameters())
+                    .filter(p -> !p.getType().equals(Natives.class))
+                    .map(parameter -> parameter.getAnnotation(FluxusArgName.class).value())
+                    .toArray(String[]::new);
 
             DocComment docComment = null;
             FluxusDoc fluxusDoc = javaMethod.getAnnotation(FluxusDoc.class);
@@ -77,6 +81,7 @@ public final class Primitives {
                     methodName,
                     returnType,
                     parameterTypes,
+                    parameterNames,
                     Arrays.asList(javaMethod.getParameterTypes()).contains(Natives.class)
             );
             metods.add(metod);

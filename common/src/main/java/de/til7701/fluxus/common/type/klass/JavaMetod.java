@@ -15,6 +15,7 @@ public record JavaMetod(
         String name,
         Type returnType,
         Type[] parameterTypes,
+        String[] parameterNames,
         boolean needsNatives
 ) implements Metod {
 

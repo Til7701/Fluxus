@@ -4,9 +4,9 @@ import de.til7701.fluxus.common.fons.Bool;
 import de.til7701.fluxus.common.fons.F;
 import de.til7701.fluxus.common.fons.I;
 import de.til7701.fluxus.common.fons.U;
-import de.til7701.fluxus.common.util.n.FN;
-import de.til7701.fluxus.common.util.n.IN;
-import de.til7701.fluxus.common.util.n.UN;
+import de.til7701.fluxus.n.FN;
+import de.til7701.fluxus.n.IN;
+import de.til7701.fluxus.n.UN;
 
 import java.util.HashMap;
 import java.util.Map;

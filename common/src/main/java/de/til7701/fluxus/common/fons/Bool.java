@@ -2,6 +2,7 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
+import de.til7701.fluxus.common.fons.util.FluxusArgName;
 import de.til7701.fluxus.common.fons.util.FluxusType;
 import de.til7701.fluxus.common.fons.util.Primitive;
 import de.til7701.fluxus.common.fons.util.Primitives;
@@ -28,23 +29,23 @@ public final class Bool implements Primitive {
     }
 
     @Ignore
-    public static Bool of(boolean value) {
+    public static Bool of(@FluxusArgName("value") boolean value) {
         return new Bool(value);
     }
 
-    public static Bool and(Bool left, Bool right) {
+    public static Bool and(@FluxusArgName("left") Bool left, @FluxusArgName("right") Bool right) {
         return of(left.value && right.value);
     }
 
-    public static Bool eq(Bool left, Bool right) {
+    public static Bool eq(@FluxusArgName("left") Bool left, @FluxusArgName("right") Bool right) {
         return of(left.value == right.value);
     }
 
-    public static Bool not(Bool value) {
+    public static Bool not(@FluxusArgName("value") Bool value) {
         return of(!value.value);
     }
 
-    public static String as__fluxus_flumen_Str(Bool value, PType ignored) {
+    public static String as__fluxus_flumen_Str(@FluxusArgName("value") Bool value, @FluxusArgName("ignored") PType ignored) {
         return Boolean.toString(value.value);
     }
 

@@ -22,4 +22,6 @@ public sealed interface Metod permits JavaMetod, FluxusMetod, TraitMetod {
 
     Type[] parameterTypes();
 
+    String[] parameterNames();
+
 }

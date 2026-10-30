@@ -427,7 +427,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
                 .toList();
         return new TypeDefinition.ClassDefinition(
                 createSpan(ctx),
-                readDocComment(ctx.docComment()),
+                ctx.docComment() == null ? null : readDocComment(ctx.docComment()),
                 imports,
                 List.of(),
                 fields,
@@ -443,7 +443,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
                 .toList();
         return new TypeDefinition.ClassFieldDefinition(
                 createSpan(ctx),
-                readDocComment(ctx.docComment()),
+                ctx.docComment() == null ? null : readDocComment(ctx.docComment()),
                 fieldModifiers,
                 (Type) visit(ctx.typeIdentifier()),
                 ctx.SymbolIdentifier().getText(),
@@ -470,7 +470,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
             body = (Statement) visit(ctx.statementList());
         return new TypeDefinition.ConstructorDefinition(
                 createSpan(ctx),
-                readDocComment(ctx.docComment()),
+                ctx.docComment() == null ? null : readDocComment(ctx.docComment()),
                 modifiers,
                 ctx.parametherList() == null
                         ? new TypeDefinition.MethodParameters(createSpan(ctx), Collections.emptyList())
@@ -521,7 +521,7 @@ public final class Walker extends FluxusParserBaseVisitor<Node> {
             body = (Statement) visit(ctx.statementList());
         return new TypeDefinition.MethodDefinition(
                 createSpan(ctx),
-                readDocComment(ctx.docComment()),
+                ctx.docComment() == null ? null : readDocComment(ctx.docComment()),
                 modifiers,
                 returnType.orElse(null),
                 ctx.SymbolIdentifier().getText(),

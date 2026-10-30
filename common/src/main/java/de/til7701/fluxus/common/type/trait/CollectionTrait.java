@@ -17,22 +17,28 @@ public record CollectionTrait(TypeDescriptor elementType, TypeDescriptor indexTy
     public Optional<Metod> findMethod(String methodName, TypeDescriptor[] argumentTypes, Environment environment) {
         return switch (methodName) {
             case "index" -> Optional.of(new TraitMetod(
+                    null,
                     true,
                     "index",
                     elementType.type(),
-                    new Type[]{this.type(), indexType.type()}
+                    new Type[]{this.type(), indexType.type()},
+                    new String[]{"collection", "index"}
             ));
             case "length" -> Optional.of(new TraitMetod(
+                    null,
                     false,
                     "length",
                     U.TYPE,
-                    new Type[]{}
+                    new Type[]{},
+                    new String[]{}
             ));
             case "as__fluxus_flumen_Str" -> Optional.of(new TraitMetod(
+                    null,
                     false,
                     "length",
                     new Type.Simple(Span.undefined(), "fluxus.flumen.Str"),
-                    new Type[]{this.type()}
+                    new Type[]{this.type()},
+                    new String[]{"collection"}
             ));
             default -> Optional.empty();
         };

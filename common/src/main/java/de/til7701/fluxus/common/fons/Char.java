@@ -2,12 +2,13 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
+import de.til7701.fluxus.common.fons.util.FluxusArgName;
 import de.til7701.fluxus.common.fons.util.FluxusType;
 import de.til7701.fluxus.common.fons.util.Primitive;
 import de.til7701.fluxus.common.fons.util.Primitives;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
-import de.til7701.fluxus.common.util.n.IN;
+import de.til7701.fluxus.n.IN;
 import lombok.Getter;
 
 @FluxusType(
@@ -33,11 +34,11 @@ public final class Char implements Primitive {
         return new Char(value);
     }
 
-    public static Bool eq(Char left, Char right) {
+    public static Bool eq(@FluxusArgName("left") Char left, @FluxusArgName("right") Char right) {
         return Bool.of(left.value == right.value);
     }
 
-    public static Bool neq(Char left, Char right) {
+    public static Bool neq(@FluxusArgName("left") Char left, @FluxusArgName("right") Char right) {
         return Bool.of(left.value != right.value);
     }
 
@@ -53,7 +54,7 @@ public final class Char implements Primitive {
         return I.of(IN.of(Character.digit(this.value, 10), 64));
     }
 
-    public static String as__fluxus_flumen_Str(Char value, PType ignored) {
+    public static String as__fluxus_flumen_Str(@FluxusArgName("value") Char value, @FluxusArgName("ignored") PType ignored) {
         return String.valueOf(value.value);
     }
 

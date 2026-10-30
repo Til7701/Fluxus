@@ -7,4 +7,11 @@
 
     <artifactId>ast</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>de.til7701.fluxus</groupId>
+            <artifactId>n</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

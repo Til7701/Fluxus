@@ -1,9 +1,7 @@
-package de.til7701.fluxus.common.util.ints;
+package de.til7701.fluxus.n;
 
 import de.til7701.fluxus.common.util.n.IN;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class INTest {
 

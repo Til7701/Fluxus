@@ -8,6 +8,16 @@ public sealed interface Type extends Node {
 
     String name();
 
+    default String simpleName() {
+        String name = name();
+        if (name.contains("."))
+            return name.substring(name.lastIndexOf('.') + 1);
+        else
+            return name;
+    }
+
+    String toCode();
+
     record Simple(Span span,
                   String name
     ) implements Type {
@@ -17,6 +27,11 @@ public sealed interface Type extends Node {
                     span,
                     nameMapper.apply(name)
             );
+        }
+
+        @Override
+        public String toCode() {
+            return simpleName();
         }
     }
 
@@ -37,6 +52,11 @@ public sealed interface Type extends Node {
             public String name() {
                 return elementType.name() + "[" + indexType.name() + "]";
             }
+
+            @Override
+            public String toCode() {
+                return elementType.toCode() + "[" + indexType.toCode() + "]";
+            }
         }
 
         record I(Span span,
@@ -50,6 +70,11 @@ public sealed interface Type extends Node {
             @Override
             public String name() {
                 return "fluxus.fons.I";
+            }
+
+            @Override
+            public String toCode() {
+                return "I" + bitCount;
             }
         }
 
@@ -65,6 +90,11 @@ public sealed interface Type extends Node {
             public String name() {
                 return "fluxus.fons.U";
             }
+
+            @Override
+            public String toCode() {
+                return "U" + bitCount;
+            }
         }
 
         record F(Span span,
@@ -78,6 +108,11 @@ public sealed interface Type extends Node {
             @Override
             public String name() {
                 return "fluxus.fons.F";
+            }
+
+            @Override
+            public String toCode() {
+                return "F" + bitCount;
             }
         }
     }

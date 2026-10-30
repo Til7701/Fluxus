@@ -1,6 +1,5 @@
-package de.til7701.fluxus.common.util.n;
+package de.til7701.fluxus.n;
 
-import de.til7701.fluxus.common.NotImplementedException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,7 @@ public final class FN {
         double v;
         if (bitCount == 64) v = value;
         else if (bitCount == 32) v = (float) value;
-        else throw new NotImplementedException();
+        else throw new UnsupportedOperationException();
         return new FN(v, bitCount);
     }
 

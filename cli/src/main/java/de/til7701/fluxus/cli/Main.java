@@ -1,11 +1,10 @@
 package de.til7701.fluxus.cli;
 
-import de.til7701.fluxus.cli.commands.Fluxus;
 import picocli.CommandLine;
 
-public class Main {
+class Main {
 
-    static void main(String[] args) {
+    static void main(Object command, String[] args) {
         CommandLine.Help.ColorScheme colorScheme = new CommandLine.Help.ColorScheme.Builder()
                 .commands(CommandLine.Help.Ansi.Style.bold, CommandLine.Help.Ansi.Style.underline)
                 .options(CommandLine.Help.Ansi.Style.fg_cyan)
@@ -16,7 +15,7 @@ public class Main {
                 .applySystemProperties() // optional: allow end users to customize
                 .ansi(CommandLine.Help.Ansi.ON)
                 .build();
-        CommandLine cli = new CommandLine(new Fluxus());
+        CommandLine cli = new CommandLine(command);
         cli.setExecutionExceptionHandler(new ExceptionHandler());
         cli.setExitCodeExceptionMapper(new ExceptionExitCodeMapper());
         cli.setColorScheme(colorScheme);

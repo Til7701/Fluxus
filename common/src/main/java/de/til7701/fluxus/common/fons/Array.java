@@ -2,15 +2,12 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
-import de.til7701.fluxus.common.fons.util.FluxusDoc;
-import de.til7701.fluxus.common.fons.util.FluxusType;
-import de.til7701.fluxus.common.fons.util.Primitive;
-import de.til7701.fluxus.common.fons.util.Primitives;
+import de.til7701.fluxus.common.fons.util.*;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.type.trait.CollectionTrait;
 import de.til7701.fluxus.common.type.trait.UTrait;
 import de.til7701.fluxus.common.util.Ignore;
-import de.til7701.fluxus.common.util.n.UN;
+import de.til7701.fluxus.n.UN;
 
 import java.util.Arrays;
 
@@ -45,12 +42,12 @@ public final class Array implements Primitive {
         return U.of(UN.of(value.length, 31));
     }
 
-    public static Object index(Array array, U index) {
+    public static Object index(@FluxusArgName("array") Array array, @FluxusArgName("index") U index) {
         int i = (int) index.getValue().getValue();
         return array.value[i];
     }
 
-    public static String as__fluxus_flumen_Str(Array value, PType ignored) {
+    public static String as__fluxus_flumen_Str(@FluxusArgName("value") Array value, @FluxusArgName("ignored") PType ignored) {
         return Arrays.deepToString(value.value);
     }
 

@@ -74,7 +74,8 @@
                                 <argument>--add-modules</argument>
                                 <argument>de.til7701.fluxus.cli</argument>
                                 <argument>--launcher</argument>
-                                <argument>fluxus=de.til7701.fluxus.cli/de.til7701.fluxus.cli.Main</argument>
+                                <argument>fluxus=de.til7701.fluxus.cli/de.til7701.fluxus.cli.FluxusMain</argument>
+                                <argument>folium=de.til7701.fluxus.cli/de.til7701.fluxus.cli.FoliumMain</argument>
                                 <argument>--no-header-files</argument>
                                 <argument>--no-man-pages</argument>
                                 <argument>--strip-debug</argument>

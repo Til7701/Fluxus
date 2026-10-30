@@ -1,16 +1,20 @@
 package de.til7701.fluxus.common.type.trait;
 
+import de.til7701.fluxus.ast.DocComment;
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
 import de.til7701.fluxus.common.type.Metod;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 
 public record TraitMetod(
+        @Nullable DocComment docComment,
         boolean isStatic,
         String name,
         Type returnType,
-        Type[] parameterTypes
+        Type[] parameterTypes,
+        String[] parameterNames
 ) implements Metod {
 
     @Override

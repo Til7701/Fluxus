@@ -81,7 +81,8 @@ TypeIdentifier : [A-Z][a-zA-Z0-9]*;
 SymbolIdentifier : [a-z][a-zA-Z_0-9]*;
 FullyQualifiedTypeIdentifier : (SymbolIdentifier DOT)+ TypeIdentifier;
 
+DOC_COMMENT_LINE: '///' ~[\r\n]*;
+
 WS: [ \t\r\n\u000C]+ -> skip;
 MULTI_LINE_COMMENT: '/*' .*? '*/' -> skip;
-DOC_COMMENT_LINE: '///' ~[\r\n]* -> skip;
 LINE_COMMENT: '//' ~[\r\n]* -> skip;

@@ -2,14 +2,15 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
+import de.til7701.fluxus.common.fons.util.FluxusArgName;
 import de.til7701.fluxus.common.fons.util.FluxusType;
 import de.til7701.fluxus.common.fons.util.Primitive;
 import de.til7701.fluxus.common.fons.util.Primitives;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
-import de.til7701.fluxus.common.util.n.FN;
-import de.til7701.fluxus.common.util.n.IN;
-import de.til7701.fluxus.common.util.n.UN;
+import de.til7701.fluxus.n.FN;
+import de.til7701.fluxus.n.IN;
+import de.til7701.fluxus.n.UN;
 import lombok.Getter;
 
 @FluxusType(
@@ -35,65 +36,65 @@ public final class F implements Primitive {
         return new F(value);
     }
 
-    public static F add(F left, F right) {
+    public static F add(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return of(FN.add(left.value, right.value));
     }
 
-    public static F sub(F left, F right) {
+    public static F sub(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return of(FN.sub(left.value, right.value));
     }
 
-    public static F mul(F left, F right) {
+    public static F mul(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return of(FN.mul(left.value, right.value));
     }
 
-    public static F div(F left, F right) {
+    public static F div(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return of(FN.div(left.value, right.value));
     }
 
-    public static Bool eq(F left, F right) {
+    public static Bool eq(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return Bool.of(FN.eq(left.value, right.value));
     }
 
-    public static Bool neq(F left, F right) {
+    public static Bool neq(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return Bool.of(FN.neq(left.value, right.value));
     }
 
-    public static Bool gt(F left, F right) {
+    public static Bool gt(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return Bool.of(FN.gt(left.value, right.value));
     }
 
-    public static Bool gte(F left, F right) {
+    public static Bool gte(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return Bool.of(FN.gte(left.value, right.value));
     }
 
-    public static Bool lt(F left, F right) {
+    public static Bool lt(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return Bool.of(FN.lt(left.value, right.value));
     }
 
-    public static Bool lte(F left, F right) {
+    public static Bool lte(@FluxusArgName("left") F left, @FluxusArgName("right") F right) {
         return Bool.of(FN.lte(left.value, right.value));
     }
 
-    public static String as__fluxus_flumen_Str(F value, PType ignored) {
+    public static String as__fluxus_flumen_Str(@FluxusArgName("value") F value, @FluxusArgName("ignored") PType ignored) {
         return value.value.toString();
     }
 
-    public static U as__fluxus_fons_U(F value, PType target) {
+    public static U as__fluxus_fons_U(@FluxusArgName("value") F value, @FluxusArgName("target") PType target) {
         if (target.getValue() instanceof Type.Trait.U utype)
             return de.til7701.fluxus.common.fons.U.of(UN.of((long) value.getValue().getValue(), utype.bitCount()));
         else
             throw new RuntimeException();
     }
 
-    public static I as__fluxus_fons_I(F value, PType target) {
+    public static I as__fluxus_fons_I(@FluxusArgName("value") F value, @FluxusArgName("target") PType target) {
         if (target.getValue() instanceof Type.Trait.I itype)
             return de.til7701.fluxus.common.fons.I.of(IN.of((long) value.getValue().getValue(), itype.bitCount()));
         else
             throw new RuntimeException();
     }
 
-    public static F as__fluxus_fons_F(F value, PType target) {
+    public static F as__fluxus_fons_F(@FluxusArgName("value") F value, @FluxusArgName("target") PType target) {
         if (target.getValue() instanceof Type.Trait.F fType)
             return de.til7701.fluxus.common.fons.F.of(FN.of(value.getValue().getValue(), fType.bitCount()));
         else

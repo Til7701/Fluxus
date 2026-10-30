@@ -1,4 +1,5 @@
 ../../../data/fluxus usr/bin/
+../../../data/folium usr/bin/
 ../jlink-out/* usr/lib/fluxus/
 ../../../data/vim/syntax/fluxus.vim /usr/share/vim/vimfiles/syntax/
 ../../../data/vim/ftdetect/fluxus.vim /usr/share/vim/vimfiles/ftdetect/

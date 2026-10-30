@@ -1,6 +1,5 @@
-package de.til7701.fluxus.common.util.n;
+package de.til7701.fluxus.n;
 
-import de.til7701.fluxus.common.NotImplementedException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ public final class IN {
 
     public static IN of(long value, long bitCount) {
         if (bitCount > 64)
-            throw new NotImplementedException();
+            throw new UnsupportedOperationException();
         return new IN(value, createBitmask(bitCount), bitCount);
     }
 
