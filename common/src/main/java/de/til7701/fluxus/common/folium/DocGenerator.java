@@ -14,6 +14,8 @@ import java.util.Comparator;
 
 public class DocGenerator {
 
+    private static final String VERSION = System.getProperty("fluxus.version");
+
     public Collection<Doc> generate(Collection<Klass> klasses) {
         return klasses.stream()
                 .map(this::generate)
@@ -22,6 +24,10 @@ public class DocGenerator {
 
     public Doc generate(Klass klass) {
         StringBuilder sb = new StringBuilder();
+
+        sb.append("<p align=\"right\">Fluxus: ")
+                .append(VERSION)
+                .append("</p>\n\n");
 
         DocComment docComment = klass.docComment();
         if (docComment != null)

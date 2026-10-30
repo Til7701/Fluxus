@@ -2,15 +2,15 @@ package de.til7701.fluxus.common.fons;
 
 import de.til7701.fluxus.ast.Span;
 import de.til7701.fluxus.ast.Type;
-import de.til7701.fluxus.common.fons.util.FluxusArgName;
-import de.til7701.fluxus.common.fons.util.FluxusType;
-import de.til7701.fluxus.common.fons.util.Primitive;
-import de.til7701.fluxus.common.fons.util.Primitives;
+import de.til7701.fluxus.common.fons.util.*;
 import de.til7701.fluxus.common.type.TypeDescriptor;
 import de.til7701.fluxus.common.util.Ignore;
 import de.til7701.fluxus.n.IN;
 import lombok.Getter;
 
+@FluxusDoc("""
+        A character like `'c'`.
+        """)
 @FluxusType(
         fullyQualifiedFluxusName = Char.FLUXUS_TYPE_NAME
 )
@@ -34,26 +34,50 @@ public final class Char implements Primitive {
         return new Char(value);
     }
 
+    @FluxusDoc("""
+            Checks if two `Char`s are equal.
+            
+            Overloads: `a == b`.
+            """)
     public static Bool eq(@FluxusArgName("left") Char left, @FluxusArgName("right") Char right) {
         return Bool.of(left.value == right.value);
     }
 
+    @FluxusDoc("""
+            Checks if two `Char`s are not equal.
+            
+            Overloads: `a == b`.
+            """)
     public static Bool neq(@FluxusArgName("left") Char left, @FluxusArgName("right") Char right) {
         return Bool.of(left.value != right.value);
     }
 
+    @FluxusDoc("""
+            Returns `true`, if the `Char` is blank (i.e. whitespace). `false` otherwise.
+            """)
     public Bool isBlank() {
         return Bool.of(Character.isWhitespace(this.value));
     }
 
+    @FluxusDoc("""
+            Returns `true`, if the `Char` is a decimal digit. `false` otherwise.
+            """)
     public Bool isDigit() {
         return Bool.of(Character.isDigit(this.value));
     }
 
+    @FluxusDoc("""
+            Returns the `Char` as a decimal digit.
+            """)
     public I asDigit() {
         return I.of(IN.of(Character.digit(this.value, 10), 64));
     }
 
+    @FluxusDoc("""
+            Converts the `Char` to a string.
+            
+            Overloads: `c as Str`.
+            """)
     public static String as__fluxus_flumen_Str(@FluxusArgName("value") Char value, @FluxusArgName("ignored") PType ignored) {
         return String.valueOf(value.value);
     }
