@@ -21,7 +21,7 @@
         <maven.compiler.release>27</maven.compiler.release>
         <lombok.version>1.18.48</lombok.version>
         <antlr4.version>4.13.2</antlr4.version>
-        <antlr4.fork.version>b6cc19ce2</antlr4.fork.version>
+        <antlr4.fork.version>4.13.2</antlr4.fork.version>
         <picocli.version>4.7.7</picocli.version>
         <slf4j.version>2.0.20</slf4j.version>
         <junit.jupiter.version>6.1.3</junit.jupiter.version>
